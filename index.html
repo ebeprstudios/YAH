@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>YAH! — Your Audience, Handled.</title>
+<link href="https://api.fontshare.com/v2/css?f[]=gilroy@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/gilroy-free" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font:'Gilroy','gilroy-free',system-ui,-apple-system,sans-serif;
+  --bg:#F2F5F0;--s1:#FFFFFF;--s2:#EBF0E6;--s3:#E0E8D8;
+  --bd:#D4DCC8;--bd2:#C2CEB4;
+  --lime:#6BBF00;--lime-bg:#D8F0A0;--lime-dk:#4A8A00;
+  --violet:#3D2A7A;--violet2:#5C44A0;--violet-bg:#EDE8F8;
+  --text:#1A1E14;--text2:#3A4232;--muted:#7A8870;--light:#9AAA88;
+  --green:#28A060;--amber:#C47820;--red:#C03030;--blue:#2860B8;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;
+  --shadow:0 1px 3px rgba(40,50,30,.08),0 4px 12px rgba(40,50,30,.05);
+  --shadow-md:0 4px 16px rgba(40,50,30,.1),0 1px 4px rgba(40,50,30,.06);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100dvh;overflow-x:hidden;line-height:1.5}
+.screen{display:none;min-height:100dvh;flex-direction:column}
+.screen.active{display:flex}
+body>.screen{padding-top:44px}
+.view-nav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;height:44px;background:var(--violet)}
+.vn-btn{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.45);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .15s}
+.vn-btn:hover{color:rgba(255,255,255,.75)}
+.vn-btn.active{color:#BAFF4A;border-bottom-color:#BAFF4A}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,28px);height:54px;background:var(--s1);border-bottom:1px solid var(--bd);position:sticky;top:44px;z-index:100;box-shadow:var(--shadow);gap:12px}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{width:26px;height:26px;flex-shrink:0}
+.brand-name{font-size:17px;font-weight:900;letter-spacing:-.5px;color:var(--text)}
+.brand-name em{color:var(--violet);font-style:normal}
+.tbr{display:flex;align-items:center;gap:8px}
+.client-pill{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px 5px 8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer}
+.cpd{width:7px;height:7px;border-radius:50%;background:var(--lime);flex-shrink:0}
+.av{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--violet),var(--violet2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:white}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r-sm);border:none;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-primary{background:var(--lime);color:var(--text)}
+.btn-primary:hover{background:var(--lime-dk);color:white}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--bd2)}
+.btn-ghost:hover{border-color:var(--violet);color:var(--violet)}
+.btn-violet{background:var(--violet);color:white}
+.btn-violet:hover{background:var(--violet2)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px;border-radius:6px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:var(--r-md);font-size:13px;font-weight:700;z-index:9999;box-shadow:var(--shadow-md);white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{background:var(--lime);color:var(--text)}
+.toast.error{background:var(--red);color:white}
+.toast.info{background:var(--violet);color:white}
+.field{margin-bottom:18px}
+.f-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.f-input{width:100%;background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);outline:none;transition:border-color .15s}
+.f-input:focus{border-color:var(--lime);box-shadow:0 0 0 3px rgba(107,191,0,.12)}
+.f-input::placeholder{color:var(--light)}
+textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
+.f-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.p-list{display:flex;flex-direction:column;gap:8px}
+.p-row{display:flex;align-items:center;gap:8px}
+.p-del{width:30px;height:30px;border-radius:6px;flex-shrink:0;background:transparent;border:1.5px solid var(--bd);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.p-del:hover{background:rgba(192,48,48,.08);color:var(--red);border-color:var(--red)}
+.p-add{font-size:12px;font-weight:700;color:var(--lime-dk);cursor:pointer;padding:6px 2px}
+.mix-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.mix-card{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow)}
+.mix-name{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.mix-row{display:flex;align-items:center;gap:10px}
+.mix-btn{width:28px;height:28px;border-radius:6px;flex-shrink:0;background:var(--s2);border:1px solid var(--bd);color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mix-btn:hover{background:var(--lime-bg);border-color:var(--lime)}
+.mix-val{font-size:20px;font-weight:900;color:var(--text);min-width:28px;text-align:center}
+#screen-setup{background:var(--bg)}
+.setup-wrap{display:flex;flex:1}
+.setup-aside{width:210px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);padding:24px 12px;display:flex;flex-direction:column;gap:2px}
+.aside-label{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--light);padding:0 10px;margin-bottom:10px}
+.s-step{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--muted)}
+.s-step.active{background:var(--lime-bg);color:var(--lime-dk);font-weight:700}
+.s-step.done{color:var(--green)}
+.s-num{width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--bd);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.s-step.active .s-num{background:var(--lime);color:var(--text)}
+.s-step.done .s-num{background:var(--green);color:white}
+.setup-body{flex:1;overflow-y:auto;padding:clamp(24px,5vw,52px)}
+.sh-eye{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime-dk);margin-bottom:8px}
+.sh-title{font-size:clamp(22px,3vw,30px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+.sh-sub{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:28px}
+.s-footer{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:22px;border-top:1px solid var(--bd);flex-wrap:wrap;gap:10px}
+#screen-dashboard{background:var(--bg)}
+.dash-wrap{display:flex;flex:1}
+.nav-sidebar{width:196px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);padding:16px 10px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--lime-bg);color:var(--lime-dk);font-weight:700}
+.nav-icon{font-size:14px;width:18px;text-align:center}
+.nav-hr{height:1px;background:var(--bd);margin:6px 4px}
+.dash-main{flex:1;padding:clamp(18px,3.5vw,32px);overflow-y:auto}
+.page-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.page-date{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.page-title{font-size:clamp(18px,3vw,22px);font-weight:900;letter-spacing:-.3px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-md);padding:15px 16px;box-shadow:var(--shadow)}
+.sc-v{font-size:clamp(22px,2.5vw,26px);font-weight:900;margin-bottom:3px}
+.sc-l{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:26px}
+.ccard{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:all .18s;box-shadow:var(--shadow)}
+.ccard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.cbar{height:4px}
+.cbody{padding:16px 18px}
+.cname{font-size:14px;font-weight:800;margin-bottom:2px;color:var(--text)}
+.chandle{font-size:11px;color:var(--muted);margin-bottom:12px}
+.cstats{display:flex;gap:16px;margin-bottom:12px}
+.csv{font-size:14px;font-weight:800;color:var(--text)}
+.csl{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.bd-draft{background:var(--lime-bg);color:var(--lime-dk)}
+.bd-pend{background:rgba(196,120,32,.1);color:var(--amber)}
+.bd-appr{background:rgba(40,160,96,.1);color:var(--green)}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.skeleton{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:var(--r-sm)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.add-ccard{background:transparent;border:1.5px dashed var(--bd2);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;min-height:160px;transition:all .15s}
+.add-ccard:hover{border-color:var(--lime);background:var(--lime-bg)}
+.add-icon{font-size:20px;color:var(--muted)}
+.add-label{font-size:12px;font-weight:600;color:var(--muted)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;grid-column:1/-1}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.35}
+.empty-title{font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--muted);line-height:1.65;max-width:320px;margin-bottom:20px}
+
+/* ── CLIENT VIEW ── */
+#screen-client{background:var(--bg)}
+.ctab-bar{display:flex;background:var(--s1);border-bottom:1px solid var(--bd);padding:0 clamp(12px,3vw,24px);overflow-x:auto;scrollbar-width:none;box-shadow:var(--shadow);position:sticky;top:98px;z-index:99}
+.ctab-bar::-webkit-scrollbar{display:none}
+.ctab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.ctab:hover{color:var(--text)}
+.ctab.active{color:var(--violet);border-bottom-color:var(--lime);font-weight:700}
+.client-body{flex:1;overflow-y:auto;padding:clamp(16px,4vw,30px)}
+
+/* ── PLANNER ── */
+.plan-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.plan-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.plan-title{font-size:clamp(17px,3vw,22px);font-weight:900;letter-spacing:-.3px}
+
+/* director notes */
+.director-box{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r-lg);padding:14px;margin-bottom:20px;box-shadow:var(--shadow)}
+.director-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.director-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bd);color:var(--text2);cursor:pointer;background:var(--s2);transition:all .12s}
+.chip:hover,.chip.active{border-color:var(--lime);background:var(--lime-bg);color:var(--lime-dk)}
+.director-input{width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:9px 14px;font-family:var(--font);font-size:13px;color:var(--text);outline:none;resize:none;line-height:1.5}
+.director-input:focus{border-color:var(--lime);box-shadow:0 0 0 3px rgba(107,191,0,.1)}
+.director-input::placeholder{color:var(--light)}
+
+/* generating state */
+.generating{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;gap:16px}
+.generating.visible{display:flex}
+.gen-spinner{width:40px;height:40px;border:3px solid var(--bd);border-top-color:var(--lime);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-label{font-size:14px;color:var(--muted);font-weight:600}
+.gen-sub{font-size:12px;color:var(--light);max-width:320px;text-align:center;line-height:1.65}
+
+/* week labels */
+.wk-section{margin-bottom:8px}
+.wk-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--lime-dk);margin-bottom:8px}
+.wk-label.dim{color:var(--muted)}
+
+/* plan rows */
+.plan-list{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.prow{display:flex;align-items:flex-start;gap:12px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-md);padding:13px 16px;transition:all .12s;box-shadow:var(--shadow)}
+.prow:hover{border-color:var(--lime);box-shadow:0 0 0 2px rgba(107,191,0,.08),var(--shadow)}
+.pday{min-width:80px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding-top:2px;flex-shrink:0}
+.pbody{flex:1;min-width:0}
+.ptitle{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
+.phook{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:4px}
+.ppurpose{font-size:11px;color:var(--lime-dk);margin-bottom:6px;font-weight:600}
+.ptags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.t-reel{background:rgba(192,48,48,.08);color:var(--red)}
+.t-carousel{background:rgba(40,96,184,.08);color:var(--blue)}
+.t-quote{background:var(--lime-bg);color:var(--lime-dk)}
+.t-static{background:rgba(196,120,32,.08);color:var(--amber)}
+.t-pillar{background:var(--s2);color:var(--muted);border:1px solid var(--bd)}
+.t-flag{background:rgba(192,48,48,.08);color:var(--red);font-style:italic}
+.pflag{font-size:11px;color:var(--amber);margin-top:4px;font-weight:600}
+
+@media(max-width:640px){
+  .setup-aside,.nav-sidebar{display:none}
+  .f-grid,.cards{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .pday{min-width:60px;font-size:9px}
+  .ctab-bar{top:54px}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<nav class="view-nav">
+  <button class="vn-btn active" onclick="goTo('dashboard')">Dashboard</button>
+  <button class="vn-btn" onclick="goTo('setup')">Add Client</button>
+  <button class="vn-btn" id="vn-client" style="display:none" onclick="goTo('client')">Planner</button>
+  <button class="vn-btn" onclick="goTo('settings')">Settings</button>
+</nav>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<section id="screen-dashboard" class="screen active">
+  <div class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 160 160" fill="none">
+        <path d="M80 118 L122 95 L80 72 L38 95 Z" fill="rgba(107,191,0,0.12)"/>
+        <path d="M80 100 L122 77 L80 54 L38 77 Z" fill="none" stroke="#6BBF00" stroke-width="2.5" opacity="0.4"/>
+        <path d="M80 82 L122 59 L80 36 L38 59 Z" fill="#6BBF00"/>
+      </svg>
+      <span class="brand-name"><em>YAH</em>!</span>
+    </div>
+    <div class="tbr">
+      <div class="client-pill"><div class="cpd"></div>EBEP R Studios</div>
+      <div class="av">ER</div>
+    </div>
+  </div>
+  <div class="dash-wrap">
+    <nav class="nav-sidebar">
+      <div class="nav-item active"><span class="nav-icon">⊞</span>Dashboard</div>
+      <div class="nav-item" onclick="goTo('setup')"><span class="nav-icon">👤</span>Add Client</div>
+      <div class="nav-hr"></div>
+      <div class="nav-item" onclick="goTo('settings')"><span class="nav-icon">⚙️</span>Settings</div>
+    </nav>
+    <main class="dash-main">
+      <div class="page-top">
+        <div><div class="page-date" id="dash-date"></div><div class="page-title">Agency Dashboard</div></div>
+        <button class="btn btn-primary btn-sm" onclick="goTo('setup')">+ Add Client</button>
+      </div>
+      <div class="stats" id="dash-stats">
+        <div class="sc"><div class="sc-v skeleton" style="width:32px;height:28px"></div><div class="sc-l" style="margin-top:6px">Active Clients</div></div>
+        <div class="sc"><div class="sc-v skeleton" style="width:32px;height:28px"></div><div class="sc-l" style="margin-top:6px">Awaiting Approval</div></div>
+        <div class="sc"><div class="sc-v skeleton" style="width:32px;height:28px"></div><div class="sc-l" style="margin-top:6px">Plans Approved</div></div>
+        <div class="sc"><div class="sc-v skeleton" style="width:32px;height:28px"></div><div class="sc-l" style="margin-top:6px">Total Posts</div></div>
+      </div>
+      <div class="sec-lbl">Your Clients</div>
+      <div class="cards" id="client-cards">
+        <div class="ccard"><div class="cbar" style="background:var(--bd)"></div><div class="cbody"><div class="skeleton" style="height:16px;width:140px;margin-bottom:8px"></div><div class="skeleton" style="height:11px;width:100px"></div></div></div>
+        <div class="ccard"><div class="cbar" style="background:var(--bd)"></div><div class="cbody"><div class="skeleton" style="height:16px;width:120px;margin-bottom:8px"></div><div class="skeleton" style="height:11px;width:80px"></div></div></div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- ══════════════ SETUP ══════════════ -->
+<section id="screen-setup" class="screen">
+  <div class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 160 160" fill="none">
+        <path d="M80 118 L122 95 L80 72 L38 95 Z" fill="rgba(107,191,0,0.12)"/>
+        <path d="M80 100 L122 77 L80 54 L38 77 Z" fill="none" stroke="#6BBF00" stroke-width="2.5" opacity="0.4"/>
+        <path d="M80 82 L122 59 L80 36 L38 59 Z" fill="#6BBF00"/>
+      </svg>
+      <span class="brand-name"><em>YAH</em>!</span>
+    </div>
+    <span style="font-size:12px;color:var(--muted);font-weight:500">New Client Setup</span>
+    <button class="btn btn-ghost btn-xs" onclick="goTo('dashboard')">Back</button>
+  </div>
+  <div class="setup-wrap">
+    <aside class="setup-aside">
+      <div class="aside-label">Setup</div>
+      <div class="s-step active" id="sn1"><div class="s-num">1</div>Client Profile</div>
+      <div class="s-step" id="sn2"><div class="s-num">2</div>Content Pillars</div>
+      <div class="s-step" id="sn3"><div class="s-num">3</div>Team and Emails</div>
+      <div class="s-step" id="sn4"><div class="s-num">4</div>Content Mix</div>
+    </aside>
+    <div class="setup-body">
+      <div id="step1">
+        <div class="sh-eye">Step 1 of 4</div>
+        <div class="sh-title">Add your client</div>
+        <div class="sh-sub">Start with the basics. You can update everything later.</div>
+        <div class="f-grid">
+          <div class="field"><label class="f-label">Client Name</label><input class="f-input" id="s1-name" placeholder="e.g. Tiffany Haynes"/></div>
+          <div class="field"><label class="f-label">Brand Name</label><input class="f-input" id="s1-brand" placeholder="e.g. The Creative Theologian Co."/></div>
+        </div>
+        <div class="field"><label class="f-label">Client Email</label><input class="f-input" id="s1-email" type="email" placeholder="For plan approval emails"/></div>
+        <div class="field"><label class="f-label">Brand Voice</label><textarea class="f-input" id="s1-voice" rows="3" placeholder="How do they sound? Bold, warm, faith-driven..."></textarea></div>
+        <div class="field"><label class="f-label">Never Use</label><input class="f-input" id="s1-avoid" placeholder="e.g. Em dashes, hustle culture, new age spirituality"/></div>
+        <div class="s-footer"><span></span><button class="btn btn-primary" onclick="goStep(2)">Continue to Pillars</button></div>
+      </div>
+      <div id="step2" style="display:none">
+        <div class="sh-eye">Step 2 of 4</div>
+        <div class="sh-title">Content pillars</div>
+        <div class="sh-sub">Recurring themes the AI plans around. Add 4 to 6 for best results.</div>
+        <div class="field"><label class="f-label">Pillars</label><div class="p-list" id="pillar-list"></div><div class="p-add" onclick="addPillar()">+ Add pillar</div></div>
+        <div class="s-footer"><button class="btn btn-ghost" onclick="goStep(1)">Back</button><button class="btn btn-primary" onclick="goStep(3)">Continue to Team</button></div>
+      </div>
+      <div id="step3" style="display:none">
+        <div class="sh-eye">Step 3 of 4</div>
+        <div class="sh-title">Team and emails</div>
+        <div class="sh-sub">Who gets notified when a plan is approved?</div>
+        <div class="field"><label class="f-label">Designer 1 — Thumbnails</label><input class="f-input" id="t-d1-name" placeholder="Name" style="margin-bottom:6px"/><input class="f-input" id="t-d1-email" type="email" placeholder="Email"/></div>
+        <div class="field"><label class="f-label">Designer 2 — Carousels</label><input class="f-input" id="t-d2-name" placeholder="Name" style="margin-bottom:6px"/><input class="f-input" id="t-d2-email" type="email" placeholder="Email"/></div>
+        <div class="field"><label class="f-label">Video Editor</label><input class="f-input" id="t-ve-name" placeholder="Name" style="margin-bottom:6px"/><input class="f-input" id="t-ve-email" type="email" placeholder="Email"/></div>
+        <div class="field"><label class="f-label">Manager (You)</label><input class="f-input" id="t-mgr-name" placeholder="Name" style="margin-bottom:6px"/><input class="f-input" id="t-mgr-email" type="email" placeholder="Your email"/></div>
+        <div class="s-footer"><button class="btn btn-ghost" onclick="goStep(2)">Back</button><button class="btn btn-primary" onclick="goStep(4)">Continue to Mix</button></div>
+      </div>
+      <div id="step4" style="display:none">
+        <div class="sh-eye">Step 4 of 4</div>
+        <div class="sh-title">Weekly content mix</div>
+        <div class="sh-sub">How many of each post type per week?</div>
+        <div class="field">
+          <div class="mix-grid">
+            <div class="mix-card"><div class="mix-name">Reels</div><div class="mix-row"><button class="mix-btn" onclick="mixAdj('reels',-1)">&#8722;</button><span class="mix-val" id="mx-reels">5</span><button class="mix-btn" onclick="mixAdj('reels',1)">+</button></div></div>
+            <div class="mix-card"><div class="mix-name">Carousels</div><div class="mix-row"><button class="mix-btn" onclick="mixAdj('carousels',-1)">&#8722;</button><span class="mix-val" id="mx-carousels">2</span><button class="mix-btn" onclick="mixAdj('carousels',1)">+</button></div></div>
+            <div class="mix-card"><div class="mix-name">Quote Posts</div><div class="mix-row"><button class="mix-btn" onclick="mixAdj('quotes',-1)">&#8722;</button><span class="mix-val" id="mx-quotes">3</span><button class="mix-btn" onclick="mixAdj('quotes',1)">+</button></div></div>
+          </div>
+          <p id="mix-total" style="font-size:11px;color:var(--muted);margin-top:10px">10 posts/week &middot; 20 posts per 2-week cycle</p>
+        </div>
+        <div class="s-footer"><button class="btn btn-ghost" onclick="goStep(3)">Back</button><button class="btn btn-primary" id="save-btn" onclick="saveClient()">Save Client to YAH!</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CLIENT / PLANNER ══════════════ -->
+<section id="screen-client" class="screen">
+  <div class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 160 160" fill="none">
+        <path d="M80 118 L122 95 L80 72 L38 95 Z" fill="rgba(107,191,0,0.12)"/>
+        <path d="M80 100 L122 77 L80 54 L38 77 Z" fill="none" stroke="#6BBF00" stroke-width="2.5" opacity="0.4"/>
+        <path d="M80 82 L122 59 L80 36 L38 59 Z" fill="#6BBF00"/>
+      </svg>
+      <span class="brand-name"><em>YAH</em>!</span>
+    </div>
+    <div class="tbr">
+      <div class="client-pill" id="active-client-pill"><div class="cpd"></div><span id="active-client-name">Client</span></div>
+      <button class="btn btn-ghost btn-xs" onclick="goTo('dashboard')">All Clients</button>
+    </div>
+  </div>
+
+  <div class="ctab-bar">
+    <div class="ctab active">Weekly Planner</div>
+    <div class="ctab">Knowledge Base</div>
+    <div class="ctab">Settings</div>
+  </div>
+
+  <div class="client-body">
+    <div class="plan-header">
+      <div>
+        <div class="plan-lbl">2-Week Content Plan</div>
+        <div class="plan-title" id="plan-week-title">Ready to generate</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="regen-btn" onclick="generatePlan(true)" style="display:none">Regenerate</button>
+        <button class="btn btn-violet btn-sm" id="send-btn" onclick="sendForApproval()" style="display:none">Send for Approval</button>
+      </div>
+    </div>
+
+    <!-- Director's Notes -->
+    <div class="director-box">
+      <div class="director-label">Director's Notes — Tell Claude what you want</div>
+      <div class="director-chips" id="chips">
+        <div class="chip" onclick="chipClick(this,'More Shenanigans')">More Shenanigans</div>
+        <div class="chip" onclick="chipClick(this,'More Lifestyle')">More Lifestyle</div>
+        <div class="chip" onclick="chipClick(this,'Punchier hooks')">Punchier hooks</div>
+        <div class="chip" onclick="chipClick(this,'More face-to-cam')">More face-to-cam</div>
+        <div class="chip" onclick="chipClick(this,'Lead with Spiritual')">Lead with Spiritual</div>
+        <div class="chip" onclick="chipClick(this,'Push brand deals angle')">Push brand deals angle</div>
+      </div>
+      <textarea class="director-input" id="director-notes" rows="2" placeholder="e.g. More humor this week, face-to-cam reels for Facebook, include Money Mondays carousel"></textarea>
+    </div>
+
+    <!-- Generate button -->
+    <div style="text-align:center;margin-bottom:28px" id="generate-wrap">
+      <button class="btn btn-primary" id="gen-btn" onclick="generatePlan(false)" style="font-size:15px;padding:12px 32px">
+        Generate 2-Week Plan
+      </button>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px" id="client-hint"></p>
+    </div>
+
+    <!-- Generating spinner -->
+    <div class="generating" id="generating-state">
+      <div class="gen-spinner"></div>
+      <div class="gen-label">Generating your 2-week plan...</div>
+      <div class="gen-sub" id="gen-status">Pulling client rules from Supabase and building the prompt</div>
+    </div>
+
+    <!-- Plan output -->
+    <div id="plan-output" style="display:none">
+      <div class="wk-section">
+        <div class="wk-label" id="wk1-label">Week 1</div>
+        <div class="plan-list" id="week1-days"></div>
+      </div>
+      <div class="wk-section">
+        <div class="wk-label dim" id="wk2-label">Week 2</div>
+        <div class="plan-list" id="week2-days"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ SETTINGS ══════════════ -->
+<section id="screen-settings" class="screen">
+  <div class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 160 160" fill="none">
+        <path d="M80 118 L122 95 L80 72 L38 95 Z" fill="rgba(107,191,0,0.12)"/>
+        <path d="M80 100 L122 77 L80 54 L38 77 Z" fill="none" stroke="#6BBF00" stroke-width="2.5" opacity="0.4"/>
+        <path d="M80 82 L122 59 L80 36 L38 59 Z" fill="#6BBF00"/>
+      </svg>
+      <span class="brand-name"><em>YAH</em>!</span>
+    </div>
+    <span style="font-size:12px;color:var(--muted);font-weight:500">Agency Settings</span>
+    <button class="btn btn-ghost btn-xs" onclick="goTo('dashboard')">Back</button>
+  </div>
+  <div style="max-width:580px;margin:0 auto;padding:clamp(24px,5vw,48px)">
+
+    <div style="margin-bottom:36px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime-dk);margin-bottom:8px">Anthropic API</div>
+      <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px">Connect Claude</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px">Your API key is stored locally in Chrome and never sent anywhere except directly to Anthropic when generating a plan.</div>
+      <div class="field">
+        <label class="f-label">Anthropic API Key</label>
+        <input class="f-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="font-family:monospace;font-size:12px"/>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lime-dk)">console.anthropic.com</a></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save Key</button>
+        <span id="key-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--bd);padding-top:28px;margin-bottom:36px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Agency</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">EBEP R Studios</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Supabase connected &bull; GitHub connected</div>
+      <div style="display:flex;gap:8px">
+        <div style="background:var(--lime-bg);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--lime-dk)">Supabase ✓</div>
+        <div style="background:var(--violet-bg);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--violet)">GitHub ✓</div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--bd);padding-top:28px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Test Connection</div>
+      <button class="btn btn-ghost btn-sm" onclick="testApiKey()">Test Claude API</button>
+      <div id="test-result" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const SB_URL = 'https://piowmyefosrdpjisguii.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpb3dteWVmb3NyZHBqaXNndWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDcyNjksImV4cCI6MjA5MDMyMzI2OX0.aI0-esJB5IH-KwgsHx_FM_YpOp9k-0M0gc5xlfdJrcY';
+const SB_H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+async function sbGet(path) {
+  const r = await fetch(SB_URL+'/rest/v1/'+path,{headers:SB_H});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'DB error '+r.status);}
+  return r.json();
+}
+async function sbPost(path,body) {
+  const r = await fetch(SB_URL+'/rest/v1/'+path,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'POST error '+r.status);}
+  return r.json();
+}
+async function sbPatch(path,body) {
+  const r = await fetch(SB_URL+'/rest/v1/'+path,{method:'PATCH',headers:{...SB_H,'Prefer':'return=minimal'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'PATCH error '+r.status);}
+}
+
+function toast(msg,type) {
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast '+(type||'success')+' show';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3400);
+}
+
+// ── active client state
+var activeClient = null;
+
+// ── navigation
+function goTo(key) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+key).classList.add('active');
+  document.querySelectorAll('.vn-btn').forEach((b,i)=>b.classList.toggle('active',['dashboard','setup','client','settings'][i]===key));
+  if(key==='settings') loadSettingsScreen();
+  window.scrollTo({top:0,behavior:'instant'});
+  if(key==='dashboard') loadDashboard();
+  if(key==='setup') resetSetup();
+}
+
+function openClient(client) {
+  activeClient = client;
+  document.getElementById('active-client-name').textContent = client.name;
+  document.getElementById('vn-client').style.display = '';
+  // build week_of: next Monday for 14 days
+  var today = new Date();
+  var day = today.getDay();
+  var daysToMon = day===0?1:(8-day)%7||7;
+  var mon = new Date(today); mon.setDate(today.getDate()+daysToMon);
+  var end = new Date(mon); end.setDate(mon.getDate()+13);
+  var fmt = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  var yr = end.getFullYear();
+  document.getElementById('plan-week-title').textContent = fmt(mon)+' - '+fmt(end)+', '+yr;
+  document.getElementById('client-hint').textContent = 'Using rules from '+client.name+'\'s Supabase profile';
+  goTo('client');
+}
+
+// ── setup state
+var pillars=['Faith & Business','Spiritual Growth','Family & Lifestyle','Humor & Personality'];
+var mix={reels:5,carousels:2,quotes:3};
+var saving=false;
+
+function resetSetup() {
+  saving=false;goStep(1);
+  ['s1-name','s1-brand','s1-email','s1-voice','s1-avoid','t-d1-name','t-d1-email',
+   't-d2-name','t-d2-email','t-ve-name','t-ve-email','t-mgr-name','t-mgr-email'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  pillars=['Faith & Business','Spiritual Growth','Family & Lifestyle','Humor & Personality'];
+  mix={reels:5,carousels:2,quotes:3};
+  renderPillars();updateMix();
+  var btn=document.getElementById('save-btn');btn.disabled=false;btn.textContent='Save Client to YAH!';
+}
+
+function goStep(n) {
+  [1,2,3,4].forEach(function(i){var el=document.getElementById('step'+i);if(el)el.style.display=i===n?'block':'none';});
+  document.querySelectorAll('.s-step').forEach(function(s,i){
+    var num=i+1,span=s.querySelector('.s-num');
+    s.classList.remove('active','done');
+    if(num<n){s.classList.add('done');span.textContent='?';}
+    else if(num===n){s.classList.add('active');span.textContent=num;}
+    else{span.textContent=num;}
+  });
+  if(n===2)renderPillars();
+}
+
+function renderPillars() {
+  document.getElementById('pillar-list').innerHTML=pillars.map(function(p,i){
+    return '<div class="p-row"><input class="f-input" style="flex:1" value="'+p.replace(/"/g,'&quot;')+'" onchange="pillars['+i+']=this.value"/><button class="p-del" onclick="pillars.splice('+i+',1);renderPillars()">x</button></div>';
+  }).join('');
+}
+function addPillar(){pillars.push('');renderPillars();var inputs=document.querySelectorAll('#pillar-list .f-input');inputs[inputs.length-1].focus();}
+function mixAdj(k,d){mix[k]=Math.max(0,Math.min(10,mix[k]+d));updateMix();}
+function updateMix(){
+  Object.keys(mix).forEach(function(k){document.getElementById('mx-'+k).textContent=mix[k];});
+  var w=mix.reels+mix.carousels+mix.quotes;
+  document.getElementById('mix-total').textContent=w+' posts/week &middot; '+(w*2)+' posts per 2-week cycle';
+}
+
+async function saveClient(){
+  if(saving)return;
+  var name=document.getElementById('s1-name').value.trim();
+  var email=document.getElementById('s1-email').value.trim();
+  if(!name){toast('Client name is required','error');goStep(1);return;}
+  if(!email){toast('Client email is required','error');goStep(1);return;}
+  saving=true;
+  var btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
+  toast('Saving to Supabase...','info');
+  try {
+    var agencies=await sbGet('agencies?select=id&limit=1');
+    if(!agencies.length)throw new Error('No agency found');
+    var agencyId=agencies[0].id;
+    var clientBody={agency_id:agencyId,name:name,client_email:email,active:true};
+    var bn=document.getElementById('s1-brand').value.trim();
+    var bv=document.getElementById('s1-voice').value.trim();
+    var av=document.getElementById('s1-avoid').value.trim();
+    if(bn)clientBody.brand_name=bn;
+    if(bv)clientBody.brand_voice=bv;
+    if(av)clientBody.avoid_rules=av;
+    var clients=await sbPost('clients',clientBody);
+    var clientId=clients[0].id;
+    await sbPatch('clients?id=eq.'+clientId,{content_mix:mix});
+    var pillarRows=pillars.map(function(p){return p.trim();}).filter(Boolean).map(function(n,i){return{client_id:clientId,name:n,position:i};});
+    if(pillarRows.length)await sbPost('pillars',pillarRows);
+    var teamRows=[
+      {role:'designer_1',name:document.getElementById('t-d1-name').value.trim(),email:document.getElementById('t-d1-email').value.trim()},
+      {role:'designer_2',name:document.getElementById('t-d2-name').value.trim(),email:document.getElementById('t-d2-email').value.trim()},
+      {role:'video_editor',name:document.getElementById('t-ve-name').value.trim(),email:document.getElementById('t-ve-email').value.trim()},
+      {role:'manager',name:document.getElementById('t-mgr-name').value.trim(),email:document.getElementById('t-mgr-email').value.trim()}
+    ].filter(function(m){return m.name&&m.email;}).map(function(m){return Object.assign({},m,{client_id:clientId});});
+    if(teamRows.length)await sbPost('team_members',teamRows);
+    toast(name+' added to YAH! ✦','success');
+    setTimeout(function(){goTo('dashboard');},1200);
+  } catch(err){
+    console.error(err);toast(err.message||'Something went wrong','error');
+    saving=false;btn.disabled=false;btn.textContent='Save Client to YAH!';
+  }
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  try {
+    var clients=await sbGet('clients?select=*,pillars(count)&active=eq.true&order=created_at.desc');
+    renderStats(clients);renderCards(clients);
+  } catch(err){
+    document.getElementById('client-cards').innerHTML='<div class="empty"><div class="empty-icon">&#9888;</div><div class="empty-title">Could not load</div><div class="empty-sub">'+err.message+'</div></div>';
+  }
+}
+
+function renderStats(clients){
+  document.getElementById('dash-stats').innerHTML=
+    '<div class="sc"><div class="sc-v" style="color:var(--violet)">'+clients.length+'</div><div class="sc-l">Active Clients</div></div>'+
+    '<div class="sc"><div class="sc-v" style="color:var(--amber)">0</div><div class="sc-l">Awaiting Approval</div></div>'+
+    '<div class="sc"><div class="sc-v" style="color:var(--green)">0</div><div class="sc-l">Plans Approved</div></div>'+
+    '<div class="sc"><div class="sc-v" style="color:var(--lime-dk)">'+(clients.length*20)+'</div><div class="sc-l">Total Posts</div></div>';
+}
+
+var COLORS=['linear-gradient(90deg,#6BBF00,#4A8A00)','linear-gradient(90deg,#3D2A7A,#5C44A0)','linear-gradient(90deg,#C47820,#8A5010)','linear-gradient(90deg,#2860B8,#1A40A0)','linear-gradient(90deg,#C03030,#901818)'];
+
+function renderCards(clients){
+  var el=document.getElementById('client-cards');
+  if(!clients.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">&#10022;</div><div class="empty-title">No clients yet</div><div class="empty-sub">Add your first client and YAH! will manage their content calendar.</div><button class="btn btn-primary btn-sm" onclick="goTo(\'setup\')">Add First Client</button></div>';
+    return;
+  }
+  el.innerHTML=clients.map(function(c,i){
+    var m=c.content_mix||{reels:5,carousels:2,quotes:3};
+    var w=(m.reels||0)+(m.carousels||0)+(m.quotes||0);
+    var pc=c.pillars&&c.pillars[0]?c.pillars[0].count:0;
+    return '<div class="ccard" onclick="openClientById(\''+c.id+'\')"><div class="cbar" style="background:'+COLORS[i%COLORS.length]+'"></div><div class="cbody"><div class="cname">'+c.name+'</div><div class="chandle">'+(c.brand_name||'&mdash;')+'</div><div class="cstats"><div><div class="csv">'+(w*2)+'</div><div class="csl">Posts</div></div><div><div class="csv">'+pc+'</div><div class="csl">Pillars</div></div><div><div class="csv">&mdash;</div><div class="csl">Next Send</div></div></div><div class="badge bd-draft"><span class="badge-dot"></span>Open Planner</div></div></div>';
+  }).join('')+'<div class="add-ccard" onclick="goTo(\'setup\')"><div class="add-icon">+</div><div class="add-label">Add New Client</div></div>';
+}
+
+async function openClientById(id) {
+  try {
+    var clients=await sbGet('clients?select=*,pillars(name,position)&id=eq.'+id);
+    if(clients.length) openClient(clients[0]);
+  } catch(err){toast('Could not load client','error');}
+}
+
+// ── CHIPS ──
+function chipClick(el, text) {
+  el.classList.toggle('active');
+  var notes=document.getElementById('director-notes');
+  var current=notes.value.trim();
+  if(el.classList.contains('active')){
+    notes.value=current?(current+', '+text):text;
+  } else {
+    notes.value=current.replace(new RegExp(',?\\s*'+text+'\\s*,?','g'),', ').replace(/^,\s*/,'').replace(/,\s*$/,'').trim();
+  }
+}
+
+// ── GENERATE PLAN ──
+async function generatePlan(isRegen) {
+  if(!activeClient){toast('No client selected','error');return;}
+
+  // show generating state
+  document.getElementById('generate-wrap').style.display='none';
+  document.getElementById('plan-output').style.display='none';
+  document.getElementById('regen-btn').style.display='none';
+  document.getElementById('send-btn').style.display='none';
+  var gs=document.getElementById('generating-state');
+  gs.classList.add('visible');
+
+  var directorNotes=document.getElementById('director-notes').value.trim();
+  var genBtn=document.getElementById('gen-btn');
+  genBtn.disabled=true;
+
+  try {
+    // Step 1: fetch full client record from Supabase
+    setGenStatus('Pulling client profile from Supabase...');
+    var clients=await sbGet('clients?select=*,pillars(name,position)&id=eq.'+activeClient.id);
+    var client=clients[0];
+
+    // Step 2: fetch team
+    var team=await sbGet('team_members?client_id=eq.'+client.id);
+
+    // Step 3: build week dates
+    var today=new Date();
+    var day=today.getDay();
+    var daysToMon=day===0?1:(8-day)%7||7;
+    var mon=new Date(today);mon.setDate(today.getDate()+daysToMon);
+    var dates=[];
+    for(var i=0;i<14;i++){var d=new Date(mon);d.setDate(mon.getDate()+i);dates.push(d);}
+    var fmtD=function(d){return d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});};
+    var fmtShort=function(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});};
+    var weekOf=fmtShort(mon)+' - '+fmtShort(dates[13])+', '+dates[13].getFullYear();
+
+    // Step 4: build prompt from Supabase fields
+    setGenStatus('Assembling prompt from client rules...');
+
+    var pillarsText=(client.pillars||[]).sort(function(a,b){return a.position-b.position;}).map(function(p){return p.name;}).join(', ');
+    var mix=client.content_mix||{reels:5,carousels:2,quotes:3};
+    var pillarMins=client.pillar_minimums||{};
+    var contentRules=client.content_rules||{};
+    var minText=Object.keys(pillarMins).map(function(k){return k+': minimum '+pillarMins[k]+' posts';}).join('. ');
+    var rulesText=Object.values(contentRules).join('\n\n');
+
+    var dateLines='';
+    dates.forEach(function(d,i){
+      dateLines+=('Day '+(i+1)+': '+fmtD(d)+(i<7?' (Week 1)':' (Week 2)'))+'\n';
+    });
+
+    var directorCtx=directorNotes?('\n\nDIRECTOR\'S NOTES (highest priority — apply first):\n'+directorNotes):'';
+
+    var prompt=
+      (client.ai_persona||'You are an expert social media content strategist.')+'\n\n'+
+      '=== YOUR TASK ===\n'+
+      'Generate a complete 14-day (2-week) social media content plan for '+client.name+
+      (client.brand_name?' ('+client.brand_name+')':'')+'.\n\n'+
+      (client.platform_notes?('=== PLATFORMS ===\n'+client.platform_notes+'\n\n'):'')+
+      '=== BRAND VOICE ===\n'+(client.brand_voice||'Authentic, warm, direct.')+'\n\n'+
+      (client.avoid_rules?('=== NEVER USE ===\n'+client.avoid_rules+'\n\n'):'')+
+      (client.copy_style?('=== COPY STYLE ===\n'+client.copy_style+'\n\n'):'')+
+      '=== CONTENT PILLARS ===\n'+pillarsText+'\n\n'+
+      (minText?('=== PILLAR MINIMUMS ===\n'+minText+'\n\n'):'')+
+      (rulesText?('=== CONTENT RULES ===\n'+rulesText+'\n\n'):'')+
+      '=== CONTENT MIX PER WEEK ===\n'+
+      (mix.reels||0)+' Reels, '+(mix.carousels||0)+' Carousels, '+(mix.quotes||0)+' Quote Posts\n\n'+
+      '=== THE 14 DAYS ===\n'+dateLines+
+      directorCtx+'\n\n'+
+      'Return ONLY valid JSON. No markdown. No backticks.\n'+
+      '{"week_of":"'+weekOf+'","planning_note":"Strategic direction max 15 words","days":['+
+      '{"day":"Monday","date":"'+fmtD(dates[0])+'","week":"Week 1","post_type":"Reel or Carousel or Quote Post","pillar":"pillar name","title":"compelling title","hook":"scroll-stopping hook","content_direction":"2 sentences what to cover and why it lands","brand_purpose":"one sentence what this does for the brand","voiceover_topic":"recording direction if Reel","quote":"verbatim Tiffany quote or FLAG string","designer_needed":"Designer 1 or Designer 2 or None","thumbnail_hook":"short punchy thumbnail text","carousel_outline":"slide outline if Carousel"}'+
+      ']}';
+
+    // Step 5: call Anthropic API
+    setGenStatus('Claude is writing the plan...');
+    var apiKey=getApiKey();
+    if(!apiKey){throw new Error('No Anthropic API key saved. Go to Settings and add your key.');}
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:8000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    if(!resp.ok) throw new Error('Anthropic API error '+resp.status);
+    var data=await resp.json();
+    var raw=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    raw=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    var plan=JSON.parse(raw);
+
+    // Step 6: render
+    setGenStatus('Rendering your plan...');
+    renderPlan(plan, weekOf);
+
+    // hide spinner, show plan
+    gs.classList.remove('visible');
+    document.getElementById('plan-output').style.display='block';
+    document.getElementById('regen-btn').style.display='';
+    document.getElementById('send-btn').style.display='';
+    document.getElementById('plan-week-title').textContent=plan.week_of||weekOf;
+    toast('Plan generated! Review and send for approval.','success');
+    // Save plan to Supabase
+    try{
+      await sbPost('plans',{client_id:activeClient.id,week_of:plan.week_of||weekOf,status:'draft'});
+    }catch(e){console.warn('Could not save plan to Supabase:',e);}
+
+  } catch(err){
+    console.error(err);
+    gs.classList.remove('visible');
+    document.getElementById('generate-wrap').style.display='';
+    genBtn.disabled=false;
+    toast(err.message||'Generation failed','error');
+  }
+}
+
+function setGenStatus(msg){
+  document.getElementById('gen-status').textContent=msg;
+}
+
+function renderPlan(plan, weekOf) {
+  var days=plan.days||[];
+  var w1=days.filter(function(d){return d.week==='Week 1'||days.indexOf(d)<7;});
+  var w2=days.filter(function(d){return d.week==='Week 2'||days.indexOf(d)>=7;});
+
+  var typeClass={
+    'Reel':'t-reel','Carousel':'t-carousel','Quote Post':'t-quote',
+    'Static Image':'t-static','Lifestyle':'t-static'
+  };
+
+  function renderDay(day){
+    var tc=typeClass[day.post_type]||'t-static';
+    var isFlag=day.quote&&day.quote.indexOf('FLAG')===0;
+    return '<div class="prow">'+
+      '<div class="pday">'+esc(day.day||'')+'<br><span style="font-weight:400;color:var(--light)">'+esc(day.date||'')+'</span></div>'+
+      '<div class="pbody">'+
+      '<span class="tag '+tc+'">'+esc(day.post_type||'')+'</span>'+
+      '<span class="tag t-pillar" style="margin-left:4px">'+esc(day.pillar||'')+'</span>'+
+      '<div class="ptitle">'+esc(day.title||'')+'</div>'+
+      (day.hook?'<div class="phook">"'+esc(day.hook)+'"</div>':'')+
+      (day.brand_purpose?'<div class="ppurpose">'+esc(day.brand_purpose)+'</div>':'')+
+      (isFlag?'<div class="pflag">'+esc(day.quote)+'</div>':'')+
+      '</div></div>';
+  }
+
+  document.getElementById('week1-days').innerHTML=w1.map(renderDay).join('');
+  document.getElementById('week2-days').innerHTML=w2.map(renderDay).join('');
+
+  var wl=weekOf.split(' - ');
+  document.getElementById('wk1-label').textContent='Week 1 '+(wl[0]||'');
+  document.getElementById('wk2-label').textContent='Week 2 '+(wl[1]||'');
+}
+
+function esc(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function sendForApproval(){
+  toast('Coming next — approval flow wiring','info');
+}
+
+
+// ── API KEY MANAGEMENT ──
+function getApiKey(){return localStorage.getItem('yah_anthropic_key')||'';}
+
+function saveApiKey(){
+  var val=document.getElementById('api-key-input').value.trim();
+  if(!val){toast('Paste your API key first','error');return;}
+  if(!val.startsWith('sk-ant')){toast('That does not look like an Anthropic key','error');return;}
+  localStorage.setItem('yah_anthropic_key',val);
+  document.getElementById('key-status').textContent='Saved in Chrome ✓';
+  document.getElementById('key-status').style.color='var(--green)';
+  toast('API key saved','success');
+}
+
+function loadSettingsScreen(){
+  var key=getApiKey();
+  var input=document.getElementById('api-key-input');
+  if(key) {
+    input.value=key;
+    document.getElementById('key-status').textContent='Key saved in Chrome ✓';
+    document.getElementById('key-status').style.color='var(--green)';
+  }
+}
+
+async function testApiKey(){
+  var key=getApiKey();
+  var res=document.getElementById('test-result');
+  if(!key){res.textContent='No API key saved yet.';res.style.color='var(--amber)';return;}
+  res.textContent='Testing...';res.style.color='var(--muted)';
+  try{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:20,messages:[{role:'user',content:'Say OK'}]})
+    });
+    if(r.ok){res.textContent='Claude is connected and responding ✓';res.style.color='var(--green)';}
+    else{var e=await r.json();res.textContent='Error: '+(e.error&&e.error.message||r.status);res.style.color='var(--red)';}
+  }catch(err){res.textContent='Connection failed: '+err.message;res.style.color='var(--red)';}
+}
+
+// ── INIT ──
+document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderPillars();
+loadDashboard();
+</script>
+</body>
+</html>
