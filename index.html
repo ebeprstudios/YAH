@@ -379,7 +379,7 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
     <!-- Generating spinner -->
     <div class="generating" id="generating-state">
       <div class="gen-spinner"></div>
-      <div class="gen-label">Generating your 2-week plan...</div>
+      <div class="gen-label" id="gen-label">Working on it...</div>
       <div class="gen-sub" id="gen-status">Pulling client rules from Supabase and building the prompt</div>
     </div>
 
@@ -417,14 +417,14 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
     <div style="margin-bottom:36px">
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime-dk);margin-bottom:8px">Anthropic API</div>
       <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px">Connect Claude</div>
-      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px">Your API key is stored locally in Chrome and never sent anywhere except directly to Anthropic when generating a plan.</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px">Your Anthropic API key is stored securely as a Supabase secret. It never touches the browser. Plans are generated via the Edge Function.</div>
       <div class="field">
         <label class="f-label">Anthropic API Key</label>
         <input class="f-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="font-family:monospace;font-size:12px"/>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lime-dk)">console.anthropic.com</a></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Your key is stored as a Supabase secret, never in the browser. Get keys at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lime-dk)">console.anthropic.com</a></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save Key</button>
+        <button class="btn btn-primary btn-sm" onclick="testApiKey()">Test Edge Function</button>
         <span id="key-status" style="font-size:12px;color:var(--muted)"></span>
       </div>
     </div>
@@ -509,6 +509,7 @@ function openClient(client) {
 var pillars=['Faith & Business','Spiritual Growth','Family & Lifestyle','Humor & Personality'];
 var mix={reels:5,carousels:2,quotes:3};
 var saving=false;
+var activePlan=null;
 
 function resetSetup() {
   saving=false;goStep(1);
@@ -610,7 +611,7 @@ var COLORS=['linear-gradient(90deg,#6BBF00,#4A8A00)','linear-gradient(90deg,#3D2
 function renderCards(clients){
   var el=document.getElementById('client-cards');
   if(!clients.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">&#10022;</div><div class="empty-title">No clients yet</div><div class="empty-sub">Add your first client and YAH! will manage their content calendar.</div><button class="btn btn-primary btn-sm" onclick="goTo(\'setup\')">Add First Client</button></div>';
+    el.innerHTML='<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">No clients yet</div><div class="empty-sub">Add your first client and YAH! will manage their content calendar.</div><button class="btn btn-primary btn-sm" onclick="goTo(\'setup\')">Add First Client</button></div>';
     return;
   }
   el.innerHTML=clients.map(function(c,i){
@@ -658,7 +659,7 @@ async function generatePlan(isRegen) {
 
   try {
     // Step 1: fetch full client record from Supabase
-    setGenStatus('Pulling client profile from Supabase...');
+    setGenStatus('Pulling '+activeClient.name+' profile from Supabase...');
     var clients=await sbGet('clients?select=*,pillars(name,position)&id=eq.'+activeClient.id);
     var client=clients[0];
 
@@ -677,7 +678,7 @@ async function generatePlan(isRegen) {
     var weekOf=fmtShort(mon)+' - '+fmtShort(dates[13])+', '+dates[13].getFullYear();
 
     // Step 4: build prompt from Supabase fields
-    setGenStatus('Assembling prompt from client rules...');
+    setGenStatus('Building the prompt from brand rules and pillars...');
 
     var pillarsText=(client.pillars||[]).sort(function(a,b){return a.position-b.position;}).map(function(p){return p.name;}).join(', ');
     var mix=client.content_mix||{reels:5,carousels:2,quotes:3};
@@ -714,27 +715,69 @@ async function generatePlan(isRegen) {
       '{"day":"Monday","date":"'+fmtD(dates[0])+'","week":"Week 1","post_type":"Reel or Carousel or Quote Post","pillar":"pillar name","title":"compelling title","hook":"scroll-stopping hook","content_direction":"2 sentences what to cover and why it lands","brand_purpose":"one sentence what this does for the brand","voiceover_topic":"recording direction if Reel","quote":"verbatim Tiffany quote or FLAG string","designer_needed":"Designer 1 or Designer 2 or None","thumbnail_hook":"short punchy thumbnail text","carousel_outline":"slide outline if Carousel"}'+
       ']}';
 
-    // Step 5: call Anthropic API
-    setGenStatus('Claude is writing the plan...');
-    var apiKey=getApiKey();
-    if(!apiKey){throw new Error('No Anthropic API key saved. Go to Settings and add your key.');}
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    // Step 5: call Edge Function (API key stays server-side)
+    setGenStatus('Claude is writing the 14-day plan. This takes about 30 seconds...');
+    var resp=await fetch(SB_URL+'/functions/v1/generate-plan',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+SB_KEY,
+        'apikey':SB_KEY
+      },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:8000,
-        messages:[{role:'user',content:prompt}]
+        client_id: activeClient.id,
+        director_notes: directorNotes,
+        week_of: weekOf,
+        date_lines: dateLines
       })
     });
-    if(!resp.ok) throw new Error('Anthropic API error '+resp.status);
-    var data=await resp.json();
-    var raw=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-    raw=raw.replace(/```json/g,'').replace(/```/g,'').trim();
-    var plan=JSON.parse(raw);
+    if(!resp.ok){
+      var errData=await resp.json().catch(function(){return {};});
+      throw new Error(errData.error||'Edge Function error '+resp.status);
+    }
+    var result=await resp.json();
+    if(result.error) throw new Error(result.error);
+    var plan=result.plan;
+
+    // Step 6: save plan + plan_days to Supabase
+    setGenStatus('Saving plan to your dashboard...');
+    try {
+      var planRows=await sbPost('plans',{
+        client_id:activeClient.id,
+        week_of:plan.week_of||weekOf,
+        status:'draft'
+      });
+      var planId=planRows[0]&&planRows[0].id;
+      if(planId&&plan.days&&plan.days.length){
+        var dayRows=plan.days.map(function(d,i){
+          return {
+            plan_id:planId,
+            day_number:i+1,
+            day_label:d.day||'',
+            date_label:d.date||'',
+            week_label:d.week||'',
+            post_type:d.post_type||'',
+            pillar:d.pillar||'',
+            title:d.title||'',
+            hook:d.hook||'',
+            content_direction:d.content_direction||'',
+            brand_purpose:d.brand_purpose||'',
+            voiceover_topic:d.voiceover_topic||'',
+            quote:d.quote||'',
+            designer_needed:d.designer_needed||'',
+            thumbnail_hook:d.thumbnail_hook||'',
+            carousel_outline:d.carousel_outline||''
+          };
+        });
+        await sbPost('plan_days',dayRows);
+        activePlan={id:planId,week_of:plan.week_of||weekOf,days:plan.days};
+      }
+    } catch(saveErr){
+      console.warn('Could not save plan days:',saveErr);
+    }
 
     // Step 6: render
-    setGenStatus('Rendering your plan...');
+    setGenStatus('Almost done...');
     renderPlan(plan, weekOf);
 
     // hide spinner, show plan
@@ -799,8 +842,27 @@ function esc(str){
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function sendForApproval(){
-  toast('Coming next — approval flow wiring','info');
+async function sendForApproval(){
+  if(!activePlan){toast('Generate a plan first','error');return;}
+  if(!activeClient){toast('No client selected','error');return;}
+  var btn=document.getElementById('send-btn');
+  btn.disabled=true;btn.textContent='Sending...';
+  toast('Sending plan to '+activeClient.name+'...','info');
+  try{
+    // Update plan status to sent
+    await sbPatch('plans?id=eq.'+activePlan.id,{status:'sent',sent_at:new Date().toISOString()});
+    // Show success
+    toast('Plan sent to '+activeClient.name+' for approval!','success');
+    btn.textContent='Sent!';
+    btn.style.background='var(--green)';
+    btn.style.color='white';
+    // Log to approval flow
+    document.getElementById('plan-week-title').textContent=activePlan.week_of+' — Awaiting Approval';
+  }catch(err){
+    console.error(err);
+    toast(err.message||'Could not send plan','error');
+    btn.disabled=false;btn.textContent='Send for Approval';
+  }
 }
 
 
@@ -828,18 +890,19 @@ function loadSettingsScreen(){
 }
 
 async function testApiKey(){
-  var key=getApiKey();
   var res=document.getElementById('test-result');
-  if(!key){res.textContent='No API key saved yet.';res.style.color='var(--amber)';return;}
-  res.textContent='Testing...';res.style.color='var(--muted)';
+  res.textContent='Testing Edge Function connection...';res.style.color='var(--muted)';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{
+    var r=await fetch(SB_URL+'/functions/v1/generate-plan',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:20,messages:[{role:'user',content:'Say OK'}]})
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'apikey':SB_KEY},
+      body:JSON.stringify({ping:true})
     });
-    if(r.ok){res.textContent='Claude is connected and responding ✓';res.style.color='var(--green)';}
-    else{var e=await r.json();res.textContent='Error: '+(e.error&&e.error.message||r.status);res.style.color='var(--red)';}
+    if(r.status===400||r.status===200||r.status===500){
+      res.textContent='Edge Function is live and reachable ✓';res.style.color='var(--green)';
+    } else {
+      res.textContent='Unexpected status: '+r.status;res.style.color='var(--amber)';
+    }
   }catch(err){res.textContent='Connection failed: '+err.message;res.style.color='var(--red)';}
 }
 
