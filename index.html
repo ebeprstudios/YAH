@@ -337,12 +337,15 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
   </div>
 
   <div class="ctab-bar">
-    <div class="ctab active">Weekly Planner</div>
-    <div class="ctab">Knowledge Base</div>
-    <div class="ctab">Settings</div>
+    <div class="ctab active" onclick="switchClientTab('planner',this)">Weekly Planner</div>
+    <div class="ctab" onclick="switchClientTab('history',this)">Plan History</div>
+    <div class="ctab" onclick="switchClientTab('ideation',this)">Ideation</div>
+    <div class="ctab" onclick="switchClientTab('kb',this)">Knowledge Base</div>
+    <div class="ctab" onclick="switchClientTab('reports',this)">Reports</div>
   </div>
 
-  <div class="client-body">
+  <!-- ── TAB: PLANNER ── -->
+  <div class="client-body" id="ctab-planner">
     <div class="plan-header">
       <div>
         <div class="plan-lbl">2-Week Content Plan</div>
@@ -353,7 +356,11 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
         <button class="btn btn-violet btn-sm" id="send-btn" onclick="sendForApproval()" style="display:none">Send for Approval</button>
       </div>
     </div>
-
+    <!-- Approval sent confirmation -->
+    <div id="approval-sent-banner" style="display:none;background:var(--lime-bg);border:1px solid var(--lime);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--lime-dk);margin-bottom:3px">✓ Plan sent for approval</div>
+      <div style="font-size:11px;color:var(--lime-dk)" id="approval-sent-detail"></div>
+    </div>
     <!-- Director's Notes -->
     <div class="director-box">
       <div class="director-label">Director's Notes — Tell Claude what you want</div>
@@ -367,22 +374,17 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
       </div>
       <textarea class="director-input" id="director-notes" rows="2" placeholder="e.g. More humor this week, face-to-cam reels for Facebook, include Money Mondays carousel"></textarea>
     </div>
-
     <!-- Generate button -->
     <div style="text-align:center;margin-bottom:28px" id="generate-wrap">
-      <button class="btn btn-primary" id="gen-btn" onclick="generatePlan(false)" style="font-size:15px;padding:12px 32px">
-        Generate 2-Week Plan
-      </button>
+      <button class="btn btn-primary" id="gen-btn" onclick="generatePlan(false)" style="font-size:15px;padding:12px 32px">Generate 2-Week Plan</button>
       <p style="font-size:11px;color:var(--muted);margin-top:10px" id="client-hint"></p>
     </div>
-
     <!-- Generating spinner -->
     <div class="generating" id="generating-state">
       <div class="gen-spinner"></div>
-      <div class="gen-label" id="gen-label">Working on it...</div>
+      <div class="gen-label">Generating your 2-week plan...</div>
       <div class="gen-sub" id="gen-status">Pulling client rules from Supabase and building the prompt</div>
     </div>
-
     <!-- Plan output -->
     <div id="plan-output" style="display:none">
       <div class="wk-section">
@@ -395,6 +397,86 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
       </div>
     </div>
   </div>
+
+  <!-- ── TAB: HISTORY ── -->
+  <div class="client-body" id="ctab-history" style="display:none">
+    <div class="plan-header">
+      <div><div class="plan-lbl">Plan Archive</div><div class="plan-title">Past Content Plans</div></div>
+    </div>
+    <div id="history-list">
+      <div style="text-align:center;padding:40px;color:var(--muted)">
+        <div style="font-size:28px;margin-bottom:10px">📋</div>
+        <div style="font-weight:700;margin-bottom:4px">Loading history...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: IDEATION ── -->
+  <div class="client-body" id="ctab-ideation" style="display:none">
+    <div class="plan-header">
+      <div><div class="plan-lbl">Pre-Plan Ideas</div><div class="plan-title">Ideation Board</div></div>
+      <button class="btn btn-primary btn-sm" onclick="saveIdeation()">Save Ideas</button>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);padding:18px;margin-bottom:16px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Team Ideas for Next Cycle</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Drop ideas, angles, video references, or anything the team wants in the next plan. Claude will use these when generating.</div>
+      <div class="field"><label class="f-label">Content Ideas &amp; Angles</label><textarea class="f-input" id="idea-content" rows="4" placeholder="e.g. She mentioned wanting to do a video about her morning routine. The comment section is full of questions about her Bible study method. Fathom transcript clip from last week — timestamp 12:34 where she talks about God's Math working in her business..."></textarea></div>
+      <div class="field"><label class="f-label">Upcoming Dates or Events</label><textarea class="f-input" id="idea-dates" rows="2" placeholder="e.g. Apr 27 Reva Challenge launch. May 12 batch shoot. Mother's Day May 10..."></textarea></div>
+      <div class="field"><label class="f-label">Top-Performing Content to Amplify</label><textarea class="f-input" id="idea-top" rows="2" placeholder="e.g. The Empire vs Sandcastle reel hit 40K views — build a carousel from that. The declarations carousel saved 2,400 times..."></textarea></div>
+    </div>
+    <div id="ideation-history" style="margin-top:8px"></div>
+  </div>
+
+  <!-- ── TAB: KNOWLEDGE BASE ── -->
+  <div class="client-body" id="ctab-kb" style="display:none">
+    <div class="plan-header">
+      <div><div class="plan-lbl">Voice Training</div><div class="plan-title">Knowledge Base</div></div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);padding:18px;margin-bottom:16px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Add Document</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Upload transcripts, brand guidelines, and performance reports. Claude uses these to generate content in the client's exact voice.</div>
+      <div class="f-grid" style="margin-bottom:14px">
+        <div class="field"><label class="f-label">Document Title</label><input class="f-input" id="kb-title" placeholder="e.g. March Voiceover Transcripts"/></div>
+        <div class="field"><label class="f-label">Document Type</label>
+          <select class="f-input" id="kb-type">
+            <option value="transcript">Transcript (Gold — Voice Training)</option>
+            <option value="meta_report">META Performance Report</option>
+            <option value="brand_guidelines">Brand Guidelines</option>
+            <option value="strategic_plan">90-Day Strategic Plan</option>
+            <option value="audience_research">Audience Research</option>
+            <option value="content_calendar">Content Calendar</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label class="f-label">Paste Document Text</label><textarea class="f-input" id="kb-content" rows="6" placeholder="Paste the full transcript, guideline document, or report text here..."></textarea></div>
+      <button class="btn btn-primary btn-sm" onclick="saveKbDoc()">Save to Knowledge Base</button>
+    </div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Saved Documents</div>
+    <div id="kb-list">
+      <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No documents yet — add your first transcript above.</div>
+    </div>
+  </div>
+
+  <!-- ── TAB: REPORTS ── -->
+  <div class="client-body" id="ctab-reports" style="display:none">
+    <div class="plan-header">
+      <div><div class="plan-lbl">Monthly Recap</div><div class="plan-title">Performance Reports</div></div>
+      <button class="btn btn-primary btn-sm" onclick="generateReport()">Generate Report</button>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);padding:18px;margin-bottom:16px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">New Report</div>
+      <div class="f-grid">
+        <div class="field"><label class="f-label">Report Month</label><input class="f-input" id="rpt-month" placeholder="e.g. April 2026" type="month"/></div>
+        <div class="field"><label class="f-label">Total Posts Published</label><input class="f-input" id="rpt-posts" type="number" placeholder="28"/></div>
+      </div>
+      <div class="field"><label class="f-label">Paste META Data or Notes</label><textarea class="f-input" id="rpt-data" rows="4" placeholder="Paste your META performance export, top posts, engagement numbers, or any notes for this month..."></textarea></div>
+    </div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Past Reports</div>
+    <div id="reports-list">
+      <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No reports yet — generate your first monthly recap above.</div>
+    </div>
+  </div>
+
 </section>
 
 
@@ -417,14 +499,14 @@ textarea.f-input{resize:vertical;min-height:80px;line-height:1.6}
     <div style="margin-bottom:36px">
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime-dk);margin-bottom:8px">Anthropic API</div>
       <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px">Connect Claude</div>
-      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px">Your Anthropic API key is stored securely as a Supabase secret. It never touches the browser. Plans are generated via the Edge Function.</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px">Your API key is stored locally in Chrome and never sent anywhere except directly to Anthropic when generating a plan.</div>
       <div class="field">
         <label class="f-label">Anthropic API Key</label>
         <input class="f-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="font-family:monospace;font-size:12px"/>
         <div style="font-size:11px;color:var(--muted);margin-top:6px">Your key is stored as a Supabase secret, never in the browser. Get keys at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lime-dk)">console.anthropic.com</a></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn btn-primary btn-sm" onclick="testApiKey()">Test Edge Function</button>
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save Key</button>
         <span id="key-status" style="font-size:12px;color:var(--muted)"></span>
       </div>
     </div>
@@ -509,7 +591,6 @@ function openClient(client) {
 var pillars=['Faith & Business','Spiritual Growth','Family & Lifestyle','Humor & Personality'];
 var mix={reels:5,carousels:2,quotes:3};
 var saving=false;
-var activePlan=null;
 
 function resetSetup() {
   saving=false;goStep(1);
@@ -592,17 +673,26 @@ async function saveClient(){
 async function loadDashboard() {
   try {
     var clients=await sbGet('clients?select=*,pillars(count)&active=eq.true&order=created_at.desc');
-    renderStats(clients);renderCards(clients);
+    var pendingCount=0, approvedCount=0;
+    try {
+      var pending=await sbGet('plans?status=eq.sent&select=id');
+      var approved=await sbGet('plans?status=eq.approved&select=id');
+      pendingCount=pending.length; approvedCount=approved.length;
+    } catch(e) {}
+    renderStats(clients, pendingCount, approvedCount);
+    renderCards(clients);
   } catch(err){
     document.getElementById('client-cards').innerHTML='<div class="empty"><div class="empty-icon">&#9888;</div><div class="empty-title">Could not load</div><div class="empty-sub">'+err.message+'</div></div>';
   }
 }
 
-function renderStats(clients){
+function renderStats(clients, pendingCount, approvedCount){
+  var pc = pendingCount || 0;
+  var ac = approvedCount || 0;
   document.getElementById('dash-stats').innerHTML=
     '<div class="sc"><div class="sc-v" style="color:var(--violet)">'+clients.length+'</div><div class="sc-l">Active Clients</div></div>'+
-    '<div class="sc"><div class="sc-v" style="color:var(--amber)">0</div><div class="sc-l">Awaiting Approval</div></div>'+
-    '<div class="sc"><div class="sc-v" style="color:var(--green)">0</div><div class="sc-l">Plans Approved</div></div>'+
+    '<div class="sc"><div class="sc-v" style="color:var(--amber)">'+pc+'</div><div class="sc-l">Awaiting Approval</div></div>'+
+    '<div class="sc"><div class="sc-v" style="color:var(--green)">'+ac+'</div><div class="sc-l">Plans Approved</div></div>'+
     '<div class="sc"><div class="sc-v" style="color:var(--lime-dk)">'+(clients.length*20)+'</div><div class="sc-l">Total Posts</div></div>';
 }
 
@@ -611,7 +701,7 @@ var COLORS=['linear-gradient(90deg,#6BBF00,#4A8A00)','linear-gradient(90deg,#3D2
 function renderCards(clients){
   var el=document.getElementById('client-cards');
   if(!clients.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">No clients yet</div><div class="empty-sub">Add your first client and YAH! will manage their content calendar.</div><button class="btn btn-primary btn-sm" onclick="goTo(\'setup\')">Add First Client</button></div>';
+    el.innerHTML='<div class="empty"><div class="empty-icon">&#10022;</div><div class="empty-title">No clients yet</div><div class="empty-sub">Add your first client and YAH! will manage their content calendar.</div><button class="btn btn-primary btn-sm" onclick="goTo(\'setup\')">Add First Client</button></div>';
     return;
   }
   el.innerHTML=clients.map(function(c,i){
@@ -659,7 +749,7 @@ async function generatePlan(isRegen) {
 
   try {
     // Step 1: fetch full client record from Supabase
-    setGenStatus('Pulling '+activeClient.name+' profile from Supabase...');
+    setGenStatus('Pulling client profile from Supabase...');
     var clients=await sbGet('clients?select=*,pillars(name,position)&id=eq.'+activeClient.id);
     var client=clients[0];
 
@@ -678,7 +768,7 @@ async function generatePlan(isRegen) {
     var weekOf=fmtShort(mon)+' - '+fmtShort(dates[13])+', '+dates[13].getFullYear();
 
     // Step 4: build prompt from Supabase fields
-    setGenStatus('Building the prompt from brand rules and pillars...');
+    setGenStatus('Assembling prompt from client rules...');
 
     var pillarsText=(client.pillars||[]).sort(function(a,b){return a.position-b.position;}).map(function(p){return p.name;}).join(', ');
     var mix=client.content_mix||{reels:5,carousels:2,quotes:3};
@@ -716,7 +806,7 @@ async function generatePlan(isRegen) {
       ']}';
 
     // Step 5: call Edge Function (API key stays server-side)
-    setGenStatus('Claude is writing the 14-day plan. This takes about 30 seconds...');
+    setGenStatus('Claude is writing the plan...');
     var resp=await fetch(SB_URL+'/functions/v1/generate-plan',{
       method:'POST',
       headers:{
@@ -739,46 +829,20 @@ async function generatePlan(isRegen) {
     if(result.error) throw new Error(result.error);
     var plan=result.plan;
 
-    // Step 6: save plan + plan_days to Supabase
-    setGenStatus('Saving plan to your dashboard...');
-    try {
-      var planRows=await sbPost('plans',{
-        client_id:activeClient.id,
-        week_of:plan.week_of||weekOf,
-        status:'draft'
-      });
-      var planId=planRows[0]&&planRows[0].id;
-      if(planId&&plan.days&&plan.days.length){
-        var dayRows=plan.days.map(function(d,i){
-          return {
-            plan_id:planId,
-            day_number:i+1,
-            day_label:d.day||'',
-            date_label:d.date||'',
-            week_label:d.week||'',
-            post_type:d.post_type||'',
-            pillar:d.pillar||'',
-            title:d.title||'',
-            hook:d.hook||'',
-            content_direction:d.content_direction||'',
-            brand_purpose:d.brand_purpose||'',
-            voiceover_topic:d.voiceover_topic||'',
-            quote:d.quote||'',
-            designer_needed:d.designer_needed||'',
-            thumbnail_hook:d.thumbnail_hook||'',
-            carousel_outline:d.carousel_outline||''
-          };
-        });
-        await sbPost('plan_days',dayRows);
-        activePlan={id:planId,week_of:plan.week_of||weekOf,days:plan.days};
-      }
-    } catch(saveErr){
-      console.warn('Could not save plan days:',saveErr);
-    }
-
     // Step 6: render
-    setGenStatus('Almost done...');
+    setGenStatus('Rendering your plan...');
+    // Store plan state for Send for Approval
+    activePlan = plan;
+    activePlanId = null; // will be created on send
+    activePlanDays = plan.days || [];
+
     renderPlan(plan, weekOf);
+
+    // Reset approval banner
+    var banner = document.getElementById('approval-sent-banner');
+    if (banner) banner.style.display = 'none';
+    var sendBtn = document.getElementById('send-btn');
+    if (sendBtn) { sendBtn.textContent = 'Send for Approval'; sendBtn.disabled = false; sendBtn.style.background = ''; }
 
     // hide spinner, show plan
     gs.classList.remove('visible');
@@ -787,10 +851,6 @@ async function generatePlan(isRegen) {
     document.getElementById('send-btn').style.display='';
     document.getElementById('plan-week-title').textContent=plan.week_of||weekOf;
     toast('Plan generated! Review and send for approval.','success');
-    // Save plan to Supabase
-    try{
-      await sbPost('plans',{client_id:activeClient.id,week_of:plan.week_of||weekOf,status:'draft'});
-    }catch(e){console.warn('Could not save plan to Supabase:',e);}
 
   } catch(err){
     console.error(err);
@@ -842,27 +902,195 @@ function esc(str){
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function sendForApproval(){
-  if(!activePlan){toast('Generate a plan first','error');return;}
-  if(!activeClient){toast('No client selected','error');return;}
-  var btn=document.getElementById('send-btn');
-  btn.disabled=true;btn.textContent='Sending...';
-  toast('Sending plan to '+activeClient.name+'...','info');
+// ── ACTIVE PLAN STATE
+var activePlan = null;
+var activePlanId = null;
+var activePlanDays = [];
+
+// ── CLIENT TAB SWITCHER
+function switchClientTab(tab, el) {
+  ['planner','history','ideation','kb','reports'].forEach(function(t) {
+    var panel = document.getElementById('ctab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ctab').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  if (tab === 'history') loadPlanHistory();
+  if (tab === 'ideation') loadIdeationHistory();
+  if (tab === 'kb') loadKbDocs();
+  if (tab === 'reports') loadReports();
+}
+
+async function sbDelete(path) {
+  const r = await fetch(SB_URL + '/rest/v1/' + path, { method: 'DELETE', headers: SB_H });
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'DELETE error ' + r.status); }
+}
+
+function generateToken() {
+  return 'yah_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function sendForApproval() {
+  if (!activeClient) { toast('No client selected', 'error'); return; }
+  if (!activePlan || !activePlanDays.length) { toast('Generate a plan first before sending', 'error'); return; }
+  var btn = document.getElementById('send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  (async function() {
+    try {
+      if (!activePlanId) {
+        var plans = await sbPost('plans', {
+          client_id: activeClient.id, week_of: activePlan.week_of || '',
+          planning_note: activePlan.planning_note || '', status: 'draft'
+        });
+        activePlanId = plans[0].id;
+      }
+      if (activePlanDays.length) {
+        var dayRows = activePlanDays.map(function(day, i) {
+          return { plan_id: activePlanId, day_number: i+1,
+            day_label: day.day + (day.date ? ', '+day.date : ''),
+            week: day.week || (i < 7 ? 'Week 1' : 'Week 2'),
+            post_type: day.post_type||'', pillar: day.pillar||'',
+            title: day.title||'', hook: day.hook||'',
+            brand_purpose: day.brand_purpose||'', voiceover_topic: day.voiceover_topic||'',
+            quote: day.quote||'', designer_needed: day.designer_needed||'',
+            thumbnail_hook: day.thumbnail_hook||'', carousel_outline: day.carousel_outline||'' };
+        });
+        try { await sbDelete('plan_days?plan_id=eq.'+activePlanId); } catch(e) {}
+        await sbPost('plan_days', dayRows);
+      }
+      var token = generateToken();
+      await sbPost('approvals', { plan_id: activePlanId, client_id: activeClient.id,
+        token: token, status: 'pending', created_at: new Date().toISOString() });
+      var baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+      var resp = await fetch(SB_URL+'/functions/v1/send-approval', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'apikey':SB_KEY},
+        body: JSON.stringify({ plan_id:activePlanId, client_id:activeClient.id, approval_token:token, base_url:baseUrl })
+      });
+      var result = await resp.json();
+      if (!resp.ok) throw new Error(result.error||'Edge Function error '+resp.status);
+      await sbPatch('plans?id=eq.'+activePlanId, {status:'sent', sent_at:new Date().toISOString()});
+      btn.textContent = 'Sent ✓'; btn.style.background = 'var(--green)';
+      var banner = document.getElementById('approval-sent-banner');
+      var detail = document.getElementById('approval-sent-detail');
+      if (banner && detail) {
+        detail.textContent = 'Sent to '+(activeClient.client_email||activeClient.name)+(result.email_sent?' — email delivered':' — approval link generated');
+        banner.style.display = 'block';
+      }
+      toast('Plan sent for approval!', 'success');
+      loadDashboard();
+    } catch(err) {
+      console.error(err); btn.disabled=false; btn.textContent='Send for Approval';
+      toast(err.message||'Could not send plan','error');
+    }
+  })();
+}
+
+async function loadPlanHistory() {
+  var el=document.getElementById('history-list'); if(!el||!activeClient)return;
+  el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Loading...</div>';
+  try {
+    var plans=await sbGet('plans?client_id=eq.'+activeClient.id+'&order=created_at.desc&limit=20&select=*');
+    if(!plans.length){el.innerHTML='<div class="empty"><div class="empty-icon">&#128203;</div><div class="empty-title">No plans yet</div><div class="empty-sub">Generate and send your first plan — it will appear here.</div></div>';return;}
+    var SC={draft:'var(--muted)',sent:'var(--amber)',approved:'var(--green)',changes_requested:'var(--red)'};
+    var SL={draft:'Draft',sent:'Awaiting Approval',approved:'Approved ✓',changes_requested:'Changes Requested'};
+    el.innerHTML=plans.map(function(p){
+      return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-md);padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
+        '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(p.week_of||'Untitled Plan')+'</div>'+
+        '<div style="font-size:10px;color:var(--muted)">'+(p.created_at?new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'')+
+        (p.planning_note?'<div style=\'font-size:11px;color:var(--lime-dk);margin-top:3px;font-style:italic\'>'+(p.planning_note)+'</div>':'')+'</div></div>'+
+        '<span style="font-size:11px;font-weight:700;color:'+(SC[p.status]||'var(--muted)')+'">'+(SL[p.status]||p.status)+'</span></div>';
+    }).join('');
+  } catch(err){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--red);font-size:12px">'+esc(err.message)+'</div>';}
+}
+
+async function saveIdeation() {
+  if(!activeClient)return;
+  var content=document.getElementById('idea-content').value.trim();
+  var dates=document.getElementById('idea-dates').value.trim();
+  var top=document.getElementById('idea-top').value.trim();
+  if(!content&&!dates&&!top){toast('Add some ideas first','error');return;}
   try{
-    // Update plan status to sent
-    await sbPatch('plans?id=eq.'+activePlan.id,{status:'sent',sent_at:new Date().toISOString()});
-    // Show success
-    toast('Plan sent to '+activeClient.name+' for approval!','success');
-    btn.textContent='Sent!';
-    btn.style.background='var(--green)';
-    btn.style.color='white';
-    // Log to approval flow
-    document.getElementById('plan-week-title').textContent=activePlan.week_of+' — Awaiting Approval';
-  }catch(err){
-    console.error(err);
-    toast(err.message||'Could not send plan','error');
-    btn.disabled=false;btn.textContent='Send for Approval';
-  }
+    await sbPost('ideation_notes',{client_id:activeClient.id,content_ideas:content,upcoming_dates:dates,top_performers:top,created_at:new Date().toISOString()});
+    ['idea-content','idea-dates','idea-top'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    toast('Ideas saved — Claude will use these in the next plan ✓','success');
+    loadIdeationHistory();
+  }catch(err){toast(err.message||'Could not save ideas','error');}
+}
+
+async function loadIdeationHistory() {
+  var el=document.getElementById('ideation-history');if(!el||!activeClient)return;
+  try{
+    var notes=await sbGet('ideation_notes?client_id=eq.'+activeClient.id+'&order=created_at.desc&limit=5');
+    if(!notes.length){el.innerHTML='';return;}
+    el.innerHTML='<div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Previous Ideation Notes</div>'+
+      notes.map(function(n){
+        return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-md);padding:12px 16px;margin-bottom:8px;font-size:12px;color:var(--text2)">'+
+          '<div style="font-size:9px;color:var(--muted);margin-bottom:6px">'+(n.created_at?new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'')+
+          (n.content_ideas?'<div style=\'margin-bottom:4px\'><strong>Ideas:</strong> '+esc(n.content_ideas)+'</div>':'')+
+          (n.upcoming_dates?'<div style=\'margin-bottom:4px\'><strong>Dates:</strong> '+esc(n.upcoming_dates)+'</div>':'')+
+          (n.top_performers?'<div><strong>Top content:</strong> '+esc(n.top_performers)+'</div>':'')+'</div></div>';
+      }).join('');
+  }catch(err){el.innerHTML='';}
+}
+
+async function saveKbDoc() {
+  if(!activeClient)return;
+  var title=document.getElementById('kb-title').value.trim();
+  var type=document.getElementById('kb-type').value;
+  var content=document.getElementById('kb-content').value.trim();
+  if(!title||!content){toast('Title and content are required','error');return;}
+  try{
+    await sbPost('kb_documents',{client_id:activeClient.id,title:title,doc_type:type,content:content,created_at:new Date().toISOString()});
+    document.getElementById('kb-title').value='';document.getElementById('kb-content').value='';
+    toast('Document saved to Knowledge Base ✓','success');loadKbDocs();
+  }catch(err){toast(err.message||'Could not save document','error');}
+}
+
+async function loadKbDocs() {
+  var el=document.getElementById('kb-list');if(!el||!activeClient)return;
+  try{
+    var docs=await sbGet('kb_documents?client_id=eq.'+activeClient.id+'&order=created_at.desc&select=id,title,doc_type,created_at');
+    if(!docs.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No documents yet — add your first transcript above.</div>';return;}
+    var TC={transcript:'#B87830',meta_report:'#C03030',brand_guidelines:'#6A50A8',strategic_plan:'#2860B8',audience_research:'#3A9E6E',content_calendar:'#C47820'};
+    var TL={transcript:'Transcript',meta_report:'META Report',brand_guidelines:'Brand Guidelines',strategic_plan:'Strategic Plan',audience_research:'Audience Research',content_calendar:'Content Calendar'};
+    el.innerHTML=docs.map(function(d){
+      return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-md);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px">'+
+        '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(d.title)+'</div>'+
+        '<div style="font-size:10px;color:var(--muted)">'+(d.created_at?new Date(d.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'')+
+        '</div></div><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.05);color:'+(TC[d.doc_type]||'#888')+'">'+(TL[d.doc_type]||d.doc_type)+'</span></div>';
+    }).join('');
+  }catch(err){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--red);font-size:12px">'+esc(err.message)+'</div>';}
+}
+
+async function generateReport() {
+  if(!activeClient)return;
+  var month=document.getElementById('rpt-month').value;
+  var posts=document.getElementById('rpt-posts').value;
+  var data=document.getElementById('rpt-data').value.trim();
+  if(!month){toast('Select a report month','error');return;}
+  var btn=document.querySelector('[onclick="generateReport()"]');
+  btn.textContent='Saving...';btn.disabled=true;
+  try{
+    var monthLabel=new Date(month+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    await sbPost('reports',{client_id:activeClient.id,report_month:month,month_label:monthLabel,total_posts:posts?parseInt(posts):null,raw_data:data,status:'draft',created_at:new Date().toISOString()});
+    document.getElementById('rpt-month').value='';document.getElementById('rpt-posts').value='';document.getElementById('rpt-data').value='';
+    toast('Report saved ✓','success');loadReports();
+  }catch(err){toast(err.message||'Could not save report','error');}
+  btn.textContent='Generate Report';btn.disabled=false;
+}
+
+async function loadReports() {
+  var el=document.getElementById('reports-list');if(!el||!activeClient)return;
+  try{
+    var reports=await sbGet('reports?client_id=eq.'+activeClient.id+'&order=created_at.desc&limit=12&select=id,month_label,total_posts,status,created_at');
+    if(!reports.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No reports yet.</div>';return;}
+    el.innerHTML=reports.map(function(r){
+      return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-md);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px">'+
+        '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+esc(r.month_label||'')+'</div>'+
+        (r.total_posts?'<div style="font-size:11px;color:var(--muted)">'+r.total_posts+' posts published</div>':'')+
+        '</div><span style="font-size:10px;font-weight:700;color:var(--muted)">'+(r.created_at?new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'')+'</span></div>';
+    }).join('');
+  }catch(err){el.innerHTML='';}
 }
 
 
@@ -890,19 +1118,18 @@ function loadSettingsScreen(){
 }
 
 async function testApiKey(){
+  var key=getApiKey();
   var res=document.getElementById('test-result');
-  res.textContent='Testing Edge Function connection...';res.style.color='var(--muted)';
+  if(!key){res.textContent='No API key saved yet.';res.style.color='var(--amber)';return;}
+  res.textContent='Testing...';res.style.color='var(--muted)';
   try{
-    var r=await fetch(SB_URL+'/functions/v1/generate-plan',{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'apikey':SB_KEY},
-      body:JSON.stringify({ping:true})
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:20,messages:[{role:'user',content:'Say OK'}]})
     });
-    if(r.status===400||r.status===200||r.status===500){
-      res.textContent='Edge Function is live and reachable ✓';res.style.color='var(--green)';
-    } else {
-      res.textContent='Unexpected status: '+r.status;res.style.color='var(--amber)';
-    }
+    if(r.ok){res.textContent='Claude is connected and responding ✓';res.style.color='var(--green)';}
+    else{var e=await r.json();res.textContent='Error: '+(e.error&&e.error.message||r.status);res.style.color='var(--red)';}
   }catch(err){res.textContent='Connection failed: '+err.message;res.style.color='var(--red)';}
 }
 
