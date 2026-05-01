@@ -6,7 +6,6 @@
 <title>YAH! Studio</title>
 <style>
   :root {
-    /* Avocado palette */
     --skin: #1F2A1A;
     --skin-2: #2D3826;
     --olive: #5A6B2D;
@@ -46,10 +45,8 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Min-width gate */
   @media (max-width: 1023px) {
     body::before {
       content: 'YAH! Studio is desktop-only. Switch to a wider screen.';
@@ -66,7 +63,7 @@
     }
   }
 
-  /* ============== AUTH GATE ============== */
+  /* ============== AUTH ============== */
   #auth-gate {
     position: fixed;
     inset: 0;
@@ -74,15 +71,20 @@
     display: grid;
     place-items: center;
     z-index: 100;
+    padding: 20px;
   }
   .auth-card {
     background: white;
     border: 0.5px solid var(--bd-soft);
     border-radius: var(--r-xl);
     padding: 40px 36px;
-    width: 380px;
+    width: 420px;
+    max-width: 100%;
     box-shadow: var(--shadow-pop);
+  }
+  .auth-head {
     text-align: center;
+    margin-bottom: 28px;
   }
   .auth-logo {
     background: var(--flesh);
@@ -93,34 +95,119 @@
     font-size: 24px;
     letter-spacing: -0.5px;
     display: inline-block;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .auth-tag {
     color: var(--text-2);
     font-size: 13px;
-    margin-bottom: 28px;
   }
-  .auth-card input {
+  .auth-title {
+    color: var(--text-1);
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+  }
+  .auth-subtitle {
+    color: var(--text-2);
+    font-size: 13px;
+    text-align: center;
+    margin: 0 0 22px;
+  }
+  .auth-field {
+    margin-bottom: 12px;
+  }
+  .auth-field label {
+    display: block;
+    color: var(--text-2);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 5px;
+  }
+  .auth-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 11px 14px;
     border: 1px solid var(--bd-strong);
     border-radius: var(--r-md);
     font: inherit;
-    margin-bottom: 12px;
+    font-size: 14px;
     background: var(--cream);
     color: var(--text-1);
     transition: border-color 120ms;
   }
-  .auth-card input:focus {
+  .auth-input:focus {
     outline: none;
     border-color: var(--olive);
+    background: white;
+  }
+  .auth-cta {
+    width: 100%;
+    margin-top: 8px;
+    justify-content: center;
+  }
+  .auth-error,
+  .auth-message {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    font-size: 12px;
+    display: none;
   }
   .auth-error {
+    background: #F8DDD0;
     color: var(--terracotta);
-    font-size: 12px;
-    margin-top: 8px;
-    min-height: 16px;
+    border: 0.5px solid #E8B8A0;
   }
+  .auth-message {
+    background: var(--flesh-pale);
+    color: var(--olive);
+    border: 0.5px solid var(--flesh-dk);
+  }
+  .auth-error.show, .auth-message.show { display: block; }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--bd-soft);
+  }
+  .auth-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .auth-foot {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .auth-foot a {
+    color: var(--olive);
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .auth-foot a:hover { text-decoration: underline; }
+  .auth-classic {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .auth-classic a { color: var(--olive); }
 
   /* ============== APP LAYOUT ============== */
   #app {
@@ -129,7 +216,6 @@
     min-height: 100vh;
   }
 
-  /* ============== LEFT RAIL ============== */
   aside#left-rail {
     background: var(--skin);
     color: var(--text-rail);
@@ -165,9 +251,7 @@
     cursor: pointer;
     transition: background 120ms;
   }
-  .rail-search:hover {
-    background: rgba(194, 216, 124, 0.12);
-  }
+  .rail-search:hover { background: rgba(194, 216, 124, 0.12); }
   .rail-search .kbd {
     margin-left: auto;
     background: rgba(194, 216, 124, 0.18);
@@ -210,26 +294,54 @@
     width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);
   }
   .rail-item.active .dot { background: var(--flesh); }
-  .rail-item.muted {
-    opacity: 0.5;
-    font-size: 12px;
-  }
-  .rail-sub {
-    margin-left: 10px;
-    border-left: 1px solid rgba(194, 216, 124, 0.12);
-    padding-left: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .rail-sub .rail-item {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
+  .rail-item.muted { opacity: 0.5; font-size: 12px; }
   .rail-foot {
     margin-top: auto;
     padding-top: 16px;
     border-top: 1px solid rgba(194, 216, 124, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* User chip in rail */
+  .rail-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(194, 216, 124, 0.08);
+    border-radius: var(--r-md);
+    margin-bottom: 4px;
+  }
+  .rail-user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--flesh);
+    color: var(--skin);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .rail-user-info {
+    min-width: 0;
+    flex: 1;
+  }
+  .rail-user-email {
+    color: var(--flesh-pale);
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .rail-user-role {
+    color: var(--text-3);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
   }
 
   /* ============== CANVAS ============== */
@@ -238,10 +350,8 @@
     max-width: 1080px;
   }
 
-  /* ============== DASHBOARD ============== */
-  .greet-block {
-    margin-bottom: 28px;
-  }
+  /* Greeting */
+  .greet-block { margin-bottom: 28px; }
   .greet-date {
     color: var(--text-3);
     font-size: 12px;
@@ -275,19 +385,13 @@
     margin-bottom: 28px;
     transition: border-color 120ms;
   }
-  .client-tile:hover {
-    border-color: var(--bd-strong);
-  }
+  .client-tile:hover { border-color: var(--bd-strong); }
   .ct-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .ct-id {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .ct-id { display: flex; align-items: center; gap: 12px; }
   .ct-avatar {
     width: 32px; height: 32px;
     border-radius: 9px;
@@ -305,6 +409,7 @@
     font-size: 16px;
     letter-spacing: -0.2px;
   }
+
   .status-pill {
     display: inline-block;
     padding: 4px 12px;
@@ -339,12 +444,8 @@
     line-height: 1.55;
   }
 
-  .ct-actions {
-    display: flex;
-    gap: 8px;
-  }
+  .ct-actions { display: flex; gap: 8px; }
 
-  /* Stat boxes */
   .stat-row {
     display: flex;
     gap: 10px;
@@ -378,7 +479,7 @@
   }
   .stat-meta.up { color: var(--olive); }
 
-  /* ============== BUTTONS ============== */
+  /* Buttons */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -404,31 +505,22 @@
     color: var(--skin);
     border-color: var(--flesh);
   }
-  .btn-primary:hover {
-    background: var(--flesh-dk);
-    border-color: var(--flesh-dk);
-  }
+  .btn-primary:hover { background: var(--flesh-dk); border-color: var(--flesh-dk); }
   .btn-skin {
     background: var(--skin);
     color: var(--flesh);
     border-color: var(--skin);
   }
-  .btn-skin:hover {
-    background: var(--skin-2);
-    border-color: var(--skin-2);
-  }
+  .btn-skin:hover { background: var(--skin-2); border-color: var(--skin-2); }
   .btn-ghost {
     background: transparent;
     color: var(--text-1);
     border-color: var(--bd-strong);
   }
-  .btn-ghost:hover {
-    background: var(--surface);
-    border-color: var(--text-2);
-  }
+  .btn-ghost:hover { background: var(--surface); border-color: var(--text-2); }
   .btn-sm { padding: 5px 12px; font-size: 12px; }
 
-  /* ============== STUDIO (per-client workspace) ============== */
+  /* Studio */
   .studio-head {
     display: flex;
     align-items: center;
@@ -444,10 +536,7 @@
     letter-spacing: 0.6px;
     margin-bottom: 4px;
   }
-  .studio-crumbs a {
-    color: var(--text-3);
-    text-decoration: none;
-  }
+  .studio-crumbs a { color: var(--text-3); text-decoration: none; }
   .studio-crumbs a:hover { color: var(--olive); }
   .studio-title {
     font-size: 26px;
@@ -457,7 +546,6 @@
     margin: 0;
   }
 
-  /* Sub-page placeholder */
   .placeholder {
     background: white;
     border: 0.5px dashed var(--bd-strong);
@@ -474,14 +562,12 @@
   .placeholder p {
     color: var(--text-2);
     font-size: 14px;
-    margin: 0 0 18px;
+    margin: 0 auto 18px;
     max-width: 420px;
-    margin-left: auto;
-    margin-right: auto;
     line-height: 1.6;
   }
 
-  /* ============== COMMAND PALETTE ============== */
+  /* Command palette */
   #cmd-overlay {
     position: fixed;
     inset: 0;
@@ -515,11 +601,7 @@
   }
   .cmd-input:focus { outline: none; }
   .cmd-input::placeholder { color: var(--text-3); }
-  .cmd-list {
-    max-height: 340px;
-    overflow-y: auto;
-    padding: 6px;
-  }
+  .cmd-list { max-height: 340px; overflow-y: auto; padding: 6px; }
   .cmd-item {
     padding: 10px 14px;
     border-radius: var(--r-md);
@@ -530,10 +612,7 @@
     color: var(--text-1);
     font-size: 14px;
   }
-  .cmd-item.selected,
-  .cmd-item:hover {
-    background: var(--surface);
-  }
+  .cmd-item.selected, .cmd-item:hover { background: var(--surface); }
   .cmd-icon {
     width: 22px; height: 22px;
     border-radius: 6px;
@@ -545,10 +624,7 @@
     flex-shrink: 0;
   }
   .cmd-label { flex: 1; }
-  .cmd-hint {
-    color: var(--text-3);
-    font-size: 11px;
-  }
+  .cmd-hint { color: var(--text-3); font-size: 11px; }
   .cmd-empty {
     padding: 24px;
     text-align: center;
@@ -556,7 +632,7 @@
     font-size: 13px;
   }
 
-  /* ============== TOAST ============== */
+  /* Toast */
   #toast {
     position: fixed;
     bottom: 24px;
@@ -574,14 +650,11 @@
     transition: opacity 200ms, transform 200ms;
     pointer-events: none;
   }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-4px);
-  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
   #toast.error { background: var(--terracotta); }
   #toast.success { background: var(--olive); }
 
-  /* ============== UTIL ============== */
+  /* Empty + util */
   .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -593,10 +666,7 @@
     font-weight: 700;
     margin: 0 0 6px;
   }
-  .empty-state p {
-    margin: 0 0 18px;
-    font-size: 14px;
-  }
+  .empty-state p { margin: 0 0 18px; font-size: 14px; }
   .switch-classic {
     margin-left: auto;
     color: var(--text-3);
@@ -607,10 +677,7 @@
     border: 0.5px solid transparent;
     transition: color 120ms, border-color 120ms;
   }
-  .switch-classic:hover {
-    color: var(--olive);
-    border-color: var(--bd-strong);
-  }
+  .switch-classic:hover { color: var(--olive); border-color: var(--bd-strong); }
 
   /* Settings */
   .settings-grid {
@@ -653,13 +720,87 @@
 <!-- ============== AUTH GATE ============== -->
 <div id="auth-gate">
   <div class="auth-card">
-    <div class="auth-logo">YAH!</div>
-    <div class="auth-tag">your audience, handled.</div>
-    <input type="password" id="auth-input" placeholder="Studio password" autofocus>
-    <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="checkAuth()">Enter Studio</button>
-    <div class="auth-error" id="auth-error"></div>
-    <div style="margin-top:20px; font-size:11px; color:var(--text-3)">
-      Looking for the classic? <a href="./index.html" style="color:var(--olive)">Open it here</a>
+    <div class="auth-head">
+      <div class="auth-logo">YAH!</div>
+      <div class="auth-tag">your audience, handled.</div>
+    </div>
+
+    <!-- SIGN IN VIEW -->
+    <div id="auth-view-signin">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to your studio.</p>
+
+      <div class="auth-field">
+        <label>Email</label>
+        <input class="auth-input" type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn btn-primary auth-cta" onclick="doSignIn()">Sign in</button>
+
+      <div class="auth-divider">or</div>
+
+      <button class="btn btn-ghost auth-secondary" onclick="doMagicLink('signin')">Email me a magic link</button>
+
+      <div class="auth-error" id="signin-error"></div>
+      <div class="auth-message" id="signin-message"></div>
+
+      <div class="auth-foot">
+        <a onclick="showAuthView('forgot')">Forgot password?</a>
+        <span style="color:var(--bd-strong); margin: 0 8px">·</span>
+        <a onclick="showAuthView('signup')">Create an account</a>
+      </div>
+    </div>
+
+    <!-- SIGN UP VIEW -->
+    <div id="auth-view-signup" style="display:none">
+      <h2 class="auth-title">Create your studio</h2>
+      <p class="auth-subtitle">Set up YAH! for your agency.</p>
+
+      <div class="auth-field">
+        <label>Email</label>
+        <input class="auth-input" type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" type="password" id="signup-password" placeholder="At least 6 characters" autocomplete="new-password">
+      </div>
+
+      <button class="btn btn-primary auth-cta" onclick="doSignUp()">Create account</button>
+
+      <div class="auth-error" id="signup-error"></div>
+      <div class="auth-message" id="signup-message"></div>
+
+      <div class="auth-foot">
+        Already have an account? <a onclick="showAuthView('signin')">Sign in</a>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="auth-view-forgot" style="display:none">
+      <h2 class="auth-title">Reset password</h2>
+      <p class="auth-subtitle">We'll email you a reset link.</p>
+
+      <div class="auth-field">
+        <label>Email</label>
+        <input class="auth-input" type="email" id="forgot-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <button class="btn btn-primary auth-cta" onclick="doForgotPassword()">Send reset link</button>
+
+      <div class="auth-error" id="forgot-error"></div>
+      <div class="auth-message" id="forgot-message"></div>
+
+      <div class="auth-foot">
+        <a onclick="showAuthView('signin')">Back to sign in</a>
+      </div>
+    </div>
+
+    <div class="auth-classic">
+      Looking for the original? <a href="./index.html">Open classic YAH</a>
     </div>
   </div>
 </div>
@@ -667,7 +808,6 @@
 <!-- ============== APP ============== -->
 <div id="app" style="display:none">
 
-  <!-- LEFT RAIL -->
   <aside id="left-rail">
     <div class="rail-logo">YAH!</div>
 
@@ -684,41 +824,43 @@
     </div>
 
     <div class="rail-section">Clients</div>
-    <div id="rail-clients" style="display:flex; flex-direction:column; gap:2px;">
-      <!-- populated -->
-    </div>
+    <div id="rail-clients" style="display:flex; flex-direction:column; gap:2px;"></div>
 
     <div class="rail-foot">
+      <div class="rail-user" id="rail-user">
+        <div class="rail-user-avatar" id="rail-user-avatar">—</div>
+        <div class="rail-user-info">
+          <div class="rail-user-email" id="rail-user-email">loading…</div>
+          <div class="rail-user-role">studio owner</div>
+        </div>
+      </div>
       <div class="rail-item" data-screen="settings" onclick="goTo('settings')">
         <span style="font-size:14px">⚙</span>
         <span>Settings</span>
       </div>
-      <a class="rail-item" href="./index.html" style="margin-top:6px">
+      <div class="rail-item" onclick="doSignOut()">
+        <span style="font-size:14px">↗</span>
+        <span style="font-size:12px">Sign out</span>
+      </div>
+      <a class="rail-item" href="./index.html">
         <span style="font-size:14px">↩</span>
         <span style="font-size:11px">Switch to classic</span>
       </a>
     </div>
   </aside>
 
-  <!-- CANVAS -->
   <main id="canvas">
 
-    <!-- DASHBOARD -->
     <section id="screen-dashboard">
       <div class="greet-block">
         <div class="greet-date" id="greet-date">—</div>
         <h1 class="greet-title" id="greet-title">Loading…</h1>
         <p class="greet-sub" id="greet-sub">Setting the table.</p>
       </div>
-      <div id="client-tiles">
-        <!-- populated -->
-      </div>
-      <div class="stat-row" id="dashboard-stats">
-        <!-- populated -->
-      </div>
+      <div id="client-tiles"></div>
+      <div class="stat-row" id="dashboard-stats"></div>
     </section>
 
-    <!-- STUDIO (per-client) -->
     <section id="screen-studio" hidden>
       <div class="studio-head">
         <div>
@@ -732,26 +874,28 @@
           <a class="switch-classic" id="open-classic-link" href="./index.html">Open in classic →</a>
         </div>
       </div>
-      <div id="studio-body">
-        <!-- populated by sub-page -->
-      </div>
+      <div id="studio-body"></div>
     </section>
 
-    <!-- SETTINGS -->
     <section id="screen-settings" hidden>
       <div class="greet-block">
         <div class="greet-date">Settings</div>
         <h1 class="greet-title">Studio configuration</h1>
-        <p class="greet-sub">API keys and agency settings.</p>
+        <p class="greet-sub">Account, API keys, and agency settings.</p>
       </div>
       <div class="settings-grid">
         <div class="settings-card">
+          <h4>Account</h4>
+          <p id="settings-account-email" style="margin-bottom:8px">—</p>
+          <button class="btn btn-ghost btn-sm" onclick="doSignOut()">Sign out</button>
+        </div>
+        <div class="settings-card">
           <h4>Anthropic API key</h4>
-          <p>Used for plan generation, strategy briefs, and any Claude-powered feature.</p>
+          <p>Used for plan generation, strategy briefs, and Claude-powered features.</p>
           <input type="password" id="set-api-key" placeholder="sk-ant-...">
           <div style="margin-top:10px; display:flex; gap:8px">
             <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save key</button>
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('set-api-key').type = document.getElementById('set-api-key').type === 'password' ? 'text' : 'password'">Show/hide</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleKeyVisibility()">Show / hide</button>
           </div>
         </div>
         <div class="settings-card">
@@ -765,14 +909,13 @@
         </div>
         <div class="settings-card">
           <h4>About this version</h4>
-          <p>You're using YAH! Studio v2 — the new shell. Sub-pages are migrating one at a time. Use "Open in classic" on any client screen to access features that haven't moved yet.</p>
+          <p>YAH! Studio v2 — the new shell. Sub-pages migrating one at a time. Use "Open in classic" on any client screen to access features that haven't moved yet.</p>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- COMMAND PALETTE -->
   <div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
     <div class="cmd-box">
       <input type="text" class="cmd-input" id="cmd-input" placeholder="Type a command or search…" autocomplete="off">
@@ -780,7 +923,6 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div id="toast"></div>
 
 </div>
@@ -789,34 +931,244 @@
   // ==================== CONFIG ====================
   const SB_URL = 'https://piowmyefosrdpjisguii.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpb3dteWVmb3NyZHBqaXNndWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDcyNjksImV4cCI6MjA5MDMyMzI2OX0.aI0-esJB5IH-KwgsHx_FM_YpOp9k-0M0gc5xlfdJrcY';
-  const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
-  const PASSWORD_HASH = '206da79a0c59c78c50b1c88518af40b3e06a0316a5d9a85864202cfbf42c3006';
 
   // ==================== STATE ====================
   let currentScreen = 'dashboard';
   let activeClient = null;
   let activeSubpage = null;
   let allClients = [];
+  let currentUser = null;       // { id, email }
+  let session = null;           // { access_token, refresh_token, expires_at }
 
-  // ==================== SUPABASE HELPERS ====================
+  // ==================== AUTH (Supabase) ====================
+  // Storage keys for persistent session
+  const SESSION_KEY = 'yah_v2_session';
+
+  function loadSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.access_token) {
+        session = s;
+        return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function saveSession(s) {
+    session = s;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+  }
+  function clearSession() {
+    session = null;
+    currentUser = null;
+    localStorage.removeItem(SESSION_KEY);
+  }
+
+  function authHeaders() {
+    return {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + (session?.access_token || SB_KEY),
+      'Content-Type': 'application/json'
+    };
+  }
+
+  // Auth API calls
+  async function authCall(path, body, opts = {}) {
+    const r = await fetch(SB_URL + '/auth/v1' + path, {
+      method: opts.method || 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const msg = data.error_description || data.msg || data.message || data.error || ('HTTP ' + r.status);
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  function showAuthView(view) {
+    ['signin', 'signup', 'forgot'].forEach(v => {
+      document.getElementById('auth-view-' + v).style.display = (v === view ? 'block' : 'none');
+    });
+    // Clear messages
+    document.querySelectorAll('.auth-error, .auth-message').forEach(el => {
+      el.textContent = '';
+      el.classList.remove('show');
+    });
+  }
+
+  function showAuthError(viewKey, msg) {
+    const el = document.getElementById(viewKey + '-error');
+    el.textContent = msg;
+    el.classList.add('show');
+    document.getElementById(viewKey + '-message').classList.remove('show');
+  }
+  function showAuthMessage(viewKey, msg) {
+    const el = document.getElementById(viewKey + '-message');
+    el.textContent = msg;
+    el.classList.add('show');
+    document.getElementById(viewKey + '-error').classList.remove('show');
+  }
+
+  async function doSignIn() {
+    const email = document.getElementById('signin-email').value.trim();
+    const password = document.getElementById('signin-password').value;
+    if (!email || !password) return showAuthError('signin', 'Enter your email and password.');
+    try {
+      const data = await authCall('/token?grant_type=password', { email, password });
+      const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
+      saveSession({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at });
+      currentUser = data.user;
+      enterApp();
+    } catch (e) {
+      const msg = /invalid login|invalid_grant/i.test(e.message)
+        ? 'Wrong email or password.'
+        : /email not confirmed/i.test(e.message)
+          ? 'Check your inbox to confirm your email first.'
+          : e.message;
+      showAuthError('signin', msg);
+    }
+  }
+
+  async function doSignUp() {
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    if (!email || !password) return showAuthError('signup', 'Enter your email and password.');
+    if (password.length < 6) return showAuthError('signup', 'Password must be at least 6 characters.');
+    try {
+      const data = await authCall('/signup', { email, password });
+      // If email confirmation is OFF, Supabase returns a session immediately.
+      if (data.access_token) {
+        const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
+        saveSession({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at });
+        currentUser = data.user;
+        enterApp();
+      } else {
+        // Email confirmation required
+        showAuthMessage('signup', 'Account created. Check your email to confirm and then sign in.');
+        document.getElementById('signup-email').value = '';
+        document.getElementById('signup-password').value = '';
+      }
+    } catch (e) {
+      const msg = /already registered|already exists/i.test(e.message)
+        ? 'That email is already registered. Try signing in instead.'
+        : e.message;
+      showAuthError('signup', msg);
+    }
+  }
+
+  async function doMagicLink(viewKey) {
+    const email = document.getElementById(viewKey + '-email').value.trim();
+    if (!email) return showAuthError(viewKey, 'Enter your email first.');
+    try {
+      await authCall('/otp', { email, create_user: true });
+      showAuthMessage(viewKey, 'Magic link sent. Check your email.');
+    } catch (e) {
+      showAuthError(viewKey, e.message);
+    }
+  }
+
+  async function doForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) return showAuthError('forgot', 'Enter your email first.');
+    try {
+      await authCall('/recover', { email });
+      showAuthMessage('forgot', 'Reset link sent. Check your email.');
+    } catch (e) {
+      showAuthError('forgot', e.message);
+    }
+  }
+
+  async function doSignOut() {
+    if (session?.access_token) {
+      try { await authCall('/logout', null, { headers: { 'Authorization': 'Bearer ' + session.access_token } }); } catch (e) {}
+    }
+    clearSession();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('auth-gate').style.display = 'grid';
+    showAuthView('signin');
+  }
+
+  async function refreshSessionIfNeeded() {
+    if (!session) return false;
+    const skew = 60; // refresh 60s before expiry
+    if (session.expires_at - skew > Math.floor(Date.now() / 1000)) return true;
+    if (!session.refresh_token) return false;
+    try {
+      const data = await authCall('/token?grant_type=refresh_token', { refresh_token: session.refresh_token });
+      const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
+      saveSession({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at });
+      currentUser = data.user;
+      return true;
+    } catch (e) {
+      clearSession();
+      return false;
+    }
+  }
+
+  async function fetchCurrentUser() {
+    if (!session?.access_token) return null;
+    try {
+      const r = await fetch(SB_URL + '/auth/v1/user', {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + session.access_token }
+      });
+      if (!r.ok) return null;
+      currentUser = await r.json();
+      return currentUser;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function enterApp() {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+    renderUserChip();
+    init();
+  }
+
+  function renderUserChip() {
+    if (!currentUser) return;
+    const email = currentUser.email || '—';
+    const initial = email[0]?.toUpperCase() || '—';
+    document.getElementById('rail-user-email').textContent = email;
+    document.getElementById('rail-user-avatar').textContent = initial;
+    const acctEl = document.getElementById('settings-account-email');
+    if (acctEl) acctEl.textContent = 'Signed in as ' + email;
+  }
+
+  // Enter key submits the visible auth form
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('auth-gate').style.display === 'none') return;
+    if (document.getElementById('auth-view-signin').style.display !== 'none') doSignIn();
+    else if (document.getElementById('auth-view-signup').style.display !== 'none') doSignUp();
+    else if (document.getElementById('auth-view-forgot').style.display !== 'none') doForgotPassword();
+  });
+
+  // ==================== SUPABASE DATA ====================
   async function sbGet(path) {
-    const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: SB_H });
+    await refreshSessionIfNeeded();
+    const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: authHeaders() });
     if (!r.ok) throw new Error('GET ' + r.status);
     return r.json();
   }
   async function sbPost(table, body) {
+    await refreshSessionIfNeeded();
     const r = await fetch(SB_URL + '/rest/v1/' + table, {
       method: 'POST',
-      headers: { ...SB_H, 'Prefer': 'return=representation' },
+      headers: { ...authHeaders(), 'Prefer': 'return=representation' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error('POST ' + r.status);
     return r.json();
   }
   async function sbPatch(path, body) {
+    await refreshSessionIfNeeded();
     const r = await fetch(SB_URL + '/rest/v1/' + path, {
       method: 'PATCH',
-      headers: { ...SB_H, 'Prefer': 'return=minimal' },
+      headers: { ...authHeaders(), 'Prefer': 'return=minimal' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error('PATCH ' + r.status);
@@ -840,31 +1192,10 @@
   }
   function getApiKey() { return localStorage.getItem('yah_api_key') || ''; }
   function setApiKey(k) { localStorage.setItem('yah_api_key', k); }
-
-  // ==================== AUTH ====================
-  async function sha256Hex(text) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  function toggleKeyVisibility() {
+    const el = document.getElementById('set-api-key');
+    el.type = el.type === 'password' ? 'text' : 'password';
   }
-  async function checkAuth() {
-    const input = document.getElementById('auth-input').value;
-    const errEl = document.getElementById('auth-error');
-    errEl.textContent = '';
-    if (!input) return;
-    const hex = await sha256Hex(input);
-    if (hex === PASSWORD_HASH) {
-      sessionStorage.setItem('yah_authed', '1');
-      document.getElementById('auth-gate').style.display = 'none';
-      document.getElementById('app').style.display = 'grid';
-      init();
-    } else {
-      errEl.textContent = 'Wrong password.';
-      document.getElementById('auth-input').select();
-    }
-  }
-  document.getElementById('auth-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkAuth();
-  });
 
   // ==================== ROUTING ====================
   function goTo(screen, opts = {}) {
@@ -891,21 +1222,20 @@
 
   // ==================== DASHBOARD ====================
   async function loadDashboard() {
-    // Greeting
     const now = new Date();
     const hour = now.getHours();
     const greeting = hour < 5 ? 'Late night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 22 ? 'Good evening' : 'Late night';
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     document.getElementById('greet-date').textContent = dateStr;
-    document.getElementById('greet-title').textContent = greeting + ', Erica.';
 
-    // Load clients
+    const firstName = (currentUser?.email || '').split('@')[0].split('.')[0];
+    const niceName = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1) : 'there';
+    document.getElementById('greet-title').textContent = greeting + ', ' + niceName + '.';
+
     let clients = [];
     try {
       clients = await sbGet('clients?active=eq.true&order=created_at.asc&select=*');
-    } catch (e) {
-      clients = [];
-    }
+    } catch (e) { clients = []; }
     allClients = clients;
     renderRailClients();
 
@@ -914,7 +1244,7 @@
       document.getElementById('client-tiles').innerHTML = `
         <div class="empty-state">
           <h3>Welcome to YAH! Studio.</h3>
-          <p>Add your first client to begin planning. You can always switch to classic if you need the legacy onboarding wizard.</p>
+          <p>Add your first client to begin planning. You can use the classic onboarding wizard until v2's onboarding migrates.</p>
           <a class="btn btn-primary" href="./index.html">Add a client in classic</a>
         </div>
       `;
@@ -923,23 +1253,18 @@
     }
 
     document.getElementById('greet-sub').textContent =
-      clients.length === 1
-        ? 'One thing on the table tonight.'
-        : `${clients.length} clients on the table tonight.`;
+      clients.length === 1 ? 'One thing on the table tonight.' : `${clients.length} clients on the table tonight.`;
 
-    // Render tiles + stats
     const tilesEl = document.getElementById('client-tiles');
     tilesEl.innerHTML = '<div class="empty-state" style="padding:20px"><p>Pulling client status…</p></div>';
 
     const tileHtml = await Promise.all(clients.map(c => buildClientTile(c)));
     tilesEl.innerHTML = tileHtml.join('');
 
-    // Stats row
     await renderDashboardStats();
   }
 
   async function buildClientTile(c) {
-    // Latest plan + insight
     let nextLabel = 'Plan due — set cadence';
     let nextPillClass = 'pill-quiet';
     let insightText = '';
@@ -949,10 +1274,10 @@
       const plans = await sbGet(`plans?client_id=eq.${c.id}&order=created_at.desc&limit=1&select=*`);
       const latest = plans[0];
       if (latest) {
-        if (latest.status === 'sent')               { nextLabel = 'Awaiting approval';        nextPillClass = 'pill-pending'; }
-        else if (latest.status === 'approved')      { nextLabel = 'Approved · plan in motion'; nextPillClass = 'pill-ok'; }
-        else if (latest.status === 'changes_requested') { nextLabel = 'Changes requested';     nextPillClass = 'pill-changes'; }
-        else                                         { nextLabel = 'Draft saved';              nextPillClass = 'pill-quiet'; }
+        if (latest.status === 'sent')                  { nextLabel = 'Awaiting approval';        nextPillClass = 'pill-pending'; }
+        else if (latest.status === 'approved')         { nextLabel = 'Approved · plan in motion'; nextPillClass = 'pill-ok'; }
+        else if (latest.status === 'changes_requested'){ nextLabel = 'Changes requested';         nextPillClass = 'pill-changes'; }
+        else                                            { nextLabel = 'Draft saved';              nextPillClass = 'pill-quiet'; }
       } else {
         nextLabel = 'No plan yet';
         nextPillClass = 'pill-due';
@@ -961,9 +1286,7 @@
 
     try {
       const briefs = await sbGet(`strategy_briefs?client_id=eq.${c.id}&order=created_at.desc&limit=1&select=brief_content`);
-      if (briefs[0]?.brief_content) {
-        insightText = extractFirstInsight(briefs[0].brief_content);
-      }
+      if (briefs[0]?.brief_content) insightText = extractFirstInsight(briefs[0].brief_content);
     } catch (e) {}
 
     if (!insightText) {
@@ -1002,7 +1325,6 @@
     `;
   }
 
-  // Pull a one-line takeaway from a Claude brief (first sentence under "What's Working" or first non-header line)
   function extractFirstInsight(brief) {
     if (!brief) return '';
     const lines = brief.split(/\n+/).map(l => l.trim()).filter(Boolean);
@@ -1013,11 +1335,8 @@
         return ln.replace(/^[-*]\s*/, '').slice(0, 200);
       }
     }
-    // Fallback: first non-header line
     for (const ln of lines) {
-      if (!ln.startsWith('#') && !ln.startsWith('-') && ln.length > 30) {
-        return ln.slice(0, 200);
-      }
+      if (!ln.startsWith('#') && !ln.startsWith('-') && ln.length > 30) return ln.slice(0, 200);
     }
     return '';
   }
@@ -1086,7 +1405,7 @@
     `).join('');
   }
 
-  // ==================== STUDIO (per-client) ====================
+  // ==================== STUDIO ====================
   async function openClient(clientId, subpage = 'planner') {
     let c = allClients.find(x => x.id === clientId);
     if (!c) {
@@ -1103,56 +1422,19 @@
     if (!activeClient) return;
     document.getElementById('studio-crumb-client').textContent = activeClient.brand_name || activeClient.name;
     document.getElementById('studio-title').textContent =
-      ({
-        planner: 'Plan',
-        performance: 'Performance',
-        kb: 'Knowledge',
-        history: 'History',
-        ideation: 'Ideation',
-        reports: 'Reports'
-      })[activeSubpage] || 'Workspace';
-
-    // Update classic deep link
-    const deepLink = './index.html';
-    document.getElementById('open-classic-link').href = deepLink;
-
-    const body = document.getElementById('studio-body');
-    body.innerHTML = renderStudioSubpage(activeSubpage);
+      ({ planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' })[activeSubpage] || 'Workspace';
+    document.getElementById('open-classic-link').href = './index.html';
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage(activeSubpage);
   }
 
   function renderStudioSubpage(sub) {
-    // Sub-page placeholders. Each links back to v1 for now.
     const map = {
-      planner: {
-        title: 'Plan canvas — coming next',
-        body: 'The new plan generation experience will replace this placeholder. It will be a chat-like canvas where you and Claude shape the next two weeks together, instead of a single textarea + button.',
-        deeplink: 'planner'
-      },
-      performance: {
-        title: 'Performance pulse — coming next',
-        body: 'Insight-led performance view. One Claude-written paragraph at the top ("What\'s working"), three proof posts below, then a fold to dive into the full grid.',
-        deeplink: 'performance'
-      },
-      kb: {
-        title: 'Knowledge library — coming next',
-        body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.',
-        deeplink: 'kb'
-      },
-      history: {
-        title: 'Plan timeline — coming next',
-        body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.',
-        deeplink: 'history'
-      },
-      ideation: {
-        title: 'Ideation thread — coming next',
-        body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.',
-        deeplink: 'ideation'
-      },
-      reports: {
-        title: 'Monthly reports — coming next',
-        body: 'Auto-generated monthly recaps for the client. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.',
-        deeplink: 'reports'
-      }
+      planner: { title: 'Plan canvas — coming next', body: 'A chat-like canvas where you and Claude shape the next two weeks together. Replaces the textarea + button flow.' },
+      performance: { title: 'Performance pulse — coming next', body: 'Insight-led performance view. One Claude-written paragraph at the top, three proof posts below, then a fold to dive into the full grid.' },
+      kb: { title: 'Knowledge library — coming next', body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.' },
+      history: { title: 'Plan timeline — coming next', body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.' },
+      ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
+      reports: { title: 'Monthly reports — coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
     };
     const cfg = map[sub] || map.planner;
 
@@ -1183,6 +1465,9 @@
   // ==================== SETTINGS ====================
   async function loadSettings() {
     document.getElementById('set-api-key').value = getApiKey();
+    if (currentUser?.email) {
+      document.getElementById('settings-account-email').textContent = 'Signed in as ' + currentUser.email;
+    }
     try {
       const ag = await sbGet('agencies?limit=1&select=*');
       if (ag[0]) {
@@ -1223,6 +1508,7 @@
     const acts = [
       { icon: '◇', label: 'Open dashboard', hint: '', run: () => goTo('dashboard') },
       { icon: '⚙', label: 'Open settings', hint: '', run: () => goTo('settings') },
+      { icon: '↗', label: 'Sign out', hint: '', run: () => doSignOut() },
       { icon: '↩', label: 'Switch to classic YAH', hint: '', run: () => location.href = './index.html' },
     ];
     allClients.forEach(c => {
@@ -1240,15 +1526,11 @@
     document.getElementById('cmd-input').focus();
     renderCmdList('');
   }
-  function closeCmd() {
-    document.getElementById('cmd-overlay').classList.remove('open');
-  }
+  function closeCmd() { document.getElementById('cmd-overlay').classList.remove('open'); }
   function renderCmdList(query) {
     const all = getCmdActions();
     const q = query.trim().toLowerCase();
-    cmdResults = q
-      ? all.filter(a => a.label.toLowerCase().includes(q))
-      : all;
+    cmdResults = q ? all.filter(a => a.label.toLowerCase().includes(q)) : all;
     cmdSelected = 0;
     const list = document.getElementById('cmd-list');
     if (cmdResults.length === 0) {
@@ -1264,9 +1546,7 @@
     `).join('');
   }
   function cmdRefreshSel() {
-    document.querySelectorAll('.cmd-item').forEach((el, i) => {
-      el.classList.toggle('selected', i === cmdSelected);
-    });
+    document.querySelectorAll('.cmd-item').forEach((el, i) => el.classList.toggle('selected', i === cmdSelected));
   }
   function runCmdResult(i) {
     const a = cmdResults[i];
@@ -1277,9 +1557,7 @@
 
   document.getElementById('cmd-input').addEventListener('input', e => renderCmdList(e.target.value));
 
-  // Global keys
   document.addEventListener('keydown', e => {
-    // ⌘K / Ctrl+K
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       const overlay = document.getElementById('cmd-overlay');
@@ -1298,23 +1576,22 @@
       cmdSelected = Math.max(cmdSelected - 1, 0);
       cmdRefreshSel();
     }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      runCmdResult(cmdSelected);
-    }
+    if (e.key === 'Enter') { e.preventDefault(); runCmdResult(cmdSelected); }
   });
 
   // ==================== INIT ====================
-  function init() {
-    goTo('dashboard');
-  }
+  function init() { goTo('dashboard'); }
 
-  // Auto-skip auth if already authed this session
-  if (sessionStorage.getItem('yah_authed') === '1') {
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('app').style.display = 'grid';
-    init();
-  }
+  // Boot — restore session if any
+  (async function boot() {
+    const s = loadSession();
+    if (s && await refreshSessionIfNeeded()) {
+      const user = await fetchCurrentUser();
+      if (user) { enterApp(); return; }
+    }
+    showAuthView('signin');
+    document.getElementById('signin-email').focus();
+  })();
 </script>
 </body>
 </html>
