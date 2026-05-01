@@ -768,8 +768,10 @@
         <div class="settings-card">
           <h4>Agency</h4>
           <p>Your studio identity — appears on plan emails and exports.</p>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Agency name</label>
           <input type="text" id="set-agency-name" placeholder="Your agency name">
-          <input type="email" id="set-owner-email" placeholder="you@example.com" style="margin-top:8px">
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:12px">Owner email</label>
+          <input type="email" id="set-owner-email" placeholder="you@example.com">
           <div style="margin-top:10px">
             <button class="btn btn-primary btn-sm" onclick="saveAgencySettings()">Save agency</button>
           </div>
@@ -971,8 +973,9 @@
   }
 
   async function loadAgency() {
+    if (!currentUser?.id) { currentAgency = null; return; }
     try {
-      const rows = await sbGet('agencies?limit=1&select=*');
+      const rows = await sbGet(`agencies?owner_user_id=eq.${currentUser.id}&select=*`);
       currentAgency = rows[0] || null;
     } catch (e) { currentAgency = null; }
     const el = document.getElementById('rail-agency-name');
@@ -1310,18 +1313,12 @@
     if (currentUser?.email) {
       document.getElementById('settings-account-email').textContent = 'Signed in as ' + currentUser.email;
     }
-    try {
-      const ag = await sbGet('agencies?limit=1&select=*');
-      if (ag[0]) {
-        document.getElementById('set-agency-name').value = ag[0].name || '';
-        document.getElementById('set-owner-email').value = ag[0].owner_email || currentUser?.email || '';
-      } else if (currentUser?.email) {
-        document.getElementById('set-owner-email').value = currentUser.email;
-      }
-    } catch (e) {
-      if (currentUser?.email) {
-        document.getElementById('set-owner-email').value = currentUser.email;
-      }
+    if (currentAgency) {
+      document.getElementById('set-agency-name').value = currentAgency.name || '';
+      document.getElementById('set-owner-email').value = currentAgency.owner_email || currentUser?.email || '';
+    } else if (currentUser?.email) {
+      document.getElementById('set-agency-name').value = '';
+      document.getElementById('set-owner-email').value = currentUser.email;
     }
     document.getElementById('test-api-result').textContent = '';
     document.getElementById('test-api-result').className = 'test-result';
@@ -1379,18 +1376,19 @@
   }
 
   async function saveAgencySettings() {
+    if (!currentUser?.id) return toast('Not signed in', 'error');
     const name = document.getElementById('set-agency-name').value.trim();
     const email = document.getElementById('set-owner-email').value.trim();
     try {
-      const ag = await sbGet('agencies?limit=1&select=id');
+      const ag = await sbGet(`agencies?owner_user_id=eq.${currentUser.id}&select=id`);
       if (ag[0]) {
-        await sbPatch('agencies?id=eq.' + ag[0].id, { name, owner_email: email });
+        await sbPatch(`agencies?id=eq.${ag[0].id}`, { name, owner_email: email });
       } else {
-        await sbPost('agencies', [{ name, owner_email: email }]);
+        await sbPost('agencies', [{ owner_user_id: currentUser.id, name, owner_email: email }]);
       }
       toast('Agency saved', 'success');
       await loadAgency();
-      loadDashboard();
+      if (currentScreen === 'dashboard') loadDashboard();
     } catch (e) {
       toast('Save failed: ' + e.message, 'error');
     }
