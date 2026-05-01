@@ -706,6 +706,299 @@
     margin-bottom: 28px;
   }
   .greet-block-row .greet-block { margin-bottom: 0; }
+
+  /* Plan canvas */
+  .plan-empty {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 32px 28px;
+  }
+  .plan-empty h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.2px;
+  }
+  .plan-empty p {
+    margin: 0 0 18px;
+    color: var(--text-2);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .plan-brief-textarea {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.55;
+    background: var(--cream);
+    color: var(--text-1);
+    resize: vertical;
+    transition: border-color 120ms;
+  }
+  .plan-brief-textarea:focus { outline: none; border-color: var(--olive); background: white; }
+
+  .plan-brief-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .plan-week-input {
+    padding: 8px 12px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 13px;
+    background: var(--cream);
+    width: 220px;
+  }
+  .plan-week-input:focus { outline: none; border-color: var(--olive); background: white; }
+
+  .plan-suggestions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .plan-chip {
+    background: var(--surface);
+    color: var(--text-2);
+    border: 0.5px solid var(--bd-soft);
+    padding: 5px 12px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .plan-chip:hover {
+    background: var(--flesh-pale);
+    color: var(--olive);
+    border-color: var(--flesh-dk);
+  }
+
+  .plan-loading {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 36px 28px;
+    text-align: center;
+    color: var(--text-2);
+  }
+  .plan-loading-pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--olive);
+    margin-right: 8px;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  /* Generated plan layout */
+  .plan-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .plan-header-meta { color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .plan-header-title { color: var(--text-1); font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin: 0 0 2px; }
+  .plan-header-sub { color: var(--text-2); font-size: 14px; margin: 0; }
+  .plan-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .plan-week-section { margin-bottom: 24px; }
+  .plan-week-label {
+    color: var(--olive);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+    margin: 0 0 12px;
+  }
+
+  .plan-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .plan-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 120ms, transform 120ms;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 130px;
+  }
+  .plan-card:hover { border-color: var(--olive); transform: translateY(-1px); }
+  .plan-card.expanded {
+    grid-column: 1 / -1;
+    border-color: var(--olive);
+    cursor: default;
+  }
+  .plan-card-day {
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .plan-card-type-pill {
+    background: var(--cream);
+    color: var(--olive);
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    border: 0.5px solid var(--bd-soft);
+  }
+  .plan-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+  }
+  .plan-card-pillar {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .plan-card-expanded-body {
+    border-top: 0.5px solid var(--bd-soft);
+    padding-top: 14px;
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .plan-card-field h5 {
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .plan-card-field p {
+    margin: 0;
+    color: var(--text-1);
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  /* Pillar balance toggle */
+  .plan-balance {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .plan-balance-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .plan-balance-pill {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 14px;
+    background: var(--cream);
+    border-radius: var(--r-md);
+    border: 0.5px solid var(--bd-soft);
+  }
+  .plan-balance-pill .pillar-name { font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .plan-balance-pill .pillar-count { font-size: 18px; font-weight: 700; color: var(--text-1); }
+
+  /* Refine chat */
+  .plan-refine {
+    background: var(--cream);
+    border: 0.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    margin-top: 24px;
+  }
+  .plan-refine-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .plan-refine-head h4 {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+  }
+  .plan-refine-msgs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .refine-msg {
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 85%;
+  }
+  .refine-msg.user {
+    background: var(--skin);
+    color: var(--cream);
+    align-self: flex-end;
+  }
+  .refine-msg.claude {
+    background: white;
+    color: var(--text-1);
+    align-self: flex-start;
+    border: 0.5px solid var(--bd-soft);
+  }
+  .plan-refine-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  .plan-refine-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 13px;
+    background: white;
+    color: var(--text-1);
+  }
+  .plan-refine-input:focus { outline: none; border-color: var(--olive); }
 </style>
 </head>
 <body>
@@ -1446,15 +1739,19 @@
       return subnavWrap + renderProfileContent();
     }
 
+    if (sub === 'planner') {
+      return subnavWrap + renderPlannerContent();
+    }
+
     const map = {
-      planner: { title: 'Plan canvas — coming next', body: 'A chat-like canvas where you and Claude shape the next two weeks together. Replaces the textarea + button flow.' },
       performance: { title: 'Performance pulse — coming next', body: 'Insight-led performance view. One Claude-written paragraph at the top, three proof posts below, then a fold to dive into the full grid.' },
       kb: { title: 'Knowledge library — coming next', body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.' },
       history: { title: 'Plan timeline — coming next', body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.' },
       ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
       reports: { title: 'Monthly reports — coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
     };
-    const cfg = map[sub] || map.planner;
+    const cfg = map[sub];
+    if (!cfg) return subnavWrap;
 
     return subnavWrap + `
       <div class="placeholder">
@@ -1624,6 +1921,487 @@
       toast('Save failed: ' + e.message, 'error');
     }
   }
+
+  // Plan canvas state
+  const planState = {
+    generating: false,
+    plan: null,        // { client_id, week_of, brief, planning_note, days: [], created_at }
+    planId: null,      // DB row id once saved
+    expandedDay: null,
+    showBalance: false,
+    refineMessages: [], // { role: 'user' | 'assistant', content: string }
+    refining: false
+  };
+
+  function renderPlannerContent() {
+    if (!activeClient) {
+      return `<div class="placeholder"><h3>No client selected</h3><p>Pick a client from the rail.</p></div>`;
+    }
+
+    if (planState.generating) {
+      return `
+        <div class="plan-loading">
+          <div><span class="plan-loading-pulse"></span>Drafting your two-week plan…</div>
+          <div style="margin-top:6px; font-size:12px; color:var(--text-3);">Reading the brand profile, balancing pillars, writing hooks. ~30s.</div>
+        </div>`;
+    }
+
+    if (!planState.plan) return renderPlanEmpty();
+    return renderPlanGenerated();
+  }
+
+  function renderPlanEmpty() {
+    const today = new Date();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + ((1 - today.getDay() + 7) % 7));
+    const defaultWeek = monday.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ' — Two-week plan';
+
+    return `
+      <div class="plan-empty">
+        <h3>What's the focus for the next two weeks?</h3>
+        <p>Type a quick brief — themes, campaigns, key dates, anything Claude should weight. Or just hit generate and we'll work from the brand profile alone.</p>
+
+        <textarea id="plan-brief" class="plan-brief-textarea" placeholder="Optional brief — e.g. 'Lean into the new podcast launch the second week. First week focus on rest and the soul. Drop a Reels series on Sabbath.'"></textarea>
+
+        <div class="plan-suggestions">
+          <span class="plan-chip" onclick="appendPlanBriefChip('Lean harder into reels this cycle.')">More reels</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Sharper hooks. First three words must hit.')">Punchier hooks</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('More humor and personality, less didactic.')">More humor</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Lead with story before teaching.')">Story-first</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Build toward an offer at the end of week two.')">Build to an offer</span>
+        </div>
+
+        <div class="plan-brief-row">
+          <input id="plan-week-of" class="plan-week-input" type="text" placeholder="Plan label" value="${esc(defaultWeek)}">
+          <button class="btn btn-primary" onclick="generatePlan()">Generate plan →</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPlanGenerated() {
+    const p = planState.plan;
+    const week1 = (p.days || []).filter(d => d.week === 'Week 1' || d.week_number === 1);
+    const week2 = (p.days || []).filter(d => d.week === 'Week 2' || d.week_number === 2);
+
+    return `
+      <div class="plan-header">
+        <div>
+          <div class="plan-header-meta">${esc(p.created_label || 'Just now')}</div>
+          <h2 class="plan-header-title">${esc(p.week_of || 'Two-week plan')}</h2>
+          ${p.planning_note ? `<p class="plan-header-sub">${esc(p.planning_note)}</p>` : ''}
+        </div>
+        <div class="plan-actions">
+          <button class="btn btn-ghost btn-sm" onclick="togglePlanBalance()">${planState.showBalance ? 'Hide' : 'Show'} pillar balance</button>
+          <button class="btn btn-ghost btn-sm" onclick="discardPlan()">Discard</button>
+          <button class="btn btn-primary btn-sm" onclick="savePlanToDb()" id="plan-save-btn">${planState.planId ? 'Update saved plan' : 'Save plan'}</button>
+        </div>
+      </div>
+
+      ${planState.showBalance ? renderBalance() : ''}
+
+      ${week1.length ? `
+        <div class="plan-week-section">
+          <h3 class="plan-week-label">Week 1 — ${esc(p.week1_label || 'Recording')}</h3>
+          <div class="plan-cards">${week1.map(renderPlanCard).join('')}</div>
+        </div>` : ''}
+
+      ${week2.length ? `
+        <div class="plan-week-section">
+          <h3 class="plan-week-label">Week 2 — ${esc(p.week2_label || 'Editing')}</h3>
+          <div class="plan-cards">${week2.map(renderPlanCard).join('')}</div>
+        </div>` : ''}
+
+      ${renderRefineChat()}
+    `;
+  }
+
+  function renderPlanCard(d) {
+    const isExpanded = planState.expandedDay === d.id;
+    const dayKey = `'${d.id}'`;
+
+    if (!isExpanded) {
+      return `
+        <div class="plan-card" onclick="expandPlanCard(${dayKey})">
+          <div class="plan-card-day">
+            ${esc(d.day_label || d.day || '')}
+            ${d.post_type ? `<span class="plan-card-type-pill">${esc(d.post_type)}</span>` : ''}
+          </div>
+          <div class="plan-card-title">${esc(d.title || '')}</div>
+          ${d.pillar ? `<div class="plan-card-pillar">${esc(d.pillar)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="plan-card expanded">
+        <div class="plan-card-day">
+          ${esc(d.day_label || d.day || '')}
+          <div style="display:flex; gap:8px; align-items:center">
+            ${d.post_type ? `<span class="plan-card-type-pill">${esc(d.post_type)}</span>` : ''}
+            <a onclick="collapsePlanCard()" style="cursor:pointer; font-size:11px; color:var(--olive); font-weight:700">Close</a>
+          </div>
+        </div>
+        <div class="plan-card-title">${esc(d.title || '')}</div>
+        ${d.pillar ? `<div class="plan-card-pillar">${esc(d.pillar)}</div>` : ''}
+        <div class="plan-card-expanded-body">
+          ${d.hook ? `<div class="plan-card-field"><h5>Hook</h5><p>${esc(d.hook)}</p></div>` : ''}
+          ${d.body || d.copy ? `<div class="plan-card-field"><h5>Body / caption</h5><p>${esc(d.body || d.copy)}</p></div>` : ''}
+          ${d.visual_direction || d.visual ? `<div class="plan-card-field"><h5>Visual direction</h5><p>${esc(d.visual_direction || d.visual)}</p></div>` : ''}
+          ${d.cta ? `<div class="plan-card-field"><h5>CTA</h5><p>${esc(d.cta)}</p></div>` : ''}
+          ${d.notes ? `<div class="plan-card-field"><h5>Notes</h5><p>${esc(d.notes)}</p></div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderBalance() {
+    const p = planState.plan;
+    const counts = {};
+    (p.days || []).forEach(d => {
+      const key = d.pillar || 'Unassigned';
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    return `
+      <div class="plan-balance">
+        <h4 style="margin:0; font-size:13px; font-weight:700; color:var(--text-1);">Pillar mix across this plan</h4>
+        <div class="plan-balance-row">
+          ${entries.map(([name, count]) => `
+            <div class="plan-balance-pill">
+              <div class="pillar-name">${esc(name)}</div>
+              <div class="pillar-count">${count}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRefineChat() {
+    const msgs = planState.refineMessages.map(m => `
+      <div class="refine-msg ${m.role === 'user' ? 'user' : 'claude'}">${esc(m.content)}</div>
+    `).join('');
+
+    return `
+      <div class="plan-refine">
+        <div class="plan-refine-head">
+          <h4>Refine with Claude</h4>
+          <span style="font-size:11px; color:var(--text-3);">Tell Claude what to adjust — they'll rewrite the plan in place.</span>
+        </div>
+        ${msgs ? `<div class="plan-refine-msgs" id="refine-msgs">${msgs}</div>` : ''}
+        <div class="plan-refine-input-row">
+          <input id="refine-input" class="plan-refine-input" type="text"
+                 placeholder="${planState.refining ? 'Claude is rewriting…' : 'e.g. \'Make Wednesday week 1 a carousel instead of a reel\''}"
+                 ${planState.refining ? 'disabled' : ''}
+                 onkeydown="if(event.key==='Enter') sendRefine()">
+          <button class="btn btn-primary btn-sm" onclick="sendRefine()" ${planState.refining ? 'disabled' : ''}>${planState.refining ? 'Sending…' : 'Send'}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function appendPlanBriefChip(text) {
+    const el = document.getElementById('plan-brief');
+    if (!el) return;
+    el.value = el.value ? (el.value.trim() + ' ' + text) : text;
+    el.focus();
+  }
+
+  function expandPlanCard(id) {
+    planState.expandedDay = id;
+    refreshPlannerScreen();
+  }
+  function collapsePlanCard() {
+    planState.expandedDay = null;
+    refreshPlannerScreen();
+  }
+  function togglePlanBalance() {
+    planState.showBalance = !planState.showBalance;
+    refreshPlannerScreen();
+  }
+  function discardPlan() {
+    if (!confirm('Discard this plan? Anything not saved will be lost.')) return;
+    planState.plan = null;
+    planState.planId = null;
+    planState.expandedDay = null;
+    planState.showBalance = false;
+    planState.refineMessages = [];
+    refreshPlannerScreen();
+  }
+
+  function refreshPlannerScreen() {
+    if (currentScreen !== 'studio' || activeSubpage !== 'planner') return;
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage('planner');
+  }
+
+  // ---- Plan generation via Anthropic API ----
+  async function generatePlan() {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      toast('Set your Anthropic API key in Settings first', 'error');
+      goTo('settings');
+      return;
+    }
+    if (!activeClient) return toast('No client selected', 'error');
+
+    const brief = document.getElementById('plan-brief')?.value?.trim() || '';
+    const weekOf = document.getElementById('plan-week-of')?.value?.trim() || 'Two-week plan';
+
+    planState.generating = true;
+    planState.plan = null;
+    planState.planId = null;
+    planState.refineMessages = [];
+    refreshPlannerScreen();
+
+    try {
+      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf });
+      planState.plan = result;
+      planState.plan.created_label = 'Just now';
+      planState.generating = false;
+      refreshPlannerScreen();
+      toast('Plan ready', 'success');
+    } catch (e) {
+      planState.generating = false;
+      refreshPlannerScreen();
+      toast('Generation failed: ' + e.message, 'error');
+    }
+  }
+
+  async function callClaudeForPlan({ apiKey, client, brief, weekOf }) {
+    const systemPrompt = buildPlannerSystemPrompt(client);
+    const userPrompt = buildPlannerUserPrompt({ brief, weekOf });
+
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error?.message || ('HTTP ' + r.status));
+
+    const text = (data.content?.[0]?.text || '').trim();
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```$/g, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (e) {
+      throw new Error('Claude returned non-JSON. Try again or simplify the brief.');
+    }
+
+    // Normalize day shape
+    parsed.client_id = client.id;
+    parsed.week_of = parsed.week_of || weekOf;
+    parsed.days = (parsed.days || []).map((d, idx) => ({
+      ...d,
+      id: d.id || `day-${idx}-${Math.random().toString(36).slice(2, 8)}`,
+      day_number: d.day_number ?? idx + 1
+    }));
+    return parsed;
+  }
+
+  function buildPlannerSystemPrompt(client) {
+    const parts = [];
+    parts.push(`You are a senior content strategist generating a two-week social media plan for one client.`);
+    parts.push(`Brand: ${client.brand_name || client.name}.`);
+    if (client.brand_voice)  parts.push(`Brand voice: ${client.brand_voice}`);
+    if (client.audience)     parts.push(`Audience: ${client.audience}`);
+    if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
+    parts.push(`
+Structure: Week 1 is RECORDING (the client films / produces). Week 2 is EDITING. Plan covers 14 distinct posts (one per day) split 7/7 across the two weeks.
+Variety: balance pillars, post types (Reel, Carousel, Quote post, Static post, Story series), and tones across the plan.
+Hooks: first three words must earn the scroll. No clichés.
+Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exactly:
+
+{
+  "week_of": "string label",
+  "planning_note": "1-2 sentence narrative on what this two weeks is doing",
+  "week1_label": "Recording" or similar,
+  "week2_label": "Editing" or similar,
+  "days": [
+    {
+      "week": "Week 1" or "Week 2",
+      "day_number": 1-14,
+      "day_label": "Mon · Day 1" or similar short label,
+      "post_type": "Reel" | "Carousel" | "Quote" | "Static" | "Story",
+      "pillar": "string",
+      "title": "the working title for this post",
+      "hook": "the opening 1-2 lines that earn the scroll",
+      "body": "the body / caption draft, 2-4 sentences",
+      "visual_direction": "what this looks like visually, 1-2 sentences",
+      "cta": "the call to action",
+      "notes": "optional production notes"
+    }
+  ]
+}`);
+    return parts.join('\n\n');
+  }
+
+  function buildPlannerUserPrompt({ brief, weekOf }) {
+    let s = `Plan label: ${weekOf}\n\n`;
+    s += brief
+      ? `Director's notes for this cycle:\n${brief}\n\nGenerate the two-week plan as JSON.`
+      : `No additional director's notes — generate the two-week plan based on the brand profile alone.`;
+    return s;
+  }
+
+  // ---- Refine flow ----
+  async function sendRefine() {
+    const apiKey = getApiKey();
+    if (!apiKey) return toast('Set your API key first', 'error');
+    if (!planState.plan) return;
+
+    const input = document.getElementById('refine-input');
+    const text = (input?.value || '').trim();
+    if (!text) return;
+
+    planState.refineMessages.push({ role: 'user', content: text });
+    planState.refining = true;
+    refreshPlannerScreen();
+
+    try {
+      const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages });
+      // Replace plan
+      planState.plan = { ...planState.plan, ...updated };
+      planState.plan.days = (updated.days || planState.plan.days).map((d, idx) => ({
+        ...d,
+        id: d.id || `day-${idx}-${Math.random().toString(36).slice(2, 8)}`,
+        day_number: d.day_number ?? idx + 1
+      }));
+      planState.refineMessages.push({ role: 'assistant', content: updated.refine_summary || 'Updated the plan.' });
+      planState.refining = false;
+      refreshPlannerScreen();
+    } catch (e) {
+      planState.refineMessages.push({ role: 'assistant', content: 'Refine failed: ' + e.message });
+      planState.refining = false;
+      refreshPlannerScreen();
+    }
+  }
+
+  async function callClaudeForRefine({ apiKey, client, plan, history }) {
+    const systemPrompt = buildPlannerSystemPrompt(client) + `\n\nThe user already has a generated plan and is asking for revisions. Apply the requested changes to the plan and return the FULL UPDATED PLAN as JSON, plus a short "refine_summary" field at the top describing what you changed.\n\nKeep the same JSON shape as before. Add a "refine_summary" string at the top of the object (1-2 sentences max).`;
+
+    const planJson = JSON.stringify({
+      week_of: plan.week_of,
+      planning_note: plan.planning_note,
+      days: plan.days
+    }, null, 2);
+
+    const conv = history.slice(0, -1).map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+    const lastMsg = history[history.length - 1].content;
+
+    const userPrompt = `CURRENT PLAN (JSON):\n${planJson}\n\nCONVERSATION SO FAR:\n${conv}\n\nLATEST USER REQUEST:\n${lastMsg}\n\nReturn the full updated plan as JSON, including the refine_summary field at top.`;
+
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error?.message || ('HTTP ' + r.status));
+
+    const txt = (data.content?.[0]?.text || '').trim();
+    const cleaned = txt.replace(/^```json\s*/i, '').replace(/```$/g, '').trim();
+    return JSON.parse(cleaned);
+  }
+
+  // ---- Save plan to DB ----
+  async function savePlanToDb() {
+    if (!planState.plan || !activeClient) return;
+
+    const btn = document.getElementById('plan-save-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+    try {
+      const planRow = {
+        client_id: activeClient.id,
+        week_of: planState.plan.week_of || 'Two-week plan',
+        planning_note: planState.plan.planning_note || null,
+        status: 'draft'
+      };
+
+      let savedPlanId;
+
+      if (planState.planId) {
+        await sbPatch(`plans?id=eq.${planState.planId}`, planRow);
+        await sbPatch(`plan_days?plan_id=eq.${planState.planId}`, { _delete: true }).catch(() => {});
+        await fetch(SB_URL + '/rest/v1/plan_days?plan_id=eq.' + planState.planId, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        savedPlanId = planState.planId;
+      } else {
+        const created = await sbPost('plans', [planRow]);
+        savedPlanId = (Array.isArray(created) ? created[0] : created)?.id;
+        if (!savedPlanId) throw new Error('Plan created but no id returned');
+        planState.planId = savedPlanId;
+      }
+
+      const dayRows = (planState.plan.days || []).map((d, idx) => ({
+        plan_id: savedPlanId,
+        day_number: d.day_number ?? idx + 1,
+        week: d.week || (idx < 7 ? 'Week 1' : 'Week 2'),
+        day_label: d.day_label || null,
+        post_type: d.post_type || null,
+        pillar: d.pillar || null,
+        title: d.title || null,
+        hook: d.hook || null,
+        body: d.body || d.copy || null,
+        visual_direction: d.visual_direction || d.visual || null,
+        cta: d.cta || null,
+        notes: d.notes || null
+      }));
+
+      if (dayRows.length) {
+        await sbPost('plan_days', dayRows);
+      }
+
+      toast('Plan saved', 'success');
+      refreshPlannerScreen();
+    } catch (e) {
+      toast('Save failed: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = planState.planId ? 'Update saved plan' : 'Save plan'; }
+    }
+  }
+
+  // Reset plan state when switching clients
+  const _origOpenClient = openClient;
+  openClient = async function(clientId, subpage = 'profile') {
+    if (clientId !== activeClient?.id) {
+      planState.plan = null;
+      planState.planId = null;
+      planState.expandedDay = null;
+      planState.showBalance = false;
+      planState.refineMessages = [];
+      planState.generating = false;
+    }
+    return _origOpenClient.call(this, clientId, subpage);
+  };
 
   // Add Client modal
   function openAddClient() {
