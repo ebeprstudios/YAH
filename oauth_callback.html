@@ -6,13 +6,13 @@
   <title>YAH! — Connecting account…</title>
   <style>
     :root {
-      --violet: #3D2A7A;
-      --lime: #BAFF4A;
-      --lime-dk: #4a8a00;
-      --red: #C03030;
-      --s2: #f0ede8;
-      --bd: #e8e5de;
-      --muted: #888888;
+      --skin: #1F2A1A;
+      --flesh: #C2D87C;
+      --olive: #5A6B2D;
+      --terracotta: #B84A2E;
+      --cream: #F8F5E9;
+      --bd: #D4CDB1;
+      --muted: #8A8567;
     }
     * { box-sizing: border-box; }
     body {
@@ -20,26 +20,26 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: var(--s2);
+      background: var(--cream);
       font-family: 'Gilroy', system-ui, sans-serif;
-      color: var(--violet);
+      color: var(--skin);
     }
     .card {
       background: white;
-      border: 1px solid var(--bd);
+      border: 0.5px solid var(--bd);
       border-radius: 16px;
       padding: 40px 32px;
       max-width: 460px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 10px 40px rgba(61, 42, 122, 0.08);
+      box-shadow: 0 10px 40px rgba(31, 42, 26, 0.08);
     }
     h1 { margin: 16px 0 8px; font-weight: 800; font-size: 22px; }
     p  { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
     .spinner {
       width: 44px; height: 44px;
       border: 3px solid var(--bd);
-      border-top-color: var(--lime-dk);
+      border-top-color: var(--olive);
       border-radius: 50%;
       margin: 0 auto;
       animation: spin 0.8s linear infinite;
@@ -50,14 +50,14 @@
       display: grid; place-items: center;
       font-size: 24px; font-weight: 900; color: white;
     }
-    .ok-mark  { background: var(--lime-dk); }
-    .err-mark { background: var(--red); }
+    .ok-mark  { background: var(--olive); }
+    .err-mark { background: var(--terracotta); }
     .btn {
       display: inline-block;
       margin-top: 20px;
       padding: 10px 22px;
-      background: var(--violet);
-      color: white;
+      background: var(--skin);
+      color: var(--flesh);
       border: none;
       border-radius: 999px;
       font-weight: 700;
@@ -83,7 +83,7 @@
                  : kind === 'err' ? '<div class="err-mark">!</div>'
                  : '<div class="spinner"></div>';
       const button = kind !== 'loading'
-        ? '<a class="btn" href="/YAH/">Back to YAH</a>'
+        ? '<a class="btn" href="/index_v2.html">Back to YAH</a>'
         : '';
       card.innerHTML = icon + '<h1>' + title + '</h1><p>' + msg + '</p>' + button;
     }
@@ -103,7 +103,6 @@
         return;
       }
 
-      // Decode provider from state prefix: 'ig_' or 'tt_'
       let provider = '';
       if (state.startsWith('ig_')) provider = 'instagram';
       else if (state.startsWith('tt_')) provider = 'tiktok';
