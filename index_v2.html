@@ -594,6 +594,118 @@
   }
   .test-result.ok { background: var(--flesh-pale); color: var(--olive); }
   .test-result.fail { background: #F8DDD0; color: var(--terracotta); }
+
+  /* Modal — Add Client */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 42, 26, 0.55);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 80px 20px 20px;
+    z-index: 250;
+    backdrop-filter: blur(2px);
+    overflow-y: auto;
+  }
+  #modal-overlay.open { display: flex; }
+  .modal-card {
+    background: white;
+    width: 540px;
+    max-width: 100%;
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-pop);
+    border: 0.5px solid var(--bd-soft);
+    overflow: hidden;
+  }
+  .modal-head {
+    padding: 24px 28px 18px;
+    border-bottom: 0.5px solid var(--bd-soft);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .modal-title {
+    color: var(--text-1);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin: 0 0 4px;
+  }
+  .modal-sub {
+    color: var(--text-2);
+    font-size: 13px;
+    margin: 0;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 120ms;
+  }
+  .modal-close:hover { background: var(--surface); color: var(--text-1); }
+  .modal-body { padding: 22px 28px; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-field label {
+    display: block;
+    color: var(--text-2);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .modal-field label .req { color: var(--terracotta); margin-left: 2px; }
+  .modal-field label .hint { color: var(--text-3); text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 11px; margin-left: 6px; }
+  .modal-input, .modal-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 13px;
+    background: var(--cream);
+    color: var(--text-1);
+    transition: border-color 120ms;
+    resize: vertical;
+  }
+  .modal-input:focus, .modal-textarea:focus { outline: none; border-color: var(--olive); background: white; }
+  .modal-textarea { min-height: 70px; line-height: 1.5; }
+  .modal-error {
+    padding: 10px 14px;
+    background: #F8DDD0;
+    color: var(--terracotta);
+    border: 0.5px solid #E8B8A0;
+    border-radius: var(--r-md);
+    font-size: 12px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .modal-error.show { display: block; }
+  .modal-foot {
+    padding: 16px 28px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 0.5px solid var(--bd-soft);
+  }
+
+  .greet-block-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .greet-block-row .greet-block { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -717,10 +829,13 @@
   <main id="canvas">
 
     <section id="screen-dashboard">
-      <div class="greet-block">
-        <div class="greet-date" id="greet-date">—</div>
-        <h1 class="greet-title" id="greet-title">Loading…</h1>
-        <p class="greet-sub" id="greet-sub">Setting the table.</p>
+      <div class="greet-block-row">
+        <div class="greet-block">
+          <div class="greet-date" id="greet-date">—</div>
+          <h1 class="greet-title" id="greet-title">Loading…</h1>
+          <p class="greet-sub" id="greet-sub">Setting the table.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddClient()" id="dashboard-add-client" style="display:none">+ Add client</button>
       </div>
       <div id="client-tiles"></div>
       <div class="stat-row" id="dashboard-stats"></div>
@@ -789,6 +904,45 @@
     <div class="cmd-box">
       <input type="text" class="cmd-input" id="cmd-input" placeholder="Type a command or search…" autocomplete="off">
       <div class="cmd-list" id="cmd-list"></div>
+    </div>
+  </div>
+
+  <div id="modal-overlay" onclick="if(event.target===this) closeAddClient()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3 class="modal-title">Add a new client</h3>
+          <p class="modal-sub">Set up a brand to plan and publish for. You can refine details later.</p>
+        </div>
+        <button class="modal-close" onclick="closeAddClient()" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="add-client-error"></div>
+        <div class="modal-field">
+          <label>Brand name <span class="req">*</span></label>
+          <input class="modal-input" type="text" id="ac-brand-name" placeholder="e.g. Tiffany Haynes Co.">
+        </div>
+        <div class="modal-field">
+          <label>Client contact email <span class="hint">— optional, where approval emails will go</span></label>
+          <input class="modal-input" type="email" id="ac-client-email" placeholder="contact@example.com">
+        </div>
+        <div class="modal-field">
+          <label>Brand voice <span class="hint">— how they sound</span></label>
+          <textarea class="modal-textarea" id="ac-brand-voice" placeholder="e.g. Warm, direct, biblically grounded. Speaks to women in their thirties navigating faith and identity."></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Audience <span class="hint">— who they speak to</span></label>
+          <textarea class="modal-textarea" id="ac-audience" placeholder="e.g. Christian women, 28–42, creatives and ministry leaders, trying to integrate faith with career."></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Things to avoid <span class="hint">— what's off-brand</span></label>
+          <textarea class="modal-textarea" id="ac-brand-avoid" placeholder="e.g. New age language, manifestation, astrology. Anything that conflicts with biblical Christianity."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost btn-sm" onclick="closeAddClient()">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="ac-save-btn" onclick="createClient()">Add client</button>
+      </div>
     </div>
   </div>
 
@@ -1091,11 +1245,15 @@
 
     if (clients.length === 0) {
       document.getElementById('greet-sub').textContent = 'No clients yet — add one to get started.';
+      document.getElementById('dashboard-add-client').style.display = 'none';
       document.getElementById('client-tiles').innerHTML = `
         <div class="empty-state">
           <h3>Welcome to YAH! Studio.</h3>
           <p>${currentAgency?.name ? '' : 'Set up your agency in Settings, then '}Add your first client to begin planning.</p>
-          <button class="btn btn-primary" onclick="goTo('settings')">${currentAgency?.name ? 'Open settings' : 'Set up your agency'}</button>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+            ${currentAgency?.name ? '' : '<button class="btn btn-ghost" onclick="goTo(\'settings\')">Set up agency</button>'}
+            <button class="btn btn-primary" onclick="openAddClient()">+ Add your first client</button>
+          </div>
         </div>
       `;
       document.getElementById('dashboard-stats').innerHTML = '';
@@ -1104,6 +1262,7 @@
 
     document.getElementById('greet-sub').textContent =
       clients.length === 1 ? 'One thing on the table tonight.' : `${clients.length} clients on the table tonight.`;
+    document.getElementById('dashboard-add-client').style.display = 'inline-flex';
 
     const tilesEl = document.getElementById('client-tiles');
     tilesEl.innerHTML = '<div class="empty-state" style="padding:20px"><p>Pulling client status…</p></div>';
@@ -1394,12 +1553,83 @@
     }
   }
 
+  // Add Client modal
+  function openAddClient() {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('ac-brand-name').value = '';
+    document.getElementById('ac-client-email').value = '';
+    document.getElementById('ac-brand-voice').value = '';
+    document.getElementById('ac-audience').value = '';
+    document.getElementById('ac-brand-avoid').value = '';
+    const err = document.getElementById('add-client-error');
+    err.textContent = ''; err.classList.remove('show');
+    setTimeout(() => document.getElementById('ac-brand-name').focus(), 50);
+  }
+
+  function closeAddClient() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  async function createClient() {
+    const brandName = document.getElementById('ac-brand-name').value.trim();
+    const clientEmail = document.getElementById('ac-client-email').value.trim();
+    const brandVoice = document.getElementById('ac-brand-voice').value.trim();
+    const audience = document.getElementById('ac-audience').value.trim();
+    const brandAvoid = document.getElementById('ac-brand-avoid').value.trim();
+
+    const errEl = document.getElementById('add-client-error');
+    errEl.textContent = ''; errEl.classList.remove('show');
+
+    if (!brandName) {
+      errEl.textContent = 'Brand name is required.';
+      errEl.classList.add('show');
+      document.getElementById('ac-brand-name').focus();
+      return;
+    }
+
+    const btn = document.getElementById('ac-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+
+    try {
+      const payload = {
+        name: brandName,
+        brand_name: brandName,
+        active: true
+      };
+      if (clientEmail) payload.client_email = clientEmail;
+      if (brandVoice) payload.brand_voice = brandVoice;
+      if (audience) payload.audience = audience;
+      if (brandAvoid) payload.brand_avoid = brandAvoid;
+
+      const created = await sbPost('clients', [payload]);
+      const newClient = Array.isArray(created) ? created[0] : created;
+
+      closeAddClient();
+      toast('Client added', 'success');
+
+      if (newClient?.id) {
+        await loadDashboard();
+        openClient(newClient.id);
+      } else {
+        loadDashboard();
+      }
+    } catch (e) {
+      errEl.textContent = 'Could not add client: ' + e.message;
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Add client';
+    }
+  }
+
   // Command palette
   let cmdSelected = 0;
   let cmdResults = [];
 
   function getCmdActions() {
     const acts = [
+      { icon: '+', label: 'Add a new client', hint: '', run: () => openAddClient() },
       { icon: '◇', label: 'Open dashboard', hint: '', run: () => goTo('dashboard') },
       { icon: '⚙', label: 'Open settings', hint: '', run: () => goTo('settings') },
       { icon: '↗', label: 'Sign out', hint: '', run: () => doSignOut() },
@@ -1457,6 +1687,14 @@
       const overlay = document.getElementById('cmd-overlay');
       overlay.classList.contains('open') ? closeCmd() : openCmd();
       return;
+    }
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('modal-overlay');
+      if (modal.classList.contains('open')) {
+        e.preventDefault();
+        closeAddClient();
+        return;
+      }
     }
     if (!document.getElementById('cmd-overlay').classList.contains('open')) return;
     if (e.key === 'Escape') { e.preventDefault(); closeCmd(); }
