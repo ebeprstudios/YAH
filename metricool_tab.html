@@ -1,0 +1,14 @@
+<!--
+  YAH! 90-Day Strategy / Performance Tab
+  Paste inside <section id="screen-client"> alongside the other ctab- divs.
+  Also add the tab button to .ctab-bar.
+-->
+
+<!-- 1. Add to .ctab-bar (after Knowledge Base, before Reports): -->
+<div class="ctab" onclick="switchClientTab('performance', this)">Performance</div>
+
+<!-- 2. Add tab body (after #ctab-kb, before #ctab-reports): -->
+<div class="client-body" id="ctab-performance" style="display:none">
+  <!-- Populated by loadPerformanceTab() -->
+  <div class="empty">Loading performance data…</div>
+</div>
