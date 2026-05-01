@@ -1,0 +1,114 @@
+/* =============================================================
+   YAH! OAuth Connector Card Styles
+   APPEND to existing <style> block (after the metricool_styles.css
+   additions). Replaces nothing — adds connector grid + cards.
+   ============================================================= */
+
+.connector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.connector-card {
+  background: white;
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+.connector-card.connected {
+  border-color: var(--lime-dk);
+  background: linear-gradient(180deg, white 0%, var(--lime-bg) 100%);
+}
+.connector-card:hover { transform: translateY(-1px); }
+.connector-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--bd);
+}
+.connector-card.connector-instagram::before {
+  background: linear-gradient(90deg, #833AB4, #FD1D1D, #F77737);
+}
+.connector-card.connector-tiktok::before {
+  background: linear-gradient(90deg, #00F2EA, #000, #FF0050);
+}
+
+.cc-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.cc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 900;
+  font-size: 18px;
+}
+.cc-icon.instagram-icon {
+  background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #FCAF45 100%);
+}
+.cc-icon.instagram-icon::before { content: 'IG'; }
+.cc-icon.tiktok-icon {
+  background: linear-gradient(135deg, #00F2EA 0%, #000 50%, #FF0050 100%);
+}
+.cc-icon.tiktok-icon::before { content: 'TT'; }
+
+.cc-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--violet);
+  line-height: 1.2;
+}
+.cc-status {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cc-status strong { color: var(--violet); }
+
+.token-warn {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #fef0e0;
+  color: var(--amber);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cc-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Btn-violet variant for pulls */
+.btn-violet {
+  background: var(--violet);
+  color: white;
+  border: 1px solid var(--violet);
+}
+.btn-violet:hover { background: #2d1f5c; }
+.btn-violet:disabled { opacity: 0.6; cursor: not-allowed; }
