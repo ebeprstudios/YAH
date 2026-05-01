@@ -1411,7 +1411,7 @@
     `).join('');
   }
 
-  async function openClient(clientId, subpage = 'planner') {
+  async function openClient(clientId, subpage = 'profile') {
     let c = allClients.find(x => x.id === clientId);
     if (!c) {
       try {
@@ -1427,12 +1427,25 @@
     if (!activeClient) return;
     document.getElementById('studio-crumb-client').textContent = activeClient.brand_name || activeClient.name;
     document.getElementById('studio-title').textContent =
-      ({ planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' })[activeSubpage] || 'Workspace';
+      ({ profile: 'Profile', planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' })[activeSubpage] || 'Workspace';
     document.getElementById('open-classic-link').href = './index.html';
     document.getElementById('studio-body').innerHTML = renderStudioSubpage(activeSubpage);
   }
 
   function renderStudioSubpage(sub) {
+    const labels = { profile: 'Profile', planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' };
+    const tabs = ['profile', 'planner', 'performance', 'kb', 'history', 'ideation', 'reports'];
+    const subnav = tabs.map(s => `
+      <button class="btn ${s === sub ? 'btn-skin' : 'btn-ghost'} btn-sm" onclick="setSubpage('${s}')">
+        ${labels[s]}
+      </button>
+    `).join('');
+    const subnavWrap = `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:24px;">${subnav}</div>`;
+
+    if (sub === 'profile') {
+      return subnavWrap + renderProfileContent();
+    }
+
     const map = {
       planner: { title: 'Plan canvas — coming next', body: 'A chat-like canvas where you and Claude shape the next two weeks together. Replaces the textarea + button flow.' },
       performance: { title: 'Performance pulse — coming next', body: 'Insight-led performance view. One Claude-written paragraph at the top, three proof posts below, then a fold to dive into the full grid.' },
@@ -1443,14 +1456,7 @@
     };
     const cfg = map[sub] || map.planner;
 
-    const subnav = ['planner', 'performance', 'kb', 'history', 'ideation', 'reports'].map(s => `
-      <button class="btn ${s === sub ? 'btn-skin' : 'btn-ghost'} btn-sm" onclick="setSubpage('${s}')">
-        ${({ planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' })[s]}
-      </button>
-    `).join('');
-
-    return `
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:24px;">${subnav}</div>
+    return subnavWrap + `
       <div class="placeholder">
         <h3>${esc(cfg.title)}</h3>
         <p>${esc(cfg.body)}</p>
@@ -1460,6 +1466,72 @@
         </div>
       </div>
     `;
+  }
+
+  function renderProfileContent() {
+    const c = activeClient || {};
+    return `
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h4>Brand identity</h4>
+          <p>The basics — what they're called and where approval emails go.</p>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Brand name</label>
+          <input type="text" id="prof-brand-name" placeholder="Brand name" value="${esc(c.brand_name || c.name || '')}">
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Client contact email</label>
+          <input type="email" id="prof-client-email" placeholder="contact@example.com" value="${esc(c.client_email || '')}">
+        </div>
+        <div class="settings-card">
+          <h4>Voice &amp; audience</h4>
+          <p>How they sound, who they speak to, and what's off-brand. Claude reads these every time it generates content.</p>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Brand voice</label>
+          <textarea id="prof-brand-voice" class="modal-textarea" style="min-height:90px" placeholder="Tone, vocabulary, what they sound like…">${esc(c.brand_voice || '')}</textarea>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Audience</label>
+          <textarea id="prof-audience" class="modal-textarea" style="min-height:90px" placeholder="Who they speak to — demographics, psychographics, what they need…">${esc(c.audience || '')}</textarea>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Things to avoid</label>
+          <textarea id="prof-brand-avoid" class="modal-textarea" style="min-height:90px" placeholder="Topics, tones, brands, language to stay away from…">${esc(c.brand_avoid || '')}</textarea>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center">
+          <button class="btn btn-primary" id="prof-save-btn" onclick="saveClientProfile()">Save profile</button>
+          <span id="prof-save-status" style="color:var(--text-3); font-size:12px"></span>
+        </div>
+      </div>
+    `;
+  }
+
+  async function saveClientProfile() {
+    if (!activeClient?.id) return toast('No client selected', 'error');
+    const updates = {
+      brand_name: document.getElementById('prof-brand-name').value.trim(),
+      client_email: document.getElementById('prof-client-email').value.trim() || null,
+      brand_voice: document.getElementById('prof-brand-voice').value.trim() || null,
+      audience: document.getElementById('prof-audience').value.trim() || null,
+      brand_avoid: document.getElementById('prof-brand-avoid').value.trim() || null
+    };
+    if (!updates.brand_name) return toast('Brand name is required', 'error');
+
+    const btn = document.getElementById('prof-save-btn');
+    const statusEl = document.getElementById('prof-save-status');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    statusEl.textContent = '';
+
+    try {
+      await sbPatch(`clients?id=eq.${activeClient.id}`, updates);
+      Object.assign(activeClient, updates);
+      const idx = allClients.findIndex(x => x.id === activeClient.id);
+      if (idx > -1) Object.assign(allClients[idx], updates);
+      document.getElementById('studio-crumb-client').textContent = activeClient.brand_name || activeClient.name;
+      renderRailClients();
+      toast('Profile saved', 'success');
+      statusEl.textContent = 'Saved.';
+      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    } catch (e) {
+      toast('Save failed: ' + e.message, 'error');
+      statusEl.textContent = 'Save failed.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save profile';
+    }
   }
 
   function setSubpage(s) {
