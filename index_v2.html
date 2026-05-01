@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAH! Studio</title>
+<style>
+  :root {
+    /* Avocado palette */
+    --skin: #1F2A1A;
+    --skin-2: #2D3826;
+    --olive: #5A6B2D;
+    --flesh-dk: #8FA94A;
+    --flesh: #C2D87C;
+    --flesh-pale: #E5E8B0;
+    --pit: #6B4226;
+    --pit-2: #8B5E3C;
+    --turmeric: #C68A24;
+    --terracotta: #B84A2E;
+    --cream: #F8F5E9;
+    --surface: #F2EEDC;
+    --surface-2: #E8E2CC;
+    --bd-soft: #D4CDB1;
+    --bd-strong: #B8B095;
+    --text-1: #1F2A1A;
+    --text-2: #4A4F38;
+    --text-3: #8A8567;
+    --text-rail: #B8B095;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-pill: 999px;
+    --rail-w: 240px;
+    --shadow-soft: 0 1px 0 rgba(31, 42, 26, 0.04);
+    --shadow-pop: 0 8px 24px rgba(31, 42, 26, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Gilroy', 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--cream);
+    color: var(--text-1);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Min-width gate */
+  @media (max-width: 1023px) {
+    body::before {
+      content: 'YAH! Studio is desktop-only. Switch to a wider screen.';
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: var(--cream);
+      color: var(--text-2);
+      font-size: 16px;
+      padding: 40px;
+      text-align: center;
+      z-index: 9999;
+    }
+  }
+
+  /* ============== AUTH GATE ============== */
+  #auth-gate {
+    position: fixed;
+    inset: 0;
+    background: var(--cream);
+    display: grid;
+    place-items: center;
+    z-index: 100;
+  }
+  .auth-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-xl);
+    padding: 40px 36px;
+    width: 380px;
+    box-shadow: var(--shadow-pop);
+    text-align: center;
+  }
+  .auth-logo {
+    background: var(--flesh);
+    color: var(--skin);
+    padding: 8px 18px;
+    border-radius: var(--r-pill);
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .auth-tag {
+    color: var(--text-2);
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+  .auth-card input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    margin-bottom: 12px;
+    background: var(--cream);
+    color: var(--text-1);
+    transition: border-color 120ms;
+  }
+  .auth-card input:focus {
+    outline: none;
+    border-color: var(--olive);
+  }
+  .auth-error {
+    color: var(--terracotta);
+    font-size: 12px;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+
+  /* ============== APP LAYOUT ============== */
+  #app {
+    display: grid;
+    grid-template-columns: var(--rail-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ============== LEFT RAIL ============== */
+  aside#left-rail {
+    background: var(--skin);
+    color: var(--text-rail);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .rail-logo {
+    background: var(--flesh);
+    color: var(--skin);
+    padding: 5px 12px;
+    border-radius: var(--r-pill);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    align-self: flex-start;
+    margin-left: 4px;
+  }
+  .rail-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(194, 216, 124, 0.06);
+    border: 1px solid rgba(194, 216, 124, 0.12);
+    border-radius: var(--r-md);
+    color: var(--text-rail);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .rail-search:hover {
+    background: rgba(194, 216, 124, 0.12);
+  }
+  .rail-search .kbd {
+    margin-left: auto;
+    background: rgba(194, 216, 124, 0.18);
+    color: var(--flesh);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .rail-section {
+    color: var(--text-3);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 0 10px;
+    margin-top: 4px;
+  }
+  .rail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--r-md);
+    color: var(--text-rail);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    text-decoration: none;
+  }
+  .rail-item:hover {
+    background: rgba(194, 216, 124, 0.08);
+    color: var(--flesh-pale);
+  }
+  .rail-item.active {
+    background: rgba(194, 216, 124, 0.14);
+    color: var(--flesh);
+  }
+  .rail-item .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);
+  }
+  .rail-item.active .dot { background: var(--flesh); }
+  .rail-item.muted {
+    opacity: 0.5;
+    font-size: 12px;
+  }
+  .rail-sub {
+    margin-left: 10px;
+    border-left: 1px solid rgba(194, 216, 124, 0.12);
+    padding-left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .rail-sub .rail-item {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .rail-foot {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(194, 216, 124, 0.08);
+  }
+
+  /* ============== CANVAS ============== */
+  main#canvas {
+    padding: 32px 40px 60px;
+    max-width: 1080px;
+  }
+
+  /* ============== DASHBOARD ============== */
+  .greet-block {
+    margin-bottom: 28px;
+  }
+  .greet-date {
+    color: var(--text-3);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .greet-title {
+    color: var(--text-1);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
+    line-height: 1.15;
+    margin: 0 0 4px;
+  }
+  .greet-sub {
+    color: var(--text-2);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* Client tile */
+  .client-tile {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 28px;
+    transition: border-color 120ms;
+  }
+  .client-tile:hover {
+    border-color: var(--bd-strong);
+  }
+  .ct-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ct-id {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ct-avatar {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--skin);
+    color: var(--flesh);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .ct-name {
+    color: var(--text-1);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.2px;
+  }
+  .status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .pill-pending { background: #F4E4C8; color: var(--pit); }
+  .pill-due { background: #F4E4C8; color: var(--pit); }
+  .pill-ok { background: var(--flesh-pale); color: var(--olive); }
+  .pill-changes { background: #F8DDD0; color: var(--terracotta); }
+  .pill-quiet { background: var(--surface-2); color: var(--text-3); }
+
+  .insight-block {
+    background: var(--cream);
+    border-left: 2px solid var(--olive);
+    padding: 13px 16px;
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+  }
+  .insight-label {
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .insight-body {
+    color: var(--text-1);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .ct-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Stat boxes */
+  .stat-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .stat-box {
+    flex: 1;
+    min-width: 160px;
+    border: 0.5px dashed var(--bd-strong);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+  }
+  .stat-lbl {
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-num {
+    color: var(--text-1);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-top: 4px;
+  }
+  .stat-meta {
+    color: var(--text-2);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .stat-meta.up { color: var(--olive); }
+
+  /* ============== BUTTONS ============== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--r-pill);
+    border: 1px solid transparent;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 80ms, background 120ms, border-color 120ms;
+    text-decoration: none;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: var(--flesh);
+    color: var(--skin);
+    border-color: var(--flesh);
+  }
+  .btn-primary:hover {
+    background: var(--flesh-dk);
+    border-color: var(--flesh-dk);
+  }
+  .btn-skin {
+    background: var(--skin);
+    color: var(--flesh);
+    border-color: var(--skin);
+  }
+  .btn-skin:hover {
+    background: var(--skin-2);
+    border-color: var(--skin-2);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-1);
+    border-color: var(--bd-strong);
+  }
+  .btn-ghost:hover {
+    background: var(--surface);
+    border-color: var(--text-2);
+  }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  /* ============== STUDIO (per-client workspace) ============== */
+  .studio-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 0.5px solid var(--bd-soft);
+  }
+  .studio-crumbs {
+    color: var(--text-3);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+  .studio-crumbs a {
+    color: var(--text-3);
+    text-decoration: none;
+  }
+  .studio-crumbs a:hover { color: var(--olive); }
+  .studio-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-1);
+    margin: 0;
+  }
+
+  /* Sub-page placeholder */
+  .placeholder {
+    background: white;
+    border: 0.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 40px;
+    text-align: center;
+  }
+  .placeholder h3 {
+    color: var(--text-1);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  .placeholder p {
+    color: var(--text-2);
+    font-size: 14px;
+    margin: 0 0 18px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  /* ============== COMMAND PALETTE ============== */
+  #cmd-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 42, 26, 0.5);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 120px;
+    z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+  #cmd-overlay.open { display: flex; }
+  .cmd-box {
+    background: white;
+    width: 580px;
+    max-width: 90vw;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
+    border: 0.5px solid var(--bd-soft);
+    overflow: hidden;
+  }
+  .cmd-input {
+    width: 100%;
+    border: none;
+    padding: 18px 20px;
+    font: inherit;
+    font-size: 16px;
+    background: transparent;
+    color: var(--text-1);
+    border-bottom: 0.5px solid var(--bd-soft);
+  }
+  .cmd-input:focus { outline: none; }
+  .cmd-input::placeholder { color: var(--text-3); }
+  .cmd-list {
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .cmd-item {
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-1);
+    font-size: 14px;
+  }
+  .cmd-item.selected,
+  .cmd-item:hover {
+    background: var(--surface);
+  }
+  .cmd-icon {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    color: var(--olive);
+    flex-shrink: 0;
+  }
+  .cmd-label { flex: 1; }
+  .cmd-hint {
+    color: var(--text-3);
+    font-size: 11px;
+  }
+  .cmd-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  /* ============== TOAST ============== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--skin);
+    color: var(--cream);
+    padding: 12px 18px;
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 300;
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    transition: opacity 200ms, transform 200ms;
+    pointer-events: none;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  #toast.error { background: var(--terracotta); }
+  #toast.success { background: var(--olive); }
+
+  /* ============== UTIL ============== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-2);
+  }
+  .empty-state h3 {
+    color: var(--text-1);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .empty-state p {
+    margin: 0 0 18px;
+    font-size: 14px;
+  }
+  .switch-classic {
+    margin-left: auto;
+    color: var(--text-3);
+    font-size: 11px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: var(--r-md);
+    border: 0.5px solid transparent;
+    transition: color 120ms, border-color 120ms;
+  }
+  .switch-classic:hover {
+    color: var(--olive);
+    border-color: var(--bd-strong);
+  }
+
+  /* Settings */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 640px;
+  }
+  .settings-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 20px 22px;
+  }
+  .settings-card h4 {
+    margin: 0 0 4px;
+    color: var(--text-1);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .settings-card p {
+    margin: 0 0 14px;
+    color: var(--text-2);
+    font-size: 13px;
+  }
+  .settings-card input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 13px;
+    background: var(--cream);
+  }
+  .settings-card input:focus { outline: none; border-color: var(--olive); }
+</style>
+</head>
+<body>
+
+<!-- ============== AUTH GATE ============== -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo">YAH!</div>
+    <div class="auth-tag">your audience, handled.</div>
+    <input type="password" id="auth-input" placeholder="Studio password" autofocus>
+    <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="checkAuth()">Enter Studio</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div style="margin-top:20px; font-size:11px; color:var(--text-3)">
+      Looking for the classic? <a href="./index.html" style="color:var(--olive)">Open it here</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============== APP ============== -->
+<div id="app" style="display:none">
+
+  <!-- LEFT RAIL -->
+  <aside id="left-rail">
+    <div class="rail-logo">YAH!</div>
+
+    <div class="rail-search" onclick="openCmd()">
+      <span>⌘ Search</span>
+      <span class="kbd">⌘K</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <div class="rail-item" data-screen="dashboard" onclick="goTo('dashboard')">
+        <span style="font-size:14px">◇</span>
+        <span>Studio</span>
+      </div>
+    </div>
+
+    <div class="rail-section">Clients</div>
+    <div id="rail-clients" style="display:flex; flex-direction:column; gap:2px;">
+      <!-- populated -->
+    </div>
+
+    <div class="rail-foot">
+      <div class="rail-item" data-screen="settings" onclick="goTo('settings')">
+        <span style="font-size:14px">⚙</span>
+        <span>Settings</span>
+      </div>
+      <a class="rail-item" href="./index.html" style="margin-top:6px">
+        <span style="font-size:14px">↩</span>
+        <span style="font-size:11px">Switch to classic</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- CANVAS -->
+  <main id="canvas">
+
+    <!-- DASHBOARD -->
+    <section id="screen-dashboard">
+      <div class="greet-block">
+        <div class="greet-date" id="greet-date">—</div>
+        <h1 class="greet-title" id="greet-title">Loading…</h1>
+        <p class="greet-sub" id="greet-sub">Setting the table.</p>
+      </div>
+      <div id="client-tiles">
+        <!-- populated -->
+      </div>
+      <div class="stat-row" id="dashboard-stats">
+        <!-- populated -->
+      </div>
+    </section>
+
+    <!-- STUDIO (per-client) -->
+    <section id="screen-studio" hidden>
+      <div class="studio-head">
+        <div>
+          <div class="studio-crumbs">
+            <a href="#" onclick="goTo('dashboard'); return false;">Studio</a> / <span id="studio-crumb-client">Client</span>
+          </div>
+          <h2 class="studio-title" id="studio-title">Client Workspace</h2>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center">
+          <button class="btn btn-ghost btn-sm" onclick="openCmd()">⌘K</button>
+          <a class="switch-classic" id="open-classic-link" href="./index.html">Open in classic →</a>
+        </div>
+      </div>
+      <div id="studio-body">
+        <!-- populated by sub-page -->
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" hidden>
+      <div class="greet-block">
+        <div class="greet-date">Settings</div>
+        <h1 class="greet-title">Studio configuration</h1>
+        <p class="greet-sub">API keys and agency settings.</p>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h4>Anthropic API key</h4>
+          <p>Used for plan generation, strategy briefs, and any Claude-powered feature.</p>
+          <input type="password" id="set-api-key" placeholder="sk-ant-...">
+          <div style="margin-top:10px; display:flex; gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save key</button>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('set-api-key').type = document.getElementById('set-api-key').type === 'password' ? 'text' : 'password'">Show/hide</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h4>Agency</h4>
+          <p>Your studio identity — appears on plan emails and exports.</p>
+          <input type="text" id="set-agency-name" placeholder="EBEPR Studios">
+          <input type="email" id="set-owner-email" placeholder="ebeprinc@gmail.com" style="margin-top:8px">
+          <div style="margin-top:10px">
+            <button class="btn btn-primary btn-sm" onclick="saveAgencySettings()">Save agency</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h4>About this version</h4>
+          <p>You're using YAH! Studio v2 — the new shell. Sub-pages are migrating one at a time. Use "Open in classic" on any client screen to access features that haven't moved yet.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- COMMAND PALETTE -->
+  <div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+    <div class="cmd-box">
+      <input type="text" class="cmd-input" id="cmd-input" placeholder="Type a command or search…" autocomplete="off">
+      <div class="cmd-list" id="cmd-list"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+</div>
+
+<script>
+  // ==================== CONFIG ====================
+  const SB_URL = 'https://piowmyefosrdpjisguii.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpb3dteWVmb3NyZHBqaXNndWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDcyNjksImV4cCI6MjA5MDMyMzI2OX0.aI0-esJB5IH-KwgsHx_FM_YpOp9k-0M0gc5xlfdJrcY';
+  const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  const PASSWORD_HASH = '206da79a0c59c78c50b1c88518af40b3e06a0316a5d9a85864202cfbf42c3006';
+
+  // ==================== STATE ====================
+  let currentScreen = 'dashboard';
+  let activeClient = null;
+  let activeSubpage = null;
+  let allClients = [];
+
+  // ==================== SUPABASE HELPERS ====================
+  async function sbGet(path) {
+    const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: SB_H });
+    if (!r.ok) throw new Error('GET ' + r.status);
+    return r.json();
+  }
+  async function sbPost(table, body) {
+    const r = await fetch(SB_URL + '/rest/v1/' + table, {
+      method: 'POST',
+      headers: { ...SB_H, 'Prefer': 'return=representation' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('POST ' + r.status);
+    return r.json();
+  }
+  async function sbPatch(path, body) {
+    const r = await fetch(SB_URL + '/rest/v1/' + path, {
+      method: 'PATCH',
+      headers: { ...SB_H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('PATCH ' + r.status);
+  }
+
+  // ==================== UTIL ====================
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+  function initials(name) {
+    return String(name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '—';
+  }
+  function toast(msg, kind = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = kind;
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+  function getApiKey() { return localStorage.getItem('yah_api_key') || ''; }
+  function setApiKey(k) { localStorage.setItem('yah_api_key', k); }
+
+  // ==================== AUTH ====================
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function checkAuth() {
+    const input = document.getElementById('auth-input').value;
+    const errEl = document.getElementById('auth-error');
+    errEl.textContent = '';
+    if (!input) return;
+    const hex = await sha256Hex(input);
+    if (hex === PASSWORD_HASH) {
+      sessionStorage.setItem('yah_authed', '1');
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('app').style.display = 'grid';
+      init();
+    } else {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('auth-input').select();
+    }
+  }
+  document.getElementById('auth-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkAuth();
+  });
+
+  // ==================== ROUTING ====================
+  function goTo(screen, opts = {}) {
+    currentScreen = screen;
+    ['dashboard', 'studio', 'settings'].forEach(s => {
+      const el = document.getElementById('screen-' + s);
+      if (el) el.hidden = (s !== screen);
+    });
+    document.querySelectorAll('.rail-item[data-screen]').forEach(el => {
+      el.classList.toggle('active', el.dataset.screen === screen);
+    });
+    document.querySelectorAll('.rail-item[data-client]').forEach(el => {
+      el.classList.toggle('active', screen === 'studio' && el.dataset.client === activeClient?.id);
+    });
+    if (screen === 'dashboard') loadDashboard();
+    if (screen === 'settings') loadSettings();
+    if (screen === 'studio' && opts.client) {
+      activeClient = opts.client;
+      activeSubpage = opts.subpage || 'planner';
+      renderStudio();
+    }
+    window.scrollTo(0, 0);
+  }
+
+  // ==================== DASHBOARD ====================
+  async function loadDashboard() {
+    // Greeting
+    const now = new Date();
+    const hour = now.getHours();
+    const greeting = hour < 5 ? 'Late night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 22 ? 'Good evening' : 'Late night';
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    document.getElementById('greet-date').textContent = dateStr;
+    document.getElementById('greet-title').textContent = greeting + ', Erica.';
+
+    // Load clients
+    let clients = [];
+    try {
+      clients = await sbGet('clients?active=eq.true&order=created_at.asc&select=*');
+    } catch (e) {
+      clients = [];
+    }
+    allClients = clients;
+    renderRailClients();
+
+    if (clients.length === 0) {
+      document.getElementById('greet-sub').textContent = 'No clients yet — add one to get started.';
+      document.getElementById('client-tiles').innerHTML = `
+        <div class="empty-state">
+          <h3>Welcome to YAH! Studio.</h3>
+          <p>Add your first client to begin planning. You can always switch to classic if you need the legacy onboarding wizard.</p>
+          <a class="btn btn-primary" href="./index.html">Add a client in classic</a>
+        </div>
+      `;
+      document.getElementById('dashboard-stats').innerHTML = '';
+      return;
+    }
+
+    document.getElementById('greet-sub').textContent =
+      clients.length === 1
+        ? 'One thing on the table tonight.'
+        : `${clients.length} clients on the table tonight.`;
+
+    // Render tiles + stats
+    const tilesEl = document.getElementById('client-tiles');
+    tilesEl.innerHTML = '<div class="empty-state" style="padding:20px"><p>Pulling client status…</p></div>';
+
+    const tileHtml = await Promise.all(clients.map(c => buildClientTile(c)));
+    tilesEl.innerHTML = tileHtml.join('');
+
+    // Stats row
+    await renderDashboardStats();
+  }
+
+  async function buildClientTile(c) {
+    // Latest plan + insight
+    let nextLabel = 'Plan due — set cadence';
+    let nextPillClass = 'pill-quiet';
+    let insightText = '';
+    let insightLabel = "What's working";
+
+    try {
+      const plans = await sbGet(`plans?client_id=eq.${c.id}&order=created_at.desc&limit=1&select=*`);
+      const latest = plans[0];
+      if (latest) {
+        if (latest.status === 'sent')               { nextLabel = 'Awaiting approval';        nextPillClass = 'pill-pending'; }
+        else if (latest.status === 'approved')      { nextLabel = 'Approved · plan in motion'; nextPillClass = 'pill-ok'; }
+        else if (latest.status === 'changes_requested') { nextLabel = 'Changes requested';     nextPillClass = 'pill-changes'; }
+        else                                         { nextLabel = 'Draft saved';              nextPillClass = 'pill-quiet'; }
+      } else {
+        nextLabel = 'No plan yet';
+        nextPillClass = 'pill-due';
+      }
+    } catch (e) {}
+
+    try {
+      const briefs = await sbGet(`strategy_briefs?client_id=eq.${c.id}&order=created_at.desc&limit=1&select=brief_content`);
+      if (briefs[0]?.brief_content) {
+        insightText = extractFirstInsight(briefs[0].brief_content);
+      }
+    } catch (e) {}
+
+    if (!insightText) {
+      try {
+        const integ = await sbGet(`client_integrations?client_id=eq.${c.id}&active=eq.true&select=provider`);
+        if (integ.length === 0) {
+          insightLabel = "Next move";
+          insightText = 'Connect Instagram or TikTok to start surfacing what works.';
+        } else {
+          insightLabel = "Next move";
+          insightText = 'Pull recent posts and run a strategy brief to surface insights.';
+        }
+      } catch (e) {
+        insightText = 'Generate a strategy brief to see what content is performing.';
+      }
+    }
+
+    return `
+      <div class="client-tile">
+        <div class="ct-head">
+          <div class="ct-id">
+            <div class="ct-avatar">${esc(initials(c.brand_name || c.name))}</div>
+            <div class="ct-name">${esc(c.brand_name || c.name)}</div>
+          </div>
+          <div class="status-pill ${nextPillClass}">${esc(nextLabel)}</div>
+        </div>
+        <div class="insight-block">
+          <div class="insight-label">${esc(insightLabel)}</div>
+          <div class="insight-body">${esc(insightText)}</div>
+        </div>
+        <div class="ct-actions">
+          <button class="btn btn-primary" onclick='openClient(${JSON.stringify(c.id)})'>Open studio →</button>
+          <button class="btn btn-ghost" onclick='openClient(${JSON.stringify(c.id)}, "history")'>See last plan</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Pull a one-line takeaway from a Claude brief (first sentence under "What's Working" or first non-header line)
+  function extractFirstInsight(brief) {
+    if (!brief) return '';
+    const lines = brief.split(/\n+/).map(l => l.trim()).filter(Boolean);
+    let inSection = false;
+    for (const ln of lines) {
+      if (/^#+\s*what'?s working/i.test(ln)) { inSection = true; continue; }
+      if (inSection && !ln.startsWith('#')) {
+        return ln.replace(/^[-*]\s*/, '').slice(0, 200);
+      }
+    }
+    // Fallback: first non-header line
+    for (const ln of lines) {
+      if (!ln.startsWith('#') && !ln.startsWith('-') && ln.length > 30) {
+        return ln.slice(0, 200);
+      }
+    }
+    return '';
+  }
+
+  async function renderDashboardStats() {
+    const el = document.getElementById('dashboard-stats');
+    el.innerHTML = '';
+    let postsRecent = 0, topScore = '—', topMeta = '', repostsQueued = 0, nextRepost = '';
+
+    try {
+      const since = new Date(Date.now() - 7 * 86400000).toISOString();
+      const recentPosts = await sbGet(`social_posts?published_at=gte.${since}&select=id&limit=200`);
+      postsRecent = recentPosts.length;
+    } catch (e) {}
+
+    try {
+      const top = await sbGet('performance_scores?order=composite_score.desc&limit=1&select=composite_score,post_id,social_posts(caption,published_at)');
+      if (top[0]) {
+        topScore = Math.round(Number(top[0].composite_score));
+        const cap = top[0].social_posts?.caption || '';
+        const dt = top[0].social_posts?.published_at
+          ? new Date(top[0].social_posts.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          : '';
+        topMeta = (cap.slice(0, 30) + (cap.length > 30 ? '…' : '')) + (dt ? ' · ' + dt : '');
+      }
+    } catch (e) {}
+
+    try {
+      const queued = await sbGet('repost_schedule?status=eq.queued&order=scheduled_for.asc&select=scheduled_for');
+      repostsQueued = queued.length;
+      if (queued[0]?.scheduled_for) {
+        nextRepost = 'Next: ' + new Date(queued[0].scheduled_for).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    } catch (e) {}
+
+    el.innerHTML = `
+      <div class="stat-box">
+        <div class="stat-lbl">Pulled this week</div>
+        <div class="stat-num">${postsRecent}</div>
+        <div class="stat-meta ${postsRecent > 0 ? 'up' : ''}">${postsRecent > 0 ? 'Direct from connected accounts' : 'No recent pulls'}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">Top score</div>
+        <div class="stat-num">${topScore}</div>
+        <div class="stat-meta">${esc(topMeta || 'Generate a brief to see proven posts')}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">Reposts queued</div>
+        <div class="stat-num">${repostsQueued}</div>
+        <div class="stat-meta">${esc(nextRepost || '—')}</div>
+      </div>
+    `;
+  }
+
+  function renderRailClients() {
+    const el = document.getElementById('rail-clients');
+    if (!allClients.length) {
+      el.innerHTML = '<div class="rail-item muted">No clients yet</div>';
+      return;
+    }
+    el.innerHTML = allClients.map(c => `
+      <div class="rail-item" data-client="${esc(c.id)}" onclick='openClient(${JSON.stringify(c.id)})'>
+        <span class="dot"></span>
+        <span>${esc(c.brand_name || c.name)}</span>
+      </div>
+    `).join('');
+  }
+
+  // ==================== STUDIO (per-client) ====================
+  async function openClient(clientId, subpage = 'planner') {
+    let c = allClients.find(x => x.id === clientId);
+    if (!c) {
+      try {
+        const res = await sbGet(`clients?id=eq.${clientId}&select=*`);
+        c = res[0];
+      } catch (e) { return toast('Client not found', 'error'); }
+    }
+    if (!c) return toast('Client not found', 'error');
+    goTo('studio', { client: c, subpage });
+  }
+
+  function renderStudio() {
+    if (!activeClient) return;
+    document.getElementById('studio-crumb-client').textContent = activeClient.brand_name || activeClient.name;
+    document.getElementById('studio-title').textContent =
+      ({
+        planner: 'Plan',
+        performance: 'Performance',
+        kb: 'Knowledge',
+        history: 'History',
+        ideation: 'Ideation',
+        reports: 'Reports'
+      })[activeSubpage] || 'Workspace';
+
+    // Update classic deep link
+    const deepLink = './index.html';
+    document.getElementById('open-classic-link').href = deepLink;
+
+    const body = document.getElementById('studio-body');
+    body.innerHTML = renderStudioSubpage(activeSubpage);
+  }
+
+  function renderStudioSubpage(sub) {
+    // Sub-page placeholders. Each links back to v1 for now.
+    const map = {
+      planner: {
+        title: 'Plan canvas — coming next',
+        body: 'The new plan generation experience will replace this placeholder. It will be a chat-like canvas where you and Claude shape the next two weeks together, instead of a single textarea + button.',
+        deeplink: 'planner'
+      },
+      performance: {
+        title: 'Performance pulse — coming next',
+        body: 'Insight-led performance view. One Claude-written paragraph at the top ("What\'s working"), three proof posts below, then a fold to dive into the full grid.',
+        deeplink: 'performance'
+      },
+      kb: {
+        title: 'Knowledge library — coming next',
+        body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.',
+        deeplink: 'kb'
+      },
+      history: {
+        title: 'Plan timeline — coming next',
+        body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.',
+        deeplink: 'history'
+      },
+      ideation: {
+        title: 'Ideation thread — coming next',
+        body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.',
+        deeplink: 'ideation'
+      },
+      reports: {
+        title: 'Monthly reports — coming next',
+        body: 'Auto-generated monthly recaps for the client. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.',
+        deeplink: 'reports'
+      }
+    };
+    const cfg = map[sub] || map.planner;
+
+    const subnav = ['planner', 'performance', 'kb', 'history', 'ideation', 'reports'].map(s => `
+      <button class="btn ${s === sub ? 'btn-skin' : 'btn-ghost'} btn-sm" onclick="setSubpage('${s}')">
+        ${({ planner: 'Plan', performance: 'Performance', kb: 'Knowledge', history: 'History', ideation: 'Ideation', reports: 'Reports' })[s]}
+      </button>
+    `).join('');
+
+    return `
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:24px;">${subnav}</div>
+      <div class="placeholder">
+        <h3>${esc(cfg.title)}</h3>
+        <p>${esc(cfg.body)}</p>
+        <div style="display:flex; gap:8px; justify-content:center">
+          <a class="btn btn-skin" href="./index.html">Open in classic</a>
+          <button class="btn btn-ghost" onclick="goTo('dashboard')">Back to studio</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function setSubpage(s) {
+    activeSubpage = s;
+    renderStudio();
+  }
+
+  // ==================== SETTINGS ====================
+  async function loadSettings() {
+    document.getElementById('set-api-key').value = getApiKey();
+    try {
+      const ag = await sbGet('agencies?limit=1&select=*');
+      if (ag[0]) {
+        document.getElementById('set-agency-name').value = ag[0].name || '';
+        document.getElementById('set-owner-email').value = ag[0].owner_email || '';
+      }
+    } catch (e) {}
+  }
+
+  function saveApiKey() {
+    const k = document.getElementById('set-api-key').value.trim();
+    if (!k) return toast('Enter a key', 'error');
+    setApiKey(k);
+    toast('API key saved', 'success');
+  }
+
+  async function saveAgencySettings() {
+    const name = document.getElementById('set-agency-name').value.trim();
+    const email = document.getElementById('set-owner-email').value.trim();
+    try {
+      const ag = await sbGet('agencies?limit=1&select=id');
+      if (ag[0]) {
+        await sbPatch('agencies?id=eq.' + ag[0].id, { name, owner_email: email });
+      } else {
+        await sbPost('agencies', [{ name, owner_email: email }]);
+      }
+      toast('Agency saved', 'success');
+    } catch (e) {
+      toast('Save failed: ' + e.message, 'error');
+    }
+  }
+
+  // ==================== COMMAND PALETTE ====================
+  let cmdSelected = 0;
+  let cmdResults = [];
+
+  function getCmdActions() {
+    const acts = [
+      { icon: '◇', label: 'Open dashboard', hint: '', run: () => goTo('dashboard') },
+      { icon: '⚙', label: 'Open settings', hint: '', run: () => goTo('settings') },
+      { icon: '↩', label: 'Switch to classic YAH', hint: '', run: () => location.href = './index.html' },
+    ];
+    allClients.forEach(c => {
+      const name = c.brand_name || c.name;
+      acts.push({ icon: '◆', label: 'Open ' + name, hint: 'studio', run: () => openClient(c.id) });
+      acts.push({ icon: '◆', label: 'Performance for ' + name, hint: 'studio', run: () => openClient(c.id, 'performance') });
+      acts.push({ icon: '◆', label: 'Plan history for ' + name, hint: 'studio', run: () => openClient(c.id, 'history') });
+    });
+    return acts;
+  }
+
+  function openCmd() {
+    document.getElementById('cmd-overlay').classList.add('open');
+    document.getElementById('cmd-input').value = '';
+    document.getElementById('cmd-input').focus();
+    renderCmdList('');
+  }
+  function closeCmd() {
+    document.getElementById('cmd-overlay').classList.remove('open');
+  }
+  function renderCmdList(query) {
+    const all = getCmdActions();
+    const q = query.trim().toLowerCase();
+    cmdResults = q
+      ? all.filter(a => a.label.toLowerCase().includes(q))
+      : all;
+    cmdSelected = 0;
+    const list = document.getElementById('cmd-list');
+    if (cmdResults.length === 0) {
+      list.innerHTML = '<div class="cmd-empty">No matching commands.</div>';
+      return;
+    }
+    list.innerHTML = cmdResults.map((a, i) => `
+      <div class="cmd-item ${i === cmdSelected ? 'selected' : ''}" onmouseenter="cmdSelected=${i}; cmdRefreshSel()" onclick="runCmdResult(${i})">
+        <div class="cmd-icon">${esc(a.icon)}</div>
+        <div class="cmd-label">${esc(a.label)}</div>
+        <div class="cmd-hint">${esc(a.hint)}</div>
+      </div>
+    `).join('');
+  }
+  function cmdRefreshSel() {
+    document.querySelectorAll('.cmd-item').forEach((el, i) => {
+      el.classList.toggle('selected', i === cmdSelected);
+    });
+  }
+  function runCmdResult(i) {
+    const a = cmdResults[i];
+    if (!a) return;
+    closeCmd();
+    a.run();
+  }
+
+  document.getElementById('cmd-input').addEventListener('input', e => renderCmdList(e.target.value));
+
+  // Global keys
+  document.addEventListener('keydown', e => {
+    // ⌘K / Ctrl+K
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const overlay = document.getElementById('cmd-overlay');
+      overlay.classList.contains('open') ? closeCmd() : openCmd();
+      return;
+    }
+    if (!document.getElementById('cmd-overlay').classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeCmd(); }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cmdSelected = Math.min(cmdSelected + 1, cmdResults.length - 1);
+      cmdRefreshSel();
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cmdSelected = Math.max(cmdSelected - 1, 0);
+      cmdRefreshSel();
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runCmdResult(cmdSelected);
+    }
+  });
+
+  // ==================== INIT ====================
+  function init() {
+    goTo('dashboard');
+  }
+
+  // Auto-skip auth if already authed this session
+  if (sessionStorage.getItem('yah_authed') === '1') {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+    init();
+  }
+</script>
+</body>
+</html>
