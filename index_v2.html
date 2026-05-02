@@ -1552,6 +1552,15 @@
           </div>
         </div>
         <div class="settings-card">
+          <h4>Theological foundation</h4>
+          <p>The theological literacy YAH applies when generating content for any client marked "Faith-based." Edit this as you notice gaps. Generic Christian content marketing language is shallow — this foundation is what gives Claude depth.</p>
+          <textarea id="set-theology-foundation" class="modal-textarea" style="min-height:200px; font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:12px; line-height:1.5" placeholder="Theological foundation document — markdown formatted."></textarea>
+          <div style="margin-top:10px; display:flex; align-items:center; gap:10px">
+            <button class="btn btn-primary btn-sm" onclick="saveTheologyFoundation()">Save foundation</button>
+            <span id="set-theology-status" style="color:var(--text-3); font-size:12px"></span>
+          </div>
+        </div>
+        <div class="settings-card">
           <h4>About this version</h4>
           <p>YAH! Studio v2 — the new shell. Sub-pages migrating one at a time. Use "Open in classic" on any client screen to access features that haven't moved yet.</p>
         </div>
@@ -1609,6 +1618,13 @@
         <div class="modal-field">
           <label>Static production model <span class="hint">— how carousels, quote posts, single images get made</span></label>
           <textarea class="modal-textarea" id="ac-static-model" placeholder="e.g. Carousels are multi-slide teaching, quote posts pull from a teaching, single images pair with longer captions"></textarea>
+        </div>
+        <div class="modal-field" style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--surface); border-radius:var(--r-md); margin-top:8px">
+          <input type="checkbox" id="ac-faith-based" style="margin-top:3px; width:auto" />
+          <label for="ac-faith-based" style="font-size:13px; color:var(--text-1); cursor:pointer">
+            <strong style="display:block; margin-bottom:2px">Faith-based content</strong>
+            <span style="color:var(--text-3); font-size:12px; font-weight:normal">When checked, Claude reads the theological foundation when generating plans. Use for clients whose content is rooted in Christian theology.</span>
+          </label>
         </div>
       </div>
       <div class="modal-foot">
@@ -2183,6 +2199,17 @@
           <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Static production model</label>
           <textarea id="prof-static-model" class="modal-textarea" style="min-height:100px" placeholder="e.g. Carousels are multi-slide teaching, quote posts pull from a teaching, single images pair with longer captions">${esc(c.static_production_model || '')}</textarea>
         </div>
+        <div class="settings-card">
+          <h4>Knowledge layers</h4>
+          <p>Optional context layers Claude reads when generating content for this client.</p>
+          <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--surface); border-radius:var(--r-md);">
+            <input type="checkbox" id="prof-faith-based" ${c.faith_based ? 'checked' : ''} style="margin-top:3px; width:auto" />
+            <label for="prof-faith-based" style="font-size:13px; color:var(--text-1); cursor:pointer">
+              <strong style="display:block; margin-bottom:2px">Faith-based content</strong>
+              <span style="color:var(--text-3); font-size:12px; font-weight:normal">When checked, Claude reads the theological foundation (editable in agency Settings) when generating plans for this client.</span>
+            </label>
+          </div>
+        </div>
         <div style="display:flex; gap:8px; align-items:center">
           <button class="btn btn-primary" id="prof-save-btn" onclick="saveClientProfile()">Save profile</button>
           <span id="prof-save-status" style="color:var(--text-3); font-size:12px"></span>
@@ -2202,7 +2229,8 @@
       brand_avoid: document.getElementById('prof-brand-avoid').value.trim() || null,
       pillars: pillarsRaw ? pillarsRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : null,
       reel_production_model: document.getElementById('prof-reel-model').value.trim() || null,
-      static_production_model: document.getElementById('prof-static-model').value.trim() || null
+      static_production_model: document.getElementById('prof-static-model').value.trim() || null,
+      faith_based: document.getElementById('prof-faith-based').checked
     };
     if (!updates.brand_name) return toast('Brand name is required', 'error');
 
@@ -2244,12 +2272,31 @@
     if (currentAgency) {
       document.getElementById('set-agency-name').value = currentAgency.name || '';
       document.getElementById('set-owner-email').value = currentAgency.owner_email || currentUser?.email || '';
+      const foundationEl = document.getElementById('set-theology-foundation');
+      if (foundationEl) foundationEl.value = currentAgency.theological_foundation || '';
     } else if (currentUser?.email) {
       document.getElementById('set-agency-name').value = '';
       document.getElementById('set-owner-email').value = currentUser.email;
     }
     document.getElementById('test-api-result').textContent = '';
     document.getElementById('test-api-result').className = 'test-result';
+  }
+
+  async function saveTheologyFoundation() {
+    if (!currentAgency?.id) return toast('No agency loaded', 'error');
+    const foundation = document.getElementById('set-theology-foundation').value.trim();
+    const statusEl = document.getElementById('set-theology-status');
+    statusEl.textContent = 'Saving…';
+    try {
+      await sbPatch(`agencies?id=eq.${currentAgency.id}`, { theological_foundation: foundation || null });
+      currentAgency.theological_foundation = foundation || null;
+      statusEl.textContent = 'Saved.';
+      toast('Theological foundation saved', 'success');
+      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    } catch (e) {
+      statusEl.textContent = 'Save failed.';
+      toast('Save failed: ' + e.message, 'error');
+    }
   }
 
   function saveApiKey() {
@@ -2735,6 +2782,22 @@
     if (client.brand_voice)  parts.push(`Brand voice: ${client.brand_voice}`);
     if (client.audience)     parts.push(`Audience: ${client.audience}`);
     if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
+
+    // Theological foundation — only injected if client is faith-based AND foundation is set
+    if (client.faith_based && currentAgency?.theological_foundation) {
+      parts.push(`
+═══════════════════════════════════════════
+THEOLOGICAL FOUNDATION FOR FAITH-BASED CONTENT
+═══════════════════════════════════════════
+
+This client produces faith-based content. Read the following theological foundation carefully — it informs how questions, hooks, talking points, and teaching content should be shaped. The goal: content that sounds like it was generated by someone who actually understands the gospel, not by an algorithm decorating self-help with Bible vocabulary.
+
+${currentAgency.theological_foundation}
+
+═══════════════════════════════════════════
+END THEOLOGICAL FOUNDATION
+═══════════════════════════════════════════`);
+    }
 
     // Pillars constraint — Claude must use ONLY these labels
     const pillars = Array.isArray(client.pillars) ? client.pillars.filter(Boolean) : [];
@@ -4027,6 +4090,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     document.getElementById('ac-pillars').value = '';
     document.getElementById('ac-reel-model').value = '';
     document.getElementById('ac-static-model').value = '';
+    document.getElementById('ac-faith-based').checked = false;
     const err = document.getElementById('add-client-error');
     err.textContent = ''; err.classList.remove('show');
     setTimeout(() => document.getElementById('ac-brand-name').focus(), 50);
@@ -4075,6 +4139,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       }
       if (reelModel) payload.reel_production_model = reelModel;
       if (staticModel) payload.static_production_model = staticModel;
+      payload.faith_based = document.getElementById('ac-faith-based').checked;
 
       const created = await sbPost('clients', [payload]);
       const newClient = Array.isArray(created) ? created[0] : created;
