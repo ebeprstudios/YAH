@@ -2805,6 +2805,11 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         ${topN.length === 0 ? '<p style="color:var(--text-3); font-size:13px;">No posts match this filter.</p>' :
           topN.map((p, i) => renderPerfCard(p, i + 1)).join('')}
       </div>
+
+      <div style="margin-top:32px; padding-top:20px; border-top:0.5px solid var(--bd-soft); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span style="color:var(--text-3); font-size:12px;">Need to start over? Erase all imported performance data for this client.</span>
+        <button class="btn btn-ghost btn-sm" onclick="erasePerformanceData()" style="border-color:var(--terracotta); color:var(--terracotta);">Erase all imports</button>
+      </div>
     `;
   }
 
@@ -2887,6 +2892,60 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     }
   }
 
+  async function erasePerformanceData() {
+    if (!activeClient) return;
+    const count = perfState.posts.length;
+    if (count === 0) return toast('Nothing to erase', 'error');
+
+    const clientName = activeClient.brand_name || activeClient.name;
+    const ok = confirm(
+      `Erase ALL ${count} imported posts and scores for ${clientName}?\n\n` +
+      `This deletes:\n` +
+      `  • All imported social posts\n` +
+      `  • All computed performance scores\n` +
+      `  • All repost schedules tied to those posts\n\n` +
+      `This cannot be undone. You can re-import CSVs afterward.\n\n` +
+      `Continue?`
+    );
+    if (!ok) return;
+
+    perfState.importing = true;
+    perfState.importMessage = 'Erasing imported data…';
+    perfState.importMessageKind = 'working';
+    refreshPerfScreen();
+
+    try {
+      // Order matters: scores reference posts, repost_schedule references posts
+      await fetch(`${SB_URL}/rest/v1/performance_scores?client_id=eq.${activeClient.id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      await fetch(`${SB_URL}/rest/v1/repost_schedule?client_id=eq.${activeClient.id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      await fetch(`${SB_URL}/rest/v1/social_posts?client_id=eq.${activeClient.id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+
+      perfState.posts = [];
+      perfState.scores = [];
+      perfState.formatFilter = 'all';
+      perfState.importing = false;
+      perfState.importMessage = `Erased ${count} post${count > 1 ? 's' : ''}. Ready for fresh imports.`;
+      perfState.importMessageKind = 'ok';
+      refreshPerfScreen();
+      toast('Performance data erased', 'success');
+    } catch (e) {
+      perfState.importing = false;
+      perfState.importMessage = 'Erase failed: ' + e.message;
+      perfState.importMessageKind = 'err';
+      refreshPerfScreen();
+      toast('Erase failed: ' + e.message, 'error');
+    }
+  }
+
   // ---- Performance: CSV import ----
   async function handlePerfFiles(fileList) {
     if (!activeClient) return toast('No client selected', 'error');
@@ -2900,6 +2959,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
     let totalInserted = 0;
     let totalSkipped = 0;
+    let totalCrossPlatformSkipped = 0;
     const errors = [];
 
     for (const file of files) {
@@ -2908,6 +2968,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         const result = await importMetricoolCsv(text, file.name);
         totalInserted += result.inserted;
         totalSkipped += result.skipped;
+        totalCrossPlatformSkipped += (result.crossPlatformSkipped || 0);
       } catch (e) {
         errors.push(`${file.name}: ${e.message}`);
       }
@@ -2925,6 +2986,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       const parts = [];
       if (totalInserted) parts.push(`${totalInserted} new post${totalInserted > 1 ? 's' : ''} imported`);
       if (totalSkipped) parts.push(`${totalSkipped} duplicate${totalSkipped > 1 ? 's' : ''} skipped`);
+      if (totalCrossPlatformSkipped) parts.push(`${totalCrossPlatformSkipped} cross-platform reel${totalCrossPlatformSkipped > 1 ? 's' : ''} deduplicated`);
       if (errors.length) parts.push(`${errors.length} file error${errors.length > 1 ? 's' : ''}`);
       perfState.importMessage = parts.join(' · ');
       perfState.importMessageKind = errors.length ? 'err' : 'ok';
@@ -2958,9 +3020,19 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
   function detectCsvFormat(headers) {
     const set = new Set(headers.map(h => h.toLowerCase().trim()));
+
+    // Reels format (FB Reels, IG Reels — same shape from Metricool)
+    if (set.has('reel link') && set.has('video views') && set.has('avg. time watched (seconds)')) return 'reels';
+
+    // Standard per-platform formats
     if (set.has('saved') && set.has('shares') && set.has('reach (organic)')) return 'instagram';
     if (set.has('shares') && set.has('reach') && set.has('reactions')) return 'facebook';
     if (set.has('plays') || (set.has('shares') && set.has('comments') && set.has('likes') && set.has('views'))) return 'tiktok';
+
+    // YouTube — Metricool's youtube export typically has these
+    if ((set.has('video') || set.has('title')) && (set.has('views') || set.has('plays')) && (set.has('subscribers gained') || set.has('watch time') || set.has('avg view duration'))) return 'youtube';
+    if (set.has('youtube') || (set.has('video') && set.has('views'))) return 'youtube';
+
     if (set.has('network') && set.has('impressions') && set.has('interactions')) return 'combined';
     return 'unknown';
   }
@@ -2993,12 +3065,30 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       return true;
     });
 
-    const existing = await sbGet(`social_posts?client_id=eq.${activeClient.id}&select=external_id,network&limit=2000`);
-    const existingKeys = new Set((existing || []).map(p => `${p.network}|${p.external_id}`));
+    // Pull existing posts for both ID-based and content-based dedup
+    const existing = await sbGet(`social_posts?client_id=eq.${activeClient.id}&select=external_id,network,caption_hash,post_type&limit=2000`);
+    const existingIdKeys = new Set((existing || []).map(p => `${p.network}|${p.external_id}`));
+    // Cross-platform content dedup: same caption_hash for a Reel cross-posted to FB and IG
+    const existingHashKeys = new Set(
+      (existing || [])
+        .filter(p => p.caption_hash && p.post_type === 'reel')
+        .map(p => p.caption_hash)
+    );
 
-    const toInsert = unique
-      .filter(p => p.external_id && !existingKeys.has(`${p.network}|${p.external_id}`))
-      .map(p => ({ ...p, client_id: activeClient.id }));
+    const toInsert = [];
+    let crossPlatformSkipped = 0;
+    for (const p of unique) {
+      if (!p.external_id) continue;
+      const idKey = `${p.network}|${p.external_id}`;
+      if (existingIdKeys.has(idKey)) continue;
+      // For reels: skip if same caption_hash already exists as a reel in another network
+      if (p.post_type === 'reel' && p.caption_hash && existingHashKeys.has(p.caption_hash)) {
+        crossPlatformSkipped++;
+        continue;
+      }
+      toInsert.push({ ...p, client_id: activeClient.id });
+      if (p.caption_hash && p.post_type === 'reel') existingHashKeys.add(p.caption_hash);
+    }
 
     let inserted = 0;
     if (toInsert.length) {
@@ -3009,7 +3099,13 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       }
     }
 
-    return { format, total: records.length, inserted, skipped: unique.length - toInsert.length };
+    return {
+      format,
+      total: records.length,
+      inserted,
+      skipped: unique.length - toInsert.length,
+      crossPlatformSkipped
+    };
   }
 
   function mapRowToPost(r, format) {
@@ -3017,17 +3113,77 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       const n = Number(String(v ?? '').replace(/,/g, '').trim());
       return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
     };
+    const numF = (v) => {
+      const n = Number(String(v ?? '').replace(/,/g, '').trim());
+      return Number.isFinite(n) ? Math.max(0, n) : 0;
+    };
     const trim = (s) => (s ?? '').trim();
+
+    if (format === 'reels') {
+      // Metricool Reels export — works for both FB Reels and IG Reels (same shape)
+      const url = trim(r['Reel Link']) || trim(r['URL']);
+      const isInstagram = /instagram\.com\/(?:reel|reels|p)\//i.test(url);
+      const network = isInstagram ? 'instagram' : 'facebook';
+      const externalId = isInstagram ? extractIgShortcode(url) : extractFbReelId(url);
+      if (!externalId) return null;
+      const caption = trim(r['Content']);
+      return {
+        external_id: externalId,
+        network,
+        post_type: 'reel',
+        caption: caption || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['Thumbnail URL']) || null,
+        published_at: parseDate(trim(r['Date'])),
+        views: num(r['Video Views']),
+        reach: num(r['Reach']) || num(r['Video Views']),
+        likes: num(r['Likes']),
+        shares: num(r['Shares']),
+        comments: num(r['Comments']),
+        impressions: num(r['Reach']) || num(r['Video Views']),
+        avg_watch_seconds: numF(r['Avg. time watched (Seconds)']) || null,
+        total_watch_seconds: numF(r['Video View time (Seconds)']) || null,
+        caption_hash: caption ? hashCaption(caption) : null,
+        source: 'csv'
+      };
+    }
+
+    if (format === 'youtube') {
+      const url = trim(r['URL']) || trim(r['Video URL']) || trim(r['Link']);
+      const externalId = extractYoutubeId(url) || trim(r['Video ID']) || trim(r['Id']);
+      if (!externalId) return null;
+      const caption = trim(r['Title']) || trim(r['Video']) || trim(r['Content']);
+      return {
+        external_id: externalId,
+        network: 'youtube',
+        post_type: 'video',
+        caption: caption || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['Thumbnail']) || trim(r['Thumbnail URL']) || trim(r['image']) || null,
+        published_at: parseDate(trim(r['Date']) || trim(r['Published']) || trim(r['Timestamp'])),
+        views: num(r['Views']) || num(r['Plays']),
+        reach: num(r['Views']) || num(r['Plays']),
+        likes: num(r['Likes']),
+        comments: num(r['Comments']),
+        shares: num(r['Shares']),
+        impressions: num(r['Views']) || num(r['Plays']),
+        avg_watch_seconds: numF(r['Avg view duration']) || numF(r['Avg. time watched (Seconds)']) || null,
+        total_watch_seconds: numF(r['Watch time']) || numF(r['Watch Time (hours)']) ? numF(r['Watch Time (hours)']) * 3600 : null,
+        caption_hash: caption ? hashCaption(caption) : null,
+        source: 'csv'
+      };
+    }
 
     if (format === 'instagram') {
       const url = trim(r['URL']);
       const externalId = trim(r['Id']) || extractIgShortcode(url);
       if (!externalId) return null;
+      const caption = trim(r['Content']);
       return {
         external_id: externalId,
         network: 'instagram',
         post_type: trim(r['type']) || null,
-        caption: trim(r['Content']) || null,
+        caption: caption || null,
         permalink: url || null,
         thumbnail_url: trim(r['image']) || null,
         published_at: parseDate(trim(r['Timestamp'])),
@@ -3038,6 +3194,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         shares: num(r['Shares']),
         comments: num(r['Comments']),
         impressions: num(r['Views']),
+        caption_hash: caption ? hashCaption(caption) : null,
         source: 'csv'
       };
     }
@@ -3046,11 +3203,12 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       const url = trim(r['URL']);
       const externalId = extractFacebookId(url) || trim(r['Id']);
       if (!externalId) return null;
+      const caption = trim(r['Content']) || trim(r['Text']);
       return {
         external_id: externalId,
         network: 'facebook',
         post_type: trim(r['type']) || null,
-        caption: trim(r['Content']) || trim(r['Text']) || null,
+        caption: caption || null,
         permalink: url || null,
         thumbnail_url: trim(r['image']) || null,
         published_at: parseDate(trim(r['Timestamp']) || trim(r['Date'])),
@@ -3059,6 +3217,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         shares: num(r['Shares']),
         comments: num(r['Comments']),
         impressions: num(r['Reach']),
+        caption_hash: caption ? hashCaption(caption) : null,
         source: 'csv'
       };
     }
@@ -3067,11 +3226,12 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       const url = trim(r['URL']);
       const externalId = extractTiktokId(url) || trim(r['Id']);
       if (!externalId) return null;
+      const caption = trim(r['Content']) || trim(r['Text']);
       return {
         external_id: externalId,
         network: 'tiktok',
         post_type: 'video',
-        caption: trim(r['Content']) || trim(r['Text']) || null,
+        caption: caption || null,
         permalink: url || null,
         thumbnail_url: trim(r['image']) || null,
         published_at: parseDate(trim(r['Timestamp']) || trim(r['Date'])),
@@ -3081,6 +3241,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         shares: num(r['Shares']),
         comments: num(r['Comments']),
         impressions: num(r['Views']) || num(r['Plays']),
+        caption_hash: caption ? hashCaption(caption) : null,
         source: 'csv'
       };
     }
@@ -3090,27 +3251,45 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       const network = trim(r['Network']).toLowerCase();
       const externalId =
         network === 'instagram' ? extractIgShortcode(url) :
-        network === 'facebook'  ? extractFacebookId(url) :
+        network === 'facebook'  ? (extractFbReelId(url) || extractFacebookId(url)) :
         network === 'tiktok'    ? extractTiktokId(url) :
         network === 'youtube'   ? extractYoutubeId(url) :
         url;
       if (!externalId) return null;
+      const caption = trim(r['Text']);
       return {
         external_id: externalId,
         network,
         post_type: null,
-        caption: trim(r['Text']) || null,
+        caption: caption || null,
         permalink: url || null,
         thumbnail_url: trim(r['Image']) || null,
         published_at: parseDate(trim(r['Date'])),
         impressions: num(r['Impressions']),
         reach: num(r['Impressions']),
         likes: num(r['Interactions']),
+        caption_hash: caption ? hashCaption(caption) : null,
         source: 'csv'
       };
     }
 
     return null;
+  }
+
+  // Caption hash for cross-platform dedup. Normalizes whitespace and casing.
+  function hashCaption(s) {
+    const normalized = String(s).toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 500);
+    let h = 5381;
+    for (let i = 0; i < normalized.length; i++) {
+      h = ((h << 5) + h) + normalized.charCodeAt(i);
+      h = h & h;
+    }
+    return 'h' + Math.abs(h).toString(36);
+  }
+
+  function extractFbReelId(url) {
+    const m = String(url).match(/facebook\.com\/reel\/(\d+)/i);
+    return m ? m[1] : null;
   }
 
   function parseDate(s) {
@@ -3155,6 +3334,18 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         const weighted = (saves * 5) + (shares * 3) + (comments * 1.5) + (likes * 1);
         const rawRate = (weighted / reach) * 100;
 
+        // Watch retention bonus for video formats. Adds 0–30% boost based on retention.
+        let retentionBonus = 1.0;
+        const isVideo = p.post_type === 'reel' || p.post_type === 'video' || p.network === 'tiktok' || p.network === 'youtube';
+        if (isVideo && p.avg_watch_seconds) {
+          // Assume short-form videos average 15-30s. Watch >12s = strong retention.
+          // Linearly scale: 0s→1.0×, 15s→1.3× (max boost cap).
+          const ws = Number(p.avg_watch_seconds);
+          if (Number.isFinite(ws) && ws > 0) {
+            retentionBonus = 1.0 + Math.min(0.3, ws / 50);
+          }
+        }
+
         let recency = 1.0;
         if (p.published_at) {
           const ageDays = (now - new Date(p.published_at).getTime()) / 86400000;
@@ -3163,7 +3354,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
           }
         }
 
-        const composite = Math.round(rawRate * recency * 100) / 100;
+        const composite = Math.round(rawRate * recency * retentionBonus * 100) / 100;
         const tier = composite >= 25 ? 'top'
                    : composite >= 10 ? 'strong'
                    : composite >= 3  ? 'mid'
