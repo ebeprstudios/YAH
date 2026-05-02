@@ -972,6 +972,7 @@
     font-size: 13px;
     line-height: 1.5;
     max-width: 85%;
+    white-space: pre-wrap;
   }
   .refine-msg.user {
     background: var(--skin);
@@ -999,6 +1000,209 @@
     color: var(--text-1);
   }
   .plan-refine-input:focus { outline: none; border-color: var(--olive); }
+
+  /* Performance tab */
+  .perf-empty {
+    background: white;
+    border: 0.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 36px 28px;
+    text-align: center;
+  }
+  .perf-empty h3 { margin: 0 0 6px; color: var(--text-1); font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
+  .perf-empty p { margin: 0 auto 18px; color: var(--text-2); font-size: 14px; line-height: 1.55; max-width: 480px; }
+
+  .perf-drop-zone {
+    background: white;
+    border: 1.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 32px 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 120ms, background 120ms;
+    margin-bottom: 20px;
+  }
+  .perf-drop-zone:hover, .perf-drop-zone.dragover {
+    border-color: var(--olive);
+    background: var(--flesh-pale);
+  }
+  .perf-drop-zone.dragover { border-style: solid; }
+  .perf-drop-zone h4 { margin: 0 0 4px; color: var(--text-1); font-size: 15px; font-weight: 700; }
+  .perf-drop-zone p { margin: 0; color: var(--text-3); font-size: 13px; }
+
+  .perf-import-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .perf-network-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--surface);
+    color: var(--text-2);
+    border: 0.5px solid var(--bd-soft);
+  }
+  .perf-network-badge.instagram { background: #FCE7F3; color: #831843; }
+  .perf-network-badge.facebook { background: #DBEAFE; color: #1E3A8A; }
+  .perf-network-badge.tiktok { background: #1F2A1A; color: var(--flesh); }
+  .perf-network-badge.youtube { background: #FEE2E2; color: #7F1D1D; }
+
+  .perf-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin: 16px 0 24px;
+  }
+  .perf-summary-box {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+  }
+  .perf-summary-lbl { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .perf-summary-num { color: var(--text-1); font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-top: 4px; }
+
+  .perf-section { margin-bottom: 28px; }
+  .perf-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .perf-section-head h3 {
+    margin: 0;
+    color: var(--text-1);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .perf-section-head .sub {
+    color: var(--text-3);
+    font-size: 12px;
+  }
+
+  .perf-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 10px;
+    transition: border-color 120ms;
+  }
+  .perf-card:hover { border-color: var(--olive); }
+  .perf-card-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    border: 0.5px solid var(--bd-soft);
+  }
+  .perf-card-body { min-width: 0; }
+  .perf-card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .perf-card-meta-date { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .perf-card-text {
+    color: var(--text-1);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 4px 0 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .perf-card-stats {
+    display: flex;
+    gap: 14px;
+    color: var(--text-3);
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  .perf-card-stats strong { color: var(--text-1); font-weight: 700; }
+  .perf-card-score {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .perf-card-score-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--olive);
+    letter-spacing: -0.3px;
+  }
+  .perf-card-score-lbl {
+    font-size: 10px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .perf-card-rank {
+    display: inline-block;
+    background: var(--skin);
+    color: var(--flesh);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--r-pill);
+  }
+
+  .perf-import-feedback {
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+  .perf-import-feedback.ok { background: var(--flesh-pale); color: var(--olive); border: 0.5px solid var(--flesh-dk); }
+  .perf-import-feedback.err { background: #F8DDD0; color: var(--terracotta); border: 0.5px solid #E8B8A0; }
+  .perf-import-feedback.working { background: var(--surface); color: var(--text-2); border: 0.5px solid var(--bd-soft); }
+
+  .perf-format-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .perf-format-tab {
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    border: 0.5px solid var(--bd-soft);
+    background: white;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .perf-format-tab.active {
+    background: var(--skin);
+    color: var(--flesh);
+    border-color: var(--skin);
+  }
+  .perf-format-tab:hover:not(.active) {
+    background: var(--surface);
+  }
 </style>
 </head>
 <body>
@@ -1743,8 +1947,11 @@
       return subnavWrap + renderPlannerContent();
     }
 
+    if (sub === 'performance') {
+      return subnavWrap + renderPerformanceContent();
+    }
+
     const map = {
-      performance: { title: 'Performance pulse — coming next', body: 'Insight-led performance view. One Claude-written paragraph at the top, three proof posts below, then a fold to dive into the full grid.' },
       kb: { title: 'Knowledge library — coming next', body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.' },
       history: { title: 'Plan timeline — coming next', body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.' },
       ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
@@ -2156,12 +2363,15 @@
     refreshPlannerScreen();
 
     try {
-      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf });
+      // Fetch top performers as proof corpus
+      const topPerformers = await fetchTopPerformers(activeClient.id, 15);
+      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers });
       planState.plan = result;
       planState.plan.created_label = 'Just now';
       planState.generating = false;
       refreshPlannerScreen();
-      toast('Plan ready', 'success');
+      const proofCount = topPerformers.length;
+      toast(proofCount > 0 ? `Plan ready · used ${proofCount} top performers as proof` : 'Plan ready', 'success');
     } catch (e) {
       planState.generating = false;
       refreshPlannerScreen();
@@ -2169,8 +2379,8 @@
     }
   }
 
-  async function callClaudeForPlan({ apiKey, client, brief, weekOf }) {
-    const systemPrompt = buildPlannerSystemPrompt(client);
+  async function callClaudeForPlan({ apiKey, client, brief, weekOf, topPerformers = [] }) {
+    const systemPrompt = buildPlannerSystemPrompt(client, topPerformers);
     const userPrompt = buildPlannerUserPrompt({ brief, weekOf });
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -2213,13 +2423,50 @@
     return parsed;
   }
 
-  function buildPlannerSystemPrompt(client) {
+  function buildPlannerSystemPrompt(client, topPerformers = []) {
     const parts = [];
     parts.push(`You are a senior content strategist generating a two-week social media plan for one client.`);
     parts.push(`Brand: ${client.brand_name || client.name}.`);
     if (client.brand_voice)  parts.push(`Brand voice: ${client.brand_voice}`);
     if (client.audience)     parts.push(`Audience: ${client.audience}`);
     if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
+
+    if (topPerformers && topPerformers.length > 0) {
+      const proofSection = ['', `═══════════════════════════════════════════`,
+                            `TOP-PERFORMING POSTS — USE AS PROOF OF WHAT WORKS`,
+                            `═══════════════════════════════════════════`,
+                            ``,
+                            `Below are this creator's actual top-performing posts from her connected accounts. These are the source of truth for what lands with her audience — voice, format, hook structure, topics, energy. Treat them as the gold standard.`,
+                            ``,
+                            `When generating the plan:`,
+                            `- Pattern-match new content to the voice and energy of these proven posts. NOT summaries of them — new posts that share their DNA.`,
+                            `- Weight format relevance: when planning a Reel, lean on insights from her top-performing Reels. Carousel? Top carousels. Same logic for static, video, story.`,
+                            `- Notice topic clusters that recur in top performers — those are probably resonance points worth revisiting from new angles.`,
+                            `- Notice hook structures that work — first 3 words, opening line patterns, question vs declaration. Apply the same DNA, not the same words.`,
+                            `- Do NOT copy these posts. Generate genuinely new content that shares their voice and instincts.`,
+                            ``,
+                            `THE PROOF CORPUS:`,
+                            ``];
+      topPerformers.forEach((p, i) => {
+        const network = (p.network || '').toUpperCase();
+        const fmt = normalizeFormat(p.post_type, p.network);
+        const fmtLabel = fmt ? formatLabel(fmt) : '';
+        const stats = [];
+        if (p.saves)    stats.push(`${p.saves} saves`);
+        if (p.shares)   stats.push(`${p.shares} shares`);
+        if (p.comments) stats.push(`${p.comments} comments`);
+        if (p.likes)    stats.push(`${p.likes} likes`);
+        if (p.reach)    stats.push(`${p.reach.toLocaleString()} reach`);
+        const date = p.published_at ? new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+        proofSection.push(`#${i + 1} — ${network}${fmtLabel ? ' · ' + fmtLabel : ''} · score ${p._score}${date ? ' · ' + date : ''}`);
+        if (stats.length) proofSection.push(`Performance: ${stats.join(' / ')}`);
+        proofSection.push(`Caption: "${(p.caption || '').slice(0, 600)}${(p.caption || '').length > 600 ? '…' : ''}"`);
+        proofSection.push('');
+      });
+      parts.push(proofSection.join('\n'));
+    }
+
     parts.push(`
 Structure: Week 1 is RECORDING (the client films / produces). Week 2 is EDITING. Plan covers 14 distinct posts (one per day) split 7/7 across the two weeks.
 Variety: balance pillars, post types (Reel, Carousel, Quote post, Static post, Story series), and tones across the plan.
@@ -2273,7 +2520,8 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
     refreshPlannerScreen();
 
     try {
-      const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages });
+      const topPerformers = await fetchTopPerformers(activeClient.id, 15);
+      const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages, topPerformers });
       // Replace plan
       planState.plan = { ...planState.plan, ...updated };
       planState.plan.days = (updated.days || planState.plan.days).map((d, idx) => ({
@@ -2281,7 +2529,17 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
         id: d.id || `day-${idx}-${Math.random().toString(36).slice(2, 8)}`,
         day_number: d.day_number ?? idx + 1
       }));
-      planState.refineMessages.push({ role: 'assistant', content: updated.refine_summary || 'Updated the plan.' });
+
+      // Build assistant reply: summary + bullet list of changes
+      const summary = updated.refine_summary || 'Updated the plan.';
+      const changes = Array.isArray(updated.changes) ? updated.changes.filter(Boolean) : [];
+      const replyParts = [summary];
+      if (changes.length) {
+        replyParts.push('Changes:');
+        changes.forEach(c => replyParts.push('• ' + c));
+      }
+      planState.refineMessages.push({ role: 'assistant', content: replyParts.join('\n') });
+
       planState.refining = false;
       refreshPlannerScreen();
     } catch (e) {
@@ -2291,19 +2549,54 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
     }
   }
 
-  async function callClaudeForRefine({ apiKey, client, plan, history }) {
-    const systemPrompt = buildPlannerSystemPrompt(client) + `\n\nThe user already has a generated plan and is asking for revisions. Apply the requested changes to the plan and return the FULL UPDATED PLAN as JSON, plus a short "refine_summary" field at the top describing what you changed.\n\nKeep the same JSON shape as before. Add a "refine_summary" string at the top of the object (1-2 sentences max).`;
+  async function callClaudeForRefine({ apiKey, client, plan, history, topPerformers = [] }) {
+    const lastMsg = history[history.length - 1].content;
+    const priorTurns = history.slice(0, -1);
+
+    const systemPrompt = `${buildPlannerSystemPrompt(client, topPerformers)}
+
+REFINE MODE — STRICT BEHAVIOR:
+
+You are NOT regenerating the plan. You are surgically applying ONE specific change a user asked for.
+
+Rules:
+1. Re-read the user's request literally. Apply EXACTLY what they asked, nothing more.
+2. Do NOT "improve" other posts. Do NOT swap pillars or post types or rewrite hooks unless the user explicitly told you to.
+3. If the request is ambiguous, make the smallest reasonable interpretation, then mention the ambiguity in refine_summary.
+4. Preserve every post the user did NOT ask you to change — keep their day_label, post_type, pillar, title, hook, body, visual_direction, cta, and notes EXACTLY as they were.
+5. Return the FULL updated plan as JSON in the same shape as before.
+6. Add two new fields at the top of the JSON:
+   - "refine_summary": one sentence explaining what you changed (e.g. "Switched Wed Week 1 from Reel to Carousel and updated the visual direction.")
+   - "changes": an array of specific strings describing each change (e.g. ["Wed Week 1: Reel → Carousel", "Wed Week 1: visual direction updated for carousel format"])
+7. If the user asked for something outside scope (e.g. "delete this client") — do NOT do it. Reply with refine_summary explaining you can't do that here, and return the plan unchanged.
+
+Output format: ONLY JSON. No preamble. No code fences. No closing remarks.`;
 
     const planJson = JSON.stringify({
       week_of: plan.week_of,
       planning_note: plan.planning_note,
+      week1_label: plan.week1_label,
+      week2_label: plan.week2_label,
       days: plan.days
     }, null, 2);
 
-    const conv = history.slice(0, -1).map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
-    const lastMsg = history[history.length - 1].content;
+    const conversationContext = priorTurns.length
+      ? `EARLIER IN THIS REFINE CONVERSATION (for context only — do not re-apply these):\n${priorTurns.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}\n\n`
+      : '';
 
-    const userPrompt = `CURRENT PLAN (JSON):\n${planJson}\n\nCONVERSATION SO FAR:\n${conv}\n\nLATEST USER REQUEST:\n${lastMsg}\n\nReturn the full updated plan as JSON, including the refine_summary field at top.`;
+    const userPrompt = `CURRENT PLAN (this is the source of truth — preserve everything you don't change):
+
+${planJson}
+
+${conversationContext}═══════════════════════════════════════════
+THE ONE CHANGE TO APPLY RIGHT NOW:
+═══════════════════════════════════════════
+
+${lastMsg}
+
+═══════════════════════════════════════════
+
+Apply ONLY that change. Return the full updated plan as JSON with refine_summary and changes fields at the top.`;
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -2389,7 +2682,18 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
     }
   }
 
-  // Reset plan state when switching clients
+  // ---- Performance tab state ----
+  const perfState = {
+    posts: [],
+    scores: [],
+    loaded: false,
+    importing: false,
+    importMessage: null,
+    importMessageKind: null,
+    formatFilter: 'all'
+  };
+
+  // Reset plan AND perf state when switching clients
   const _origOpenClient = openClient;
   openClient = async function(clientId, subpage = 'profile') {
     if (clientId !== activeClient?.id) {
@@ -2399,9 +2703,521 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       planState.showBalance = false;
       planState.refineMessages = [];
       planState.generating = false;
+      perfState.posts = [];
+      perfState.scores = [];
+      perfState.loaded = false;
+      perfState.formatFilter = 'all';
+      perfState.importMessage = null;
     }
     return _origOpenClient.call(this, clientId, subpage);
   };
+
+  // ---- Performance: render ----
+  function renderPerformanceContent() {
+    if (!activeClient) {
+      return `<div class="placeholder"><h3>No client selected</h3><p>Pick a client from the rail.</p></div>`;
+    }
+    if (!perfState.loaded) {
+      loadPerformanceData();
+      return `<div class="perf-empty"><h3>Loading performance data…</h3><p>Fetching imported posts and scores.</p></div>`;
+    }
+
+    const dropZone = `
+      <div class="perf-drop-zone"
+           id="perf-drop-zone"
+           onclick="document.getElementById('perf-csv-input').click()"
+           ondragover="event.preventDefault(); this.classList.add('dragover');"
+           ondragleave="this.classList.remove('dragover');"
+           ondrop="event.preventDefault(); this.classList.remove('dragover'); handlePerfFiles(event.dataTransfer.files);">
+        <h4>Drop Metricool CSVs here</h4>
+        <p>One per platform (Instagram, Facebook, TikTok, YouTube), or the combined Brand Summary export. We'll auto-detect format and import.</p>
+        <input type="file" id="perf-csv-input" accept=".csv" multiple style="display:none" onchange="handlePerfFiles(event.target.files)">
+      </div>
+      ${perfState.importMessage ? `<div class="perf-import-feedback ${perfState.importMessageKind}">${esc(perfState.importMessage)}</div>` : ''}
+    `;
+
+    if (perfState.posts.length === 0) {
+      return dropZone + `
+        <div class="perf-empty" style="margin-top:24px">
+          <h3>No performance data yet</h3>
+          <p>Once you import a Metricool CSV, your top-performing posts will surface here. The plan generator will use them as proof of what works for ${esc(activeClient.brand_name || activeClient.name)}.</p>
+        </div>
+      `;
+    }
+
+    return dropZone + renderPerformanceLoaded();
+  }
+
+  function renderPerformanceLoaded() {
+    const posts = perfState.posts;
+    const scores = perfState.scores;
+    const scoreById = new Map(scores.map(s => [s.post_id, s]));
+
+    const totalPosts = posts.length;
+    const networks = new Set(posts.map(p => p.network));
+    const totalReach = posts.reduce((sum, p) => sum + (p.reach || p.impressions || 0), 0);
+    const avgScore = scores.length
+      ? Math.round(scores.reduce((s, x) => s + Number(x.composite_score || 0), 0) / scores.length * 10) / 10
+      : 0;
+
+    const filteredPosts = perfState.formatFilter === 'all'
+      ? posts
+      : posts.filter(p => normalizeFormat(p.post_type, p.network) === perfState.formatFilter);
+
+    const enriched = filteredPosts
+      .map(p => ({ ...p, _score: Number(scoreById.get(p.id)?.composite_score || 0) }))
+      .sort((a, b) => b._score - a._score);
+
+    const topN = enriched.slice(0, 15);
+
+    const allFormats = new Set(posts.map(p => normalizeFormat(p.post_type, p.network)).filter(Boolean));
+    const formatTabs = ['all', ...Array.from(allFormats)].map(f => `
+      <button class="perf-format-tab ${perfState.formatFilter === f ? 'active' : ''}"
+              onclick="setPerfFormatFilter('${esc(f)}')">${formatLabel(f)}</button>
+    `).join('');
+
+    return `
+      <div class="perf-summary">
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Posts imported</div>
+          <div class="perf-summary-num">${totalPosts}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Networks covered</div>
+          <div class="perf-summary-num">${networks.size}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Total reach</div>
+          <div class="perf-summary-num">${totalReach.toLocaleString()}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Avg composite score</div>
+          <div class="perf-summary-num">${avgScore}</div>
+        </div>
+      </div>
+
+      <div class="perf-section">
+        <div class="perf-section-head">
+          <h3>Top performers</h3>
+          <span class="sub">These shape new plans — Claude reads them as proof of what works.</span>
+        </div>
+        <div class="perf-format-row">${formatTabs}</div>
+        ${topN.length === 0 ? '<p style="color:var(--text-3); font-size:13px;">No posts match this filter.</p>' :
+          topN.map((p, i) => renderPerfCard(p, i + 1)).join('')}
+      </div>
+    `;
+  }
+
+  function renderPerfCard(p, rank) {
+    const date = p.published_at
+      ? new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—';
+    const network = (p.network || '').toLowerCase();
+    const text = (p.caption || '').slice(0, 200);
+    const stats = [];
+    if (p.saves)    stats.push(`<span><strong>${p.saves}</strong> saves</span>`);
+    if (p.shares)   stats.push(`<span><strong>${p.shares}</strong> shares</span>`);
+    if (p.comments) stats.push(`<span><strong>${p.comments}</strong> comments</span>`);
+    if (p.likes)    stats.push(`<span><strong>${p.likes}</strong> likes</span>`);
+    if (p.reach || p.impressions) stats.push(`<span><strong>${(p.reach || p.impressions).toLocaleString()}</strong> reach</span>`);
+
+    return `
+      <div class="perf-card">
+        <div class="perf-card-thumb" style="${p.thumbnail_url ? `background-image: url('${esc(p.thumbnail_url)}')` : ''}"></div>
+        <div class="perf-card-body">
+          <div class="perf-card-meta">
+            <span class="perf-card-rank">#${rank}</span>
+            <span class="perf-network-badge ${esc(network)}">${esc(network)}</span>
+            ${p.post_type ? `<span class="perf-card-meta-date">${esc(formatLabel(normalizeFormat(p.post_type, network)))}</span>` : ''}
+            <span class="perf-card-meta-date">${esc(date)}</span>
+          </div>
+          <div class="perf-card-text">${esc(text)}${p.caption?.length > 200 ? '…' : ''}</div>
+          <div class="perf-card-stats">${stats.join('')}</div>
+        </div>
+        <div class="perf-card-score">
+          <div class="perf-card-score-num">${Math.round(p._score * 10) / 10}</div>
+          <div class="perf-card-score-lbl">score</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function setPerfFormatFilter(f) {
+    perfState.formatFilter = f;
+    refreshPerfScreen();
+  }
+
+  function refreshPerfScreen() {
+    if (currentScreen !== 'studio' || activeSubpage !== 'performance') return;
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage('performance');
+  }
+
+  function normalizeFormat(postType, network) {
+    if (!postType) return null;
+    const t = String(postType).toLowerCase();
+    if (t.includes('reel'))     return 'reel';
+    if (t.includes('carousel') || t.includes('album')) return 'carousel';
+    if (t.includes('story'))    return 'story';
+    if (t.includes('video') && network === 'youtube') return 'video';
+    if (t.includes('video'))    return 'video';
+    if (t.includes('image') || t === 'feed_image' || t === 'feed_photo' || t === 'photo') return 'static';
+    return t;
+  }
+
+  function formatLabel(f) {
+    return ({ all: 'All formats', reel: 'Reels', carousel: 'Carousels', story: 'Stories', video: 'Videos', static: 'Static' })[f] || f;
+  }
+
+  async function loadPerformanceData() {
+    if (!activeClient) return;
+    try {
+      const [posts, scores] = await Promise.all([
+        sbGet(`social_posts?client_id=eq.${activeClient.id}&order=published_at.desc&select=*&limit=500`),
+        sbGet(`performance_scores?client_id=eq.${activeClient.id}&select=*&limit=500`)
+      ]);
+      perfState.posts = posts || [];
+      perfState.scores = scores || [];
+      perfState.loaded = true;
+      refreshPerfScreen();
+    } catch (e) {
+      perfState.loaded = true;
+      perfState.importMessage = 'Could not load performance data: ' + e.message;
+      perfState.importMessageKind = 'err';
+      refreshPerfScreen();
+    }
+  }
+
+  // ---- Performance: CSV import ----
+  async function handlePerfFiles(fileList) {
+    if (!activeClient) return toast('No client selected', 'error');
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    perfState.importing = true;
+    perfState.importMessage = `Reading ${files.length} file${files.length > 1 ? 's' : ''}…`;
+    perfState.importMessageKind = 'working';
+    refreshPerfScreen();
+
+    let totalInserted = 0;
+    let totalSkipped = 0;
+    const errors = [];
+
+    for (const file of files) {
+      try {
+        const text = await file.text();
+        const result = await importMetricoolCsv(text, file.name);
+        totalInserted += result.inserted;
+        totalSkipped += result.skipped;
+      } catch (e) {
+        errors.push(`${file.name}: ${e.message}`);
+      }
+    }
+
+    if (totalInserted > 0) {
+      await recomputeAllScores(activeClient.id);
+    }
+
+    perfState.importing = false;
+    if (errors.length && totalInserted === 0) {
+      perfState.importMessage = 'Import failed: ' + errors.join(' · ');
+      perfState.importMessageKind = 'err';
+    } else {
+      const parts = [];
+      if (totalInserted) parts.push(`${totalInserted} new post${totalInserted > 1 ? 's' : ''} imported`);
+      if (totalSkipped) parts.push(`${totalSkipped} duplicate${totalSkipped > 1 ? 's' : ''} skipped`);
+      if (errors.length) parts.push(`${errors.length} file error${errors.length > 1 ? 's' : ''}`);
+      perfState.importMessage = parts.join(' · ');
+      perfState.importMessageKind = errors.length ? 'err' : 'ok';
+    }
+
+    await loadPerformanceData();
+  }
+
+  function parseCsv(text) {
+    const rows = [];
+    let i = 0, field = '', row = [], inQuotes = false;
+    while (i < text.length) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { row.push(field); field = ''; i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { row.push(field); rows.push(row); field = ''; row = []; i++; continue; }
+      field += c; i++;
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    if (rows[0] && rows[0][0]) rows[0][0] = rows[0][0].replace(/^\uFEFF/, '');
+    return rows.filter(r => r.length > 1 || (r.length === 1 && r[0].trim()));
+  }
+
+  function detectCsvFormat(headers) {
+    const set = new Set(headers.map(h => h.toLowerCase().trim()));
+    if (set.has('saved') && set.has('shares') && set.has('reach (organic)')) return 'instagram';
+    if (set.has('shares') && set.has('reach') && set.has('reactions')) return 'facebook';
+    if (set.has('plays') || (set.has('shares') && set.has('comments') && set.has('likes') && set.has('views'))) return 'tiktok';
+    if (set.has('network') && set.has('impressions') && set.has('interactions')) return 'combined';
+    return 'unknown';
+  }
+
+  async function importMetricoolCsv(csvText, fileName) {
+    const rows = parseCsv(csvText);
+    if (rows.length < 2) throw new Error('Empty CSV');
+    const headers = rows[0].map(h => h.trim());
+    const format = detectCsvFormat(headers);
+
+    if (format === 'unknown') {
+      throw new Error(`Could not detect format from columns: ${headers.slice(0, 5).join(', ')}…`);
+    }
+
+    const dataRows = rows.slice(1).filter(r => r.some(c => c && c.trim()));
+    const records = dataRows.map(r => {
+      const obj = {};
+      headers.forEach((h, idx) => obj[h] = (r[idx] ?? '').trim());
+      return obj;
+    });
+
+    const mapped = records.map(r => mapRowToPost(r, format)).filter(Boolean);
+    if (mapped.length === 0) throw new Error('No valid rows after mapping');
+
+    const seen = new Set();
+    const unique = mapped.filter(p => {
+      const key = `${p.network}|${p.external_id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const existing = await sbGet(`social_posts?client_id=eq.${activeClient.id}&select=external_id,network&limit=2000`);
+    const existingKeys = new Set((existing || []).map(p => `${p.network}|${p.external_id}`));
+
+    const toInsert = unique
+      .filter(p => p.external_id && !existingKeys.has(`${p.network}|${p.external_id}`))
+      .map(p => ({ ...p, client_id: activeClient.id }));
+
+    let inserted = 0;
+    if (toInsert.length) {
+      for (let i = 0; i < toInsert.length; i += 100) {
+        const chunk = toInsert.slice(i, i + 100);
+        await sbPost('social_posts', chunk);
+        inserted += chunk.length;
+      }
+    }
+
+    return { format, total: records.length, inserted, skipped: unique.length - toInsert.length };
+  }
+
+  function mapRowToPost(r, format) {
+    const num = (v) => {
+      const n = Number(String(v ?? '').replace(/,/g, '').trim());
+      return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+    };
+    const trim = (s) => (s ?? '').trim();
+
+    if (format === 'instagram') {
+      const url = trim(r['URL']);
+      const externalId = trim(r['Id']) || extractIgShortcode(url);
+      if (!externalId) return null;
+      return {
+        external_id: externalId,
+        network: 'instagram',
+        post_type: trim(r['type']) || null,
+        caption: trim(r['Content']) || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['image']) || null,
+        published_at: parseDate(trim(r['Timestamp'])),
+        views: num(r['Views']),
+        reach: num(r['Reach (Organic)']) || num(r['Views']),
+        likes: num(r['Likes']),
+        saves: num(r['Saved']),
+        shares: num(r['Shares']),
+        comments: num(r['Comments']),
+        impressions: num(r['Views']),
+        source: 'csv'
+      };
+    }
+
+    if (format === 'facebook') {
+      const url = trim(r['URL']);
+      const externalId = extractFacebookId(url) || trim(r['Id']);
+      if (!externalId) return null;
+      return {
+        external_id: externalId,
+        network: 'facebook',
+        post_type: trim(r['type']) || null,
+        caption: trim(r['Content']) || trim(r['Text']) || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['image']) || null,
+        published_at: parseDate(trim(r['Timestamp']) || trim(r['Date'])),
+        reach: num(r['Reach']),
+        likes: num(r['Reactions']) || num(r['Likes']),
+        shares: num(r['Shares']),
+        comments: num(r['Comments']),
+        impressions: num(r['Reach']),
+        source: 'csv'
+      };
+    }
+
+    if (format === 'tiktok') {
+      const url = trim(r['URL']);
+      const externalId = extractTiktokId(url) || trim(r['Id']);
+      if (!externalId) return null;
+      return {
+        external_id: externalId,
+        network: 'tiktok',
+        post_type: 'video',
+        caption: trim(r['Content']) || trim(r['Text']) || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['image']) || null,
+        published_at: parseDate(trim(r['Timestamp']) || trim(r['Date'])),
+        views: num(r['Views']) || num(r['Plays']),
+        reach: num(r['Views']) || num(r['Plays']),
+        likes: num(r['Likes']),
+        shares: num(r['Shares']),
+        comments: num(r['Comments']),
+        impressions: num(r['Views']) || num(r['Plays']),
+        source: 'csv'
+      };
+    }
+
+    if (format === 'combined') {
+      const url = trim(r['URL']);
+      const network = trim(r['Network']).toLowerCase();
+      const externalId =
+        network === 'instagram' ? extractIgShortcode(url) :
+        network === 'facebook'  ? extractFacebookId(url) :
+        network === 'tiktok'    ? extractTiktokId(url) :
+        network === 'youtube'   ? extractYoutubeId(url) :
+        url;
+      if (!externalId) return null;
+      return {
+        external_id: externalId,
+        network,
+        post_type: null,
+        caption: trim(r['Text']) || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['Image']) || null,
+        published_at: parseDate(trim(r['Date'])),
+        impressions: num(r['Impressions']),
+        reach: num(r['Impressions']),
+        likes: num(r['Interactions']),
+        source: 'csv'
+      };
+    }
+
+    return null;
+  }
+
+  function parseDate(s) {
+    if (!s) return null;
+    const cleaned = s.replace(' ', 'T');
+    const d = new Date(cleaned);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  }
+
+  function extractIgShortcode(url) {
+    const m = String(url).match(/instagram\.com\/(?:p|reel|reels)\/([\w-]+)/i);
+    return m ? m[1] : null;
+  }
+  function extractFacebookId(url) {
+    let m = String(url).match(/facebook\.com\/[^/]+\/posts\/(\d+)/i);
+    if (m) return m[1];
+    m = String(url).match(/facebook\.com\/.*\/(\d{10,})/);
+    return m ? m[1] : null;
+  }
+  function extractTiktokId(url) {
+    const m = String(url).match(/tiktok\.com\/[^/]+\/video\/(\d+)/i);
+    return m ? m[1] : null;
+  }
+  function extractYoutubeId(url) {
+    const m = String(url).match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/i);
+    return m ? m[1] : null;
+  }
+
+  async function recomputeAllScores(clientId) {
+    try {
+      const posts = await sbGet(`social_posts?client_id=eq.${clientId}&select=*&limit=2000`);
+      if (!posts || posts.length === 0) return;
+
+      const now = Date.now();
+      const scoreRows = posts.map(p => {
+        const reach = Math.max(1, p.reach || p.impressions || 0);
+        const saves = p.saves || 0;
+        const shares = p.shares || 0;
+        const comments = p.comments || 0;
+        const likes = p.likes || 0;
+
+        const weighted = (saves * 5) + (shares * 3) + (comments * 1.5) + (likes * 1);
+        const rawRate = (weighted / reach) * 100;
+
+        let recency = 1.0;
+        if (p.published_at) {
+          const ageDays = (now - new Date(p.published_at).getTime()) / 86400000;
+          if (ageDays > 30) {
+            recency = Math.max(0.6, 1.0 - ((ageDays - 30) / 150) * 0.4);
+          }
+        }
+
+        const composite = Math.round(rawRate * recency * 100) / 100;
+        const tier = composite >= 25 ? 'top'
+                   : composite >= 10 ? 'strong'
+                   : composite >= 3  ? 'mid'
+                   :                   'low';
+
+        return {
+          post_id: p.id,
+          client_id: clientId,
+          composite_score: composite,
+          reach_percentile: null,
+          save_rate: saves > 0 ? Math.round((saves / reach) * 10000) / 100 : 0,
+          share_rate: shares > 0 ? Math.round((shares / reach) * 10000) / 100 : 0,
+          engagement_rate: Math.round(((saves + shares + comments + likes) / reach) * 10000) / 100,
+          tier
+        };
+      });
+
+      await fetch(`${SB_URL}/rest/v1/performance_scores?client_id=eq.${clientId}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      for (let i = 0; i < scoreRows.length; i += 100) {
+        await sbPost('performance_scores', scoreRows.slice(i, i + 100));
+      }
+    } catch (e) {
+      console.error('Score recompute failed:', e);
+    }
+  }
+
+  // Fetch top performers for the planner
+  async function fetchTopPerformers(clientId, limit = 15) {
+    try {
+      const scores = await sbGet(`performance_scores?client_id=eq.${clientId}&order=composite_score.desc&limit=${limit}&select=post_id,composite_score,save_rate,share_rate,engagement_rate,tier`);
+      if (!scores || scores.length === 0) return [];
+
+      const ids = scores.map(s => s.post_id).filter(Boolean);
+      if (ids.length === 0) return [];
+
+      const idList = ids.map(i => `"${i}"`).join(',');
+      const posts = await sbGet(`social_posts?id=in.(${idList})&select=*`);
+
+      const byId = new Map((posts || []).map(p => [p.id, p]));
+      return scores
+        .map(s => {
+          const post = byId.get(s.post_id);
+          if (!post) return null;
+          return { ...post, _score: s.composite_score, _tier: s.tier };
+        })
+        .filter(Boolean);
+    } catch (e) {
+      console.warn('fetchTopPerformers failed:', e);
+      return [];
+    }
+  }
 
   // Add Client modal
   function openAddClient() {
