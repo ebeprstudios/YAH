@@ -1131,6 +1131,28 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-wrap;
+  }
+  .perf-card.expanded .perf-card-text {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+  .perf-card-toggle {
+    background: none;
+    border: none;
+    color: var(--olive);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .perf-card-toggle:hover { text-decoration: underline; }
+  .perf-card.expanded {
+    grid-template-columns: 80px 1fr auto;
   }
   .perf-card-stats {
     display: flex;
@@ -2461,7 +2483,7 @@
 
         proofSection.push(`#${i + 1} — ${network}${fmtLabel ? ' · ' + fmtLabel : ''} · score ${p._score}${date ? ' · ' + date : ''}`);
         if (stats.length) proofSection.push(`Performance: ${stats.join(' / ')}`);
-        proofSection.push(`Caption: "${(p.caption || '').slice(0, 600)}${(p.caption || '').length > 600 ? '…' : ''}"`);
+        proofSection.push(`Caption: "${p.caption || ''}"`);
         proofSection.push('');
       });
       parts.push(proofSection.join('\n'));
@@ -2690,7 +2712,8 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     importing: false,
     importMessage: null,
     importMessageKind: null,
-    formatFilter: 'all'
+    formatFilter: 'all',
+    expandedPostId: null
   };
 
   // Reset plan AND perf state when switching clients
@@ -2708,6 +2731,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       perfState.loaded = false;
       perfState.formatFilter = 'all';
       perfState.importMessage = null;
+      perfState.expandedPostId = null;
     }
     return _origOpenClient.call(this, clientId, subpage);
   };
@@ -2818,7 +2842,9 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       ? new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       : '—';
     const network = (p.network || '').toLowerCase();
-    const text = (p.caption || '').slice(0, 200);
+    const fullCaption = p.caption || '';
+    const isExpanded = perfState.expandedPostId === p.id;
+    const isLong = fullCaption.length > 200;
     const stats = [];
     if (p.saves)    stats.push(`<span><strong>${p.saves}</strong> saves</span>`);
     if (p.shares)   stats.push(`<span><strong>${p.shares}</strong> shares</span>`);
@@ -2835,8 +2861,10 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       return `<span class="perf-network-badge ${esc(nLower)}">${esc(nLower)}</span>`;
     }).join('');
 
+    const idAttr = JSON.stringify(p.id);
+
     return `
-      <div class="perf-card">
+      <div class="perf-card ${isExpanded ? 'expanded' : ''}">
         <div class="perf-card-thumb" style="${p.thumbnail_url ? `background-image: url('${esc(p.thumbnail_url)}')` : ''}"></div>
         <div class="perf-card-body">
           <div class="perf-card-meta">
@@ -2844,9 +2872,11 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
             ${networkBadges}
             ${p.post_type ? `<span class="perf-card-meta-date">${esc(formatLabel(normalizeFormat(p.post_type, network)))}</span>` : ''}
             <span class="perf-card-meta-date">${esc(date)}</span>
+            ${p.permalink ? `<a href="${esc(p.permalink)}" target="_blank" rel="noopener" class="perf-card-meta-date" style="color:var(--olive); text-decoration:none;">View original ↗</a>` : ''}
           </div>
-          <div class="perf-card-text">${esc(text)}${p.caption?.length > 200 ? '…' : ''}</div>
-          <div class="perf-card-stats">${stats.join('')}</div>
+          <div class="perf-card-text">${esc(fullCaption)}</div>
+          ${isLong ? `<button class="perf-card-toggle" onclick='togglePerfCardExpand(${idAttr})'>${isExpanded ? '— Show less' : '+ Show full caption'}</button>` : ''}
+          <div class="perf-card-stats" style="margin-top:8px">${stats.join('')}</div>
         </div>
         <div class="perf-card-score">
           <div class="perf-card-score-num">${Math.round(p._score * 10) / 10}</div>
@@ -2854,6 +2884,11 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         </div>
       </div>
     `;
+  }
+
+  function togglePerfCardExpand(postId) {
+    perfState.expandedPostId = perfState.expandedPostId === postId ? null : postId;
+    refreshPerfScreen();
   }
 
   function setPerfFormatFilter(f) {
