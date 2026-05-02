@@ -2139,6 +2139,10 @@
           <textarea class="modal-textarea" id="ac-brand-voice" placeholder="e.g. Warm, direct, biblically grounded. Speaks to women in their thirties navigating faith and identity."></textarea>
         </div>
         <div class="modal-field">
+          <label>Voice instructions <span class="hint">— operational rules for HOW to write captions, scripts, and slide copy</span></label>
+          <textarea class="modal-textarea" id="ac-voice-instructions" style="min-height:140px" placeholder="e.g. Write like a 20-year marketing veteran who knows IG, FB, TikTok natively. Tell stories, draw people in. No em-dashes. No staccato sentences. No corporate corny. Human, not super serious."></textarea>
+        </div>
+        <div class="modal-field">
           <label>Audience <span class="hint">— who they speak to</span></label>
           <textarea class="modal-textarea" id="ac-audience" placeholder="e.g. Christian women, 28–42, creatives and ministry leaders, trying to integrate faith with career."></textarea>
         </div>
@@ -2792,6 +2796,11 @@
           <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Things to avoid</label>
           <textarea id="prof-brand-avoid" class="modal-textarea" style="min-height:90px" placeholder="Topics, tones, brands, language to stay away from…">${esc(c.brand_avoid || '')}</textarea>
         </div>
+        <div class="settings-card" style="border-left:3px solid var(--olive)">
+          <h4>Voice instructions</h4>
+          <p>The operator's brief on HOW to write captions, Reel scripts, and slide copy for this client. This sits ABOVE generic copywriting expertise — Claude treats this as authoritative direction. Use it for: platform-specific tone notes, pacing rules, words/punctuation to avoid, story-vs-teaching mix, anything that shapes the WAY content sounds. Not for what the brand is — that's brand voice. This is for HOW to write.</p>
+          <textarea id="prof-voice-instructions" class="modal-textarea" style="min-height:200px; font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:12px; line-height:1.55" placeholder="e.g. Write like a 20-year marketing veteran. Native to IG, FB, TikTok. Tell stories — never bullet-point teach. No em-dashes. No staccato sentences. No corporate corny. Human, not super serious. Captions earn the scroll-stop in the first three words.">${esc(c.voice_instructions || '')}</textarea>
+        </div>
         <div class="settings-card">
           <h4>Content pillars</h4>
           <p>The categories every post should fall under. Claude will use ONLY these labels — one per line.</p>
@@ -2833,6 +2842,7 @@
       brand_voice: document.getElementById('prof-brand-voice').value.trim() || null,
       audience: document.getElementById('prof-audience').value.trim() || null,
       brand_avoid: document.getElementById('prof-brand-avoid').value.trim() || null,
+      voice_instructions: document.getElementById('prof-voice-instructions').value.trim() || null,
       pillars: pillarsRaw ? pillarsRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : null,
       reel_production_model: document.getElementById('prof-reel-model').value.trim() || null,
       static_production_model: document.getElementById('prof-static-model').value.trim() || null,
@@ -3563,6 +3573,24 @@ You are generating a two-week social media plan for: ${client.brand_name || clie
     if (client.brand_voice)  parts.push(`Brand voice: ${client.brand_voice}`);
     if (client.audience)     parts.push(`Audience: ${client.audience}`);
     if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
+
+    // ---- Voice Instructions — operator brief on HOW to write ----
+    // Sits at high priority alongside brand voice and theological foundation.
+    // This is the agency operator's authoritative direction for written content.
+    if (client.voice_instructions) {
+      parts.push(`
+═══════════════════════════════════════════
+VOICE INSTRUCTIONS — OPERATOR'S AUTHORITATIVE BRIEF
+═══════════════════════════════════════════
+
+The following instructions come directly from the agency operator running this client. They override generic copywriting expertise. Theo (the Copywriter), Magnus (the Brand Voice Linguist), and anyone else producing written content for this client — captions, Reel scripts, slide copy, hooks, CTAs — must read these instructions FIRST and treat them as authoritative direction. When these instructions conflict with generic best practices, follow these instructions.
+
+${client.voice_instructions}
+
+═══════════════════════════════════════════
+END VOICE INSTRUCTIONS
+═══════════════════════════════════════════`);
+    }
 
     // Theological foundation — only injected if client is faith-based AND foundation is set
     if (client.faith_based && currentAgency?.theological_foundation) {
@@ -5438,6 +5466,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     document.getElementById('ac-brand-name').value = '';
     document.getElementById('ac-client-email').value = '';
     document.getElementById('ac-brand-voice').value = '';
+    document.getElementById('ac-voice-instructions').value = '';
     document.getElementById('ac-audience').value = '';
     document.getElementById('ac-brand-avoid').value = '';
     document.getElementById('ac-pillars').value = '';
@@ -5457,6 +5486,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     const brandName = document.getElementById('ac-brand-name').value.trim();
     const clientEmail = document.getElementById('ac-client-email').value.trim();
     const brandVoice = document.getElementById('ac-brand-voice').value.trim();
+    const voiceInstructions = document.getElementById('ac-voice-instructions').value.trim();
     const audience = document.getElementById('ac-audience').value.trim();
     const brandAvoid = document.getElementById('ac-brand-avoid').value.trim();
     const pillarsRaw = document.getElementById('ac-pillars').value.trim();
@@ -5485,6 +5515,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       };
       if (clientEmail) payload.client_email = clientEmail;
       if (brandVoice) payload.brand_voice = brandVoice;
+      if (voiceInstructions) payload.voice_instructions = voiceInstructions;
       if (audience) payload.audience = audience;
       if (brandAvoid) payload.brand_avoid = brandAvoid;
       if (pillarsRaw) {
