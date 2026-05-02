@@ -1468,6 +1468,133 @@
     color: var(--terracotta);
     border: 0.5px solid #E8B8A0;
   }
+
+  /* Skills cards */
+  .skill-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    transition: border-color 120ms;
+  }
+  .skill-card:hover { border-color: var(--olive); }
+  .skill-card.inactive { opacity: 0.5; }
+  .skill-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .skill-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.1px;
+    margin: 0;
+  }
+  .skill-card-role {
+    font-size: 11px;
+    color: var(--olive);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .skill-card-years {
+    font-size: 10px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    background: var(--surface);
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+    flex-shrink: 0;
+  }
+  .skill-card-desc {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+    margin: 8px 0 12px;
+  }
+  .skill-card-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .skill-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-3);
+    cursor: pointer;
+    user-select: none;
+  }
+  .skill-toggle input { width: auto; margin: 0; }
+  .skill-edit-btn {
+    margin-left: auto;
+    background: none;
+    border: 0.5px solid var(--bd-soft);
+    color: var(--text-2);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 120ms;
+  }
+  .skill-edit-btn:hover {
+    background: var(--surface);
+    color: var(--text-1);
+    border-color: var(--olive);
+  }
+
+  /* Skill edit modal */
+  .skill-edit-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 42, 26, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .skill-edit-overlay.open { display: flex; }
+  .skill-edit-box {
+    background: var(--cream);
+    border-radius: var(--r-lg);
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  }
+  .skill-edit-head {
+    padding: 18px 24px;
+    border-bottom: 0.5px solid var(--bd-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .skill-edit-body {
+    padding: 18px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .skill-edit-foot {
+    padding: 14px 24px;
+    border-top: 0.5px solid var(--bd-soft);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+  }
 </style>
 </head>
 <body>
@@ -1662,6 +1789,11 @@
             <span id="set-theology-status" style="color:var(--text-3); font-size:12px"></span>
           </div>
         </div>
+        <div class="settings-card" style="grid-column: 1 / -1">
+          <h4>Your agency team</h4>
+          <p>The 9 industry experts that operate as your agency team. Each one reads the active client's profile, performance, and knowledge layers before generating output. Edit any of their expertise as you learn what produces better plans for your clients.</p>
+          <div id="skills-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; margin-top:12px"></div>
+        </div>
         <div class="settings-card">
           <h4>About this version</h4>
           <p>YAH! Studio v2 — the new shell. Sub-pages migrating one at a time. Use "Open in classic" on any client screen to access features that haven't moved yet.</p>
@@ -1675,6 +1807,33 @@
     <div class="cmd-box">
       <input type="text" class="cmd-input" id="cmd-input" placeholder="Type a command or search…" autocomplete="off">
       <div class="cmd-list" id="cmd-list"></div>
+    </div>
+  </div>
+
+  <div id="skill-edit-overlay" class="skill-edit-overlay" onclick="if(event.target===this) closeSkillEdit()">
+    <div class="skill-edit-box">
+      <div class="skill-edit-head">
+        <div>
+          <h3 class="modal-title" id="skill-edit-title">Edit expertise</h3>
+          <p class="modal-sub" id="skill-edit-sub">— role · years experience</p>
+        </div>
+        <button class="modal-close" onclick="closeSkillEdit()" aria-label="Close">×</button>
+      </div>
+      <div class="skill-edit-body">
+        <div style="margin-bottom:14px">
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Short description</label>
+          <input type="text" id="skill-edit-desc" class="modal-input" placeholder="One line summary of what this persona does">
+        </div>
+        <div>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Expertise (markdown)</label>
+          <textarea id="skill-edit-expertise" class="modal-textarea" style="min-height:400px; font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:12px; line-height:1.55"></textarea>
+        </div>
+      </div>
+      <div class="skill-edit-foot">
+        <span id="skill-edit-status" style="color:var(--text-3); font-size:12px; margin-right:auto"></span>
+        <button class="btn btn-ghost" onclick="closeSkillEdit()">Cancel</button>
+        <button class="btn btn-primary" id="skill-edit-save-btn" onclick="saveSkillEdit()">Save expertise</button>
+      </div>
     </div>
   </div>
 
@@ -1917,11 +2076,23 @@
   }
 
   async function loadAgency() {
-    if (!currentUser?.id) { currentAgency = null; return; }
+    if (!currentUser?.id) { currentAgency = null; window.__activeSkills = []; return; }
     try {
       const rows = await sbGet(`agencies?owner_user_id=eq.${currentUser.id}&select=*`);
       currentAgency = rows[0] || null;
-    } catch (e) { currentAgency = null; }
+      // Load skills for this agency
+      if (currentAgency?.id) {
+        try {
+          const skills = await sbGet(`skills?agency_id=eq.${currentAgency.id}&order=sort_order.asc&select=*`);
+          window.__activeSkills = skills || [];
+        } catch (e) {
+          window.__activeSkills = [];
+          console.warn('Could not load skills:', e);
+        }
+      } else {
+        window.__activeSkills = [];
+      }
+    } catch (e) { currentAgency = null; window.__activeSkills = []; }
     const el = document.getElementById('rail-agency-name');
     if (el) el.textContent = currentAgency?.name || '';
   }
@@ -2382,6 +2553,7 @@
     }
     document.getElementById('test-api-result').textContent = '';
     document.getElementById('test-api-result').className = 'test-result';
+    renderSkillsList();
   }
 
   async function saveTheologyFoundation() {
@@ -2398,6 +2570,98 @@
     } catch (e) {
       statusEl.textContent = 'Save failed.';
       toast('Save failed: ' + e.message, 'error');
+    }
+  }
+
+  // ---- Skills (agency team) ----
+
+  function renderSkillsList() {
+    const container = document.getElementById('skills-list');
+    if (!container) return;
+    const skills = window.__activeSkills || [];
+    if (skills.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-3); font-size:13px; grid-column:1/-1">No skills loaded. Run the skills migration in Supabase to seed your team.</p>';
+      return;
+    }
+    container.innerHTML = skills.map(s => `
+      <div class="skill-card ${s.is_active ? '' : 'inactive'}">
+        <div class="skill-card-header">
+          <div>
+            <h5 class="skill-card-name">${esc(s.name)}</h5>
+            <div class="skill-card-role">${esc(s.role)}</div>
+          </div>
+          <span class="skill-card-years">${esc(String(s.years_experience))}+ yrs</span>
+        </div>
+        <p class="skill-card-desc">${esc(s.short_description || '')}</p>
+        <div class="skill-card-actions">
+          <label class="skill-toggle">
+            <input type="checkbox" ${s.is_active ? 'checked' : ''} onchange="toggleSkillActive('${esc(s.id)}', this.checked)">
+            ${s.is_active ? 'Active' : 'Disabled'}
+          </label>
+          <button class="skill-edit-btn" onclick="openSkillEdit('${esc(s.id)}')">Edit expertise</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function toggleSkillActive(skillId, isActive) {
+    try {
+      await sbPatch(`skills?id=eq.${skillId}`, { is_active: isActive });
+      const skill = (window.__activeSkills || []).find(s => s.id === skillId);
+      if (skill) skill.is_active = isActive;
+      renderSkillsList();
+      toast(isActive ? 'Skill activated' : 'Skill disabled', 'success');
+    } catch (e) {
+      toast('Toggle failed: ' + e.message, 'error');
+    }
+  }
+
+  let editingSkillId = null;
+
+  function openSkillEdit(skillId) {
+    const skill = (window.__activeSkills || []).find(s => s.id === skillId);
+    if (!skill) return;
+    editingSkillId = skillId;
+    document.getElementById('skill-edit-title').textContent = skill.name;
+    document.getElementById('skill-edit-sub').textContent = `${skill.role} · ${skill.years_experience}+ years experience`;
+    document.getElementById('skill-edit-desc').value = skill.short_description || '';
+    document.getElementById('skill-edit-expertise').value = skill.expertise || '';
+    document.getElementById('skill-edit-status').textContent = '';
+    document.getElementById('skill-edit-overlay').classList.add('open');
+  }
+
+  function closeSkillEdit() {
+    document.getElementById('skill-edit-overlay').classList.remove('open');
+    editingSkillId = null;
+  }
+
+  async function saveSkillEdit() {
+    if (!editingSkillId) return;
+    const updates = {
+      short_description: document.getElementById('skill-edit-desc').value.trim() || null,
+      expertise: document.getElementById('skill-edit-expertise').value.trim()
+    };
+    if (!updates.expertise) return toast('Expertise cannot be empty', 'error');
+
+    const btn = document.getElementById('skill-edit-save-btn');
+    const statusEl = document.getElementById('skill-edit-status');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    statusEl.textContent = '';
+
+    try {
+      await sbPatch(`skills?id=eq.${editingSkillId}`, updates);
+      const skill = (window.__activeSkills || []).find(s => s.id === editingSkillId);
+      if (skill) Object.assign(skill, updates);
+      renderSkillsList();
+      toast('Expertise saved', 'success');
+      closeSkillEdit();
+    } catch (e) {
+      statusEl.textContent = 'Save failed.';
+      toast('Save failed: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save expertise';
     }
   }
 
@@ -2932,8 +3196,37 @@
 
   function buildPlannerSystemPrompt(client, topPerformers = []) {
     const parts = [];
-    parts.push(`You are a senior content strategist generating a two-week social media plan for one client.`);
-    parts.push(`Brand: ${client.brand_name || client.name}.`);
+
+    // ---- Skills team intro (only if skills are loaded) ----
+    const activeSkills = (window.__activeSkills || []).filter(s => s.is_active);
+    if (activeSkills.length > 0) {
+      parts.push(`You are an agency content team operating as ${activeSkills.length} expert collaborators. Each persona below has 25-35 years of generic-industry experience. They are NOT specialists in this particular client — they bring industry expertise and adapt it to the SPECIFIC client profile, performance data, and knowledge layers below.
+
+Every persona's first move is the same: read the client's brand profile, voice, audience, brand_avoid, pillars, production model, and proof corpus carefully. Apply your expertise to THIS client's specific reality. Never produce generic best-practice output — produce work that's been adapted to this brand.
+
+The personas operate together. Dominic plans the arc; Whit reads the data; Marlowe selects formats; Iris writes interview questions; Theo writes copy; Magnus polishes voice; Cora gut-checks for the audience; Ezra confirms production realism; Sloane stewards the brand at the gate. The output of plan generation is the synthesis of their collaboration.
+
+═══════════════════════════════════════════
+THE TEAM
+═══════════════════════════════════════════`);
+
+      activeSkills.forEach(skill => {
+        parts.push(`\n--- ${skill.name} — ${skill.role} (${skill.years_experience}+ years) ---\n${skill.expertise}`);
+      });
+
+      parts.push(`\n═══════════════════════════════════════════
+END TEAM EXPERTISE
+═══════════════════════════════════════════
+
+You are the synthesis of these 9 perspectives. The plan you generate should reflect each one's contribution. Sloane reviews last — flag in your planning_note anything where Sloane's voice fidelity check or Cora's audience advocacy check identified concerns that the user should review.`);
+    }
+
+    // ---- Client profile ----
+    parts.push(`\n═══════════════════════════════════════════
+CLIENT PROFILE — READ CAREFULLY
+═══════════════════════════════════════════
+
+You are generating a two-week social media plan for: ${client.brand_name || client.name}.`);
     if (client.brand_voice)  parts.push(`Brand voice: ${client.brand_voice}`);
     if (client.audience)     parts.push(`Audience: ${client.audience}`);
     if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
@@ -2945,7 +3238,7 @@
 THEOLOGICAL FOUNDATION FOR FAITH-BASED CONTENT
 ═══════════════════════════════════════════
 
-This client produces faith-based content. Read the following theological foundation carefully — it informs how questions, hooks, talking points, and teaching content should be shaped. The goal: content that sounds like it was generated by someone who actually understands the gospel, not by an algorithm decorating self-help with Bible vocabulary.
+This client produces faith-based content. Read the following theological foundation carefully — it informs how questions, hooks, talking points, and teaching content should be shaped.
 
 ${currentAgency.theological_foundation}
 
