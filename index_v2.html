@@ -1225,6 +1225,147 @@
   .perf-format-tab:hover:not(.active) {
     background: var(--surface);
   }
+
+  /* Proof references on plan cards */
+  .proof-refs-section {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--flesh-pale);
+    border: 0.5px solid var(--flesh-dk);
+    border-radius: var(--r-md);
+  }
+  .proof-refs-label {
+    font-size: 10px;
+    color: var(--olive);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+  .proof-ref-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .proof-ref-chip {
+    background: white;
+    border: 0.5px solid var(--flesh-dk);
+    color: var(--olive);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 120ms;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .proof-ref-chip:hover { background: var(--flesh); border-color: var(--olive); }
+  .proof-ref-chip .net { font-size: 9px; opacity: 0.7; text-transform: uppercase; }
+  .proof-ref-popover {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .proof-ref-popover .meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    color: var(--text-3);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .proof-ref-popover .caption {
+    color: var(--text-1);
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .proof-no-refs {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-3);
+    font-style: italic;
+  }
+
+  /* Carousel slide rendering */
+  .carousel-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--turmeric);
+    color: white;
+    margin-left: 8px;
+  }
+  .carousel-type-badge.declaration { background: var(--terracotta); }
+  .carousel-type-badge.repurposed_reel { background: var(--olive); }
+  .carousel-type-badge.original_teaching { background: var(--pit); }
+  .carousel-slides {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 8px 0 14px;
+    scrollbar-width: thin;
+  }
+  .carousel-slide {
+    flex: 0 0 200px;
+    min-height: 120px;
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .carousel-slide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .carousel-slide-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .carousel-slide-role {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: var(--r-pill);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--surface);
+    color: var(--text-2);
+  }
+  .carousel-slide-role.hook { background: var(--flesh-pale); color: var(--olive); }
+  .carousel-slide-role.declaration { background: #FCE4DC; color: var(--terracotta); }
+  .carousel-slide-role.teaching { background: var(--surface); color: var(--text-1); }
+  .carousel-slide-role.cta { background: var(--skin); color: var(--flesh); }
+  .carousel-slide-content {
+    flex: 1;
+    color: var(--text-1);
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+  }
 </style>
 </head>
 <body>
@@ -1456,6 +1597,18 @@
         <div class="modal-field">
           <label>Things to avoid <span class="hint">— what's off-brand</span></label>
           <textarea class="modal-textarea" id="ac-brand-avoid" placeholder="e.g. New age language, manifestation, astrology. Anything that conflicts with biblical Christianity."></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Content pillars <span class="hint">— the categories every post should fall under (one per line)</span></label>
+          <textarea class="modal-textarea" id="ac-pillars" placeholder="Business Development&#10;Spiritual Development&#10;Personal Development&#10;Lifestyle/Family&#10;Humor"></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Reel production model <span class="hint">— how Reels get made</span></label>
+          <textarea class="modal-textarea" id="ac-reel-model" placeholder="e.g. Brand police asks topical question → client records talking-head answer → cut with b-roll → photos for emphasis"></textarea>
+        </div>
+        <div class="modal-field">
+          <label>Static production model <span class="hint">— how carousels, quote posts, single images get made</span></label>
+          <textarea class="modal-textarea" id="ac-static-model" placeholder="e.g. Carousels are multi-slide teaching, quote posts pull from a teaching, single images pair with longer captions"></textarea>
         </div>
       </div>
       <div class="modal-foot">
@@ -1996,6 +2149,7 @@
 
   function renderProfileContent() {
     const c = activeClient || {};
+    const pillarsText = Array.isArray(c.pillars) ? c.pillars.join('\n') : (c.pillars || '');
     return `
       <div class="settings-grid">
         <div class="settings-card">
@@ -2016,6 +2170,19 @@
           <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Things to avoid</label>
           <textarea id="prof-brand-avoid" class="modal-textarea" style="min-height:90px" placeholder="Topics, tones, brands, language to stay away from…">${esc(c.brand_avoid || '')}</textarea>
         </div>
+        <div class="settings-card">
+          <h4>Content pillars</h4>
+          <p>The categories every post should fall under. Claude will use ONLY these labels — one per line.</p>
+          <textarea id="prof-pillars" class="modal-textarea" style="min-height:110px" placeholder="Business Development&#10;Spiritual Development&#10;Personal Development&#10;Lifestyle/Family&#10;Humor">${esc(pillarsText)}</textarea>
+        </div>
+        <div class="settings-card">
+          <h4>Production model</h4>
+          <p>How content actually gets made. Claude generates briefs in this exact format so each post is something the team can immediately act on.</p>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Reel production model</label>
+          <textarea id="prof-reel-model" class="modal-textarea" style="min-height:100px" placeholder="e.g. Brand police asks topical question → talking-head answer → b-roll → photos">${esc(c.reel_production_model || '')}</textarea>
+          <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px; margin-top:14px">Static production model</label>
+          <textarea id="prof-static-model" class="modal-textarea" style="min-height:100px" placeholder="e.g. Carousels are multi-slide teaching, quote posts pull from a teaching, single images pair with longer captions">${esc(c.static_production_model || '')}</textarea>
+        </div>
         <div style="display:flex; gap:8px; align-items:center">
           <button class="btn btn-primary" id="prof-save-btn" onclick="saveClientProfile()">Save profile</button>
           <span id="prof-save-status" style="color:var(--text-3); font-size:12px"></span>
@@ -2026,12 +2193,16 @@
 
   async function saveClientProfile() {
     if (!activeClient?.id) return toast('No client selected', 'error');
+    const pillarsRaw = document.getElementById('prof-pillars').value.trim();
     const updates = {
       brand_name: document.getElementById('prof-brand-name').value.trim(),
       client_email: document.getElementById('prof-client-email').value.trim() || null,
       brand_voice: document.getElementById('prof-brand-voice').value.trim() || null,
       audience: document.getElementById('prof-audience').value.trim() || null,
-      brand_avoid: document.getElementById('prof-brand-avoid').value.trim() || null
+      brand_avoid: document.getElementById('prof-brand-avoid').value.trim() || null,
+      pillars: pillarsRaw ? pillarsRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : null,
+      reel_production_model: document.getElementById('prof-reel-model').value.trim() || null,
+      static_production_model: document.getElementById('prof-static-model').value.trim() || null
     };
     if (!updates.brand_name) return toast('Brand name is required', 'error');
 
@@ -2159,7 +2330,9 @@
     expandedDay: null,
     showBalance: false,
     refineMessages: [], // { role: 'user' | 'assistant', content: string }
-    refining: false
+    refining: false,
+    proofCorpus: [],   // top performers used in last generation, for reference rendering
+    expandedProofRef: null  // { dayId, postIndex } for proof popover state
   };
 
   function renderPlannerContent() {
@@ -2271,17 +2444,126 @@
             <a onclick="collapsePlanCard()" style="cursor:pointer; font-size:11px; color:var(--olive); font-weight:700">Close</a>
           </div>
         </div>
-        <div class="plan-card-title">${esc(d.title || '')}</div>
+        <div class="plan-card-title">${esc(d.title || '')}${d.post_type === 'Carousel' && d.carousel_type ? `<span class="carousel-type-badge ${esc(d.carousel_type)}">${esc(formatCarouselType(d.carousel_type))}</span>` : ''}</div>
         ${d.pillar ? `<div class="plan-card-pillar">${esc(d.pillar)}</div>` : ''}
         <div class="plan-card-expanded-body">
           ${d.hook ? `<div class="plan-card-field"><h5>Hook</h5><p>${esc(d.hook)}</p></div>` : ''}
+          ${d.brand_police_question ? `<div class="plan-card-field"><h5>Question for brand police to ask</h5><p>${esc(d.brand_police_question)}</p></div>` : ''}
+          ${d.talking_head_points ? `<div class="plan-card-field"><h5>Talking-head answer points</h5><p style="white-space:pre-wrap">${esc(d.talking_head_points)}</p></div>` : ''}
+          ${d.b_roll_direction ? `<div class="plan-card-field"><h5>B-roll direction</h5><p>${esc(d.b_roll_direction)}</p></div>` : ''}
+          ${d.photo_direction ? `<div class="plan-card-field"><h5>Photo direction</h5><p>${esc(d.photo_direction)}</p></div>` : ''}
+          ${renderCarouselSlides(d)}
           ${d.body || d.copy ? `<div class="plan-card-field"><h5>Body / caption</h5><p>${esc(d.body || d.copy)}</p></div>` : ''}
           ${d.visual_direction || d.visual ? `<div class="plan-card-field"><h5>Visual direction</h5><p>${esc(d.visual_direction || d.visual)}</p></div>` : ''}
           ${d.cta ? `<div class="plan-card-field"><h5>CTA</h5><p>${esc(d.cta)}</p></div>` : ''}
           ${d.notes ? `<div class="plan-card-field"><h5>Notes</h5><p>${esc(d.notes)}</p></div>` : ''}
+          ${renderProofRefs(d)}
         </div>
       </div>
     `;
+  }
+
+  function formatCarouselType(t) {
+    return ({ declaration: 'Declaration', repurposed_reel: 'Repurposed Reel', original_teaching: 'Original Teaching' })[t] || t;
+  }
+
+  function renderCarouselSlides(d) {
+    if (d.post_type !== 'Carousel') return '';
+    const slides = Array.isArray(d.slides) ? d.slides : null;
+    if (!slides || slides.length === 0) return '';
+    const slidesHtml = slides.map(s => {
+      const num = s.slide_number || '';
+      const role = (s.role || '').toLowerCase();
+      const content = s.content || '';
+      return `
+        <div class="carousel-slide">
+          <div class="carousel-slide-header">
+            <span class="carousel-slide-num">Slide ${esc(String(num))}</span>
+            ${role ? `<span class="carousel-slide-role ${esc(role)}">${esc(role)}</span>` : ''}
+          </div>
+          <div class="carousel-slide-content">${esc(content)}</div>
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="plan-card-field">
+        <h5>Carousel slides (${slides.length})</h5>
+        <div class="carousel-slides">${slidesHtml}</div>
+      </div>
+    `;
+  }
+
+  function renderProofRefs(d) {
+    const refs = Array.isArray(d.proof_post_refs) ? d.proof_post_refs.filter(n => Number.isInteger(n) && n >= 1) : [];
+    const corpus = planState.proofCorpus || [];
+    if (corpus.length === 0) return '';
+
+    if (refs.length === 0) {
+      return `<div class="proof-no-refs">Net-new — no specific proof post anchored.</div>`;
+    }
+
+    const dayId = d.id || `day-${d.day_number}`;
+
+    const chips = refs.map(num => {
+      const post = corpus[num - 1]; // proof corpus is 1-indexed in prompts
+      if (!post) return '';
+      const network = (post.network || '').toLowerCase();
+      const date = post.published_at
+        ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : '';
+      return `<button class="proof-ref-chip" onclick='toggleProofRef(${JSON.stringify(dayId)}, ${num})'>
+        <span>#${num}</span>
+        <span class="net">${esc(network)}</span>
+        <span style="opacity:0.7">${esc(date)}</span>
+      </button>`;
+    }).join('');
+
+    let popover = '';
+    if (planState.expandedProofRef && planState.expandedProofRef.dayId === dayId) {
+      const post = corpus[planState.expandedProofRef.postIndex - 1];
+      if (post) {
+        const network = (post.network || '').toUpperCase();
+        const date = post.published_at
+          ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '';
+        const stats = [];
+        if (post.saves)    stats.push(`${post.saves} saves`);
+        if (post.shares)   stats.push(`${post.shares} shares`);
+        if (post.comments) stats.push(`${post.comments} comments`);
+        if (post.likes)    stats.push(`${post.likes} likes`);
+        popover = `
+          <div class="proof-ref-popover">
+            <div class="meta">
+              <span>Post #${planState.expandedProofRef.postIndex}</span>
+              <span>·</span>
+              <span>${esc(network)}</span>
+              ${date ? `<span>· ${esc(date)}</span>` : ''}
+              ${stats.length ? `<span>· ${esc(stats.join(' / '))}</span>` : ''}
+              ${post.permalink ? `<a href="${esc(post.permalink)}" target="_blank" rel="noopener" style="color:var(--olive); margin-left:auto; text-decoration:none;">View original ↗</a>` : ''}
+            </div>
+            <div class="caption">${esc(post.caption || '(no caption)')}</div>
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="proof-refs-section">
+        <div class="proof-refs-label">Drew from these proof posts</div>
+        <div class="proof-ref-chips">${chips}</div>
+        ${popover}
+      </div>
+    `;
+  }
+
+  function toggleProofRef(dayId, postIndex) {
+    const cur = planState.expandedProofRef;
+    if (cur && cur.dayId === dayId && cur.postIndex === postIndex) {
+      planState.expandedProofRef = null;
+    } else {
+      planState.expandedProofRef = { dayId, postIndex };
+    }
+    refreshPlannerScreen();
   }
 
   function renderBalance() {
@@ -2386,10 +2668,11 @@
 
     try {
       // Fetch top performers as proof corpus
-      const topPerformers = await fetchTopPerformers(activeClient.id, 15);
+      const topPerformers = await fetchTopPerformers(activeClient.id, 20);
       const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers });
       planState.plan = result;
       planState.plan.created_label = 'Just now';
+      planState.proofCorpus = topPerformers;
       planState.generating = false;
       refreshPlannerScreen();
       const proofCount = topPerformers.length;
@@ -2453,19 +2736,83 @@
     if (client.audience)     parts.push(`Audience: ${client.audience}`);
     if (client.brand_avoid)  parts.push(`Strictly avoid: ${client.brand_avoid}`);
 
+    // Pillars constraint — Claude must use ONLY these labels
+    const pillars = Array.isArray(client.pillars) ? client.pillars.filter(Boolean) : [];
+    if (pillars.length > 0) {
+      parts.push(`
+═══════════════════════════════════════════
+CONTENT PILLARS — USE ONLY THESE LABELS
+═══════════════════════════════════════════
+
+Every post you generate MUST be categorized under exactly one of these pillars. Do NOT invent new pillar names. Do NOT use synonyms or variations. Use the exact label as written:
+
+${pillars.map(p => `  • ${p}`).join('\n')}
+
+Balance posts across these pillars throughout the two weeks. Don't stack three of one pillar in a row.`);
+    }
+
+    // Production model — drives the SHAPE of generated briefs
+    const reelModel = (client.reel_production_model || '').trim();
+    const staticModel = (client.static_production_model || '').trim();
+    if (reelModel || staticModel) {
+      const productionParts = [`
+═══════════════════════════════════════════
+PRODUCTION MODEL — HOW THIS CLIENT MAKES CONTENT
+═══════════════════════════════════════════
+
+Every brief you generate must be shaped to this client's actual production workflow. Do NOT generate generic "write a Reel about X" suggestions. Generate briefs that are immediately actionable in their production format.`];
+
+      if (reelModel) {
+        productionParts.push(`
+REEL PRODUCTION MODEL:
+${reelModel}
+
+For every Reel in the plan, output the brief in this exact structure:
+  • brand_police_question: the specific question her brand police should ask her on camera. This question should anchor in something specific from her existing content — a story she's told, a framework she uses, a concept from a past teaching, an illustration she's known for. AVOID generic questions like "what's your biggest tip on X" — instead use prompts like "tell us about [specific thing from her catalog]" or "walk us through your [specific concept]" or "take us back to [specific moment in her story]." The proof corpus shows you what stories and frameworks she already has — surface those.
+  • talking_head_points: 2-4 bullet points covering what her talking-head answer should hit. Specific, not vague.
+  • b_roll_direction: what supporting footage should be cut in (lifestyle shots, environment, action footage, etc.)
+  • photo_direction: what still images should be intercut for emphasis and pacing
+  • hook: the opening 1-2 lines of the finished Reel — first-person, conversational, lived-in. Examples of the energy: "They told me to be realistic. So I am." / "I was driving to my job making not enough money." / "This is the prayer I pray over my money." NOT generic "did you know..." or "let me tell you about..."`);
+      }
+
+      if (staticModel) {
+        productionParts.push(`
+STATIC PRODUCTION MODEL (carousels, single images, quote posts):
+${staticModel}
+
+For Carousels specifically: identify which pattern fits each one BEFORE writing it. Set the carousel_type field to "declaration", "repurposed_reel", or "original_teaching". Then output a slides array with slide-by-slide structure (typically 5-7 slides). Each slide is an object: { slide_number, role, content }. Roles include: "hook" (slide 1), "teaching" or "declaration" (middle slides), "cta" (last slide).
+
+For repurposed_reel carousels: the proof_post_refs MUST cite the source Reel being repurposed. Pull the slide content directly from the Reel's teaching, broken into discrete points.
+
+For declaration carousels: 5 slides total — hook / 3 declarations over different life areas / CTA.
+
+For original_teaching carousels: 5-7 slides with whatever shape fits (contrast/comparison, list, framework, step-by-step). The brief should make the shape obvious from the slide structure.
+
+For Quote posts and single Static images: standard body + visual_direction + cta. No slides array needed.`);
+      }
+
+      parts.push(productionParts.join('\n'));
+    }
+
     if (topPerformers && topPerformers.length > 0) {
       const proofSection = ['', `═══════════════════════════════════════════`,
-                            `TOP-PERFORMING POSTS — USE AS PROOF OF WHAT WORKS`,
+                            `TOP-PERFORMING POSTS — USE AS PROOF AND AS A CATALOG`,
                             `═══════════════════════════════════════════`,
                             ``,
-                            `Below are this creator's actual top-performing posts from her connected accounts. These are the source of truth for what lands with her audience — voice, format, hook structure, topics, energy. Treat them as the gold standard.`,
+                            `Below are this creator's actual top-performing posts. These serve TWO purposes:`,
                             ``,
-                            `When generating the plan:`,
-                            `- Pattern-match new content to the voice and energy of these proven posts. NOT summaries of them — new posts that share their DNA.`,
-                            `- Weight format relevance: when planning a Reel, lean on insights from her top-performing Reels. Carousel? Top carousels. Same logic for static, video, story.`,
-                            `- Notice topic clusters that recur in top performers — those are probably resonance points worth revisiting from new angles.`,
-                            `- Notice hook structures that work — first 3 words, opening line patterns, question vs declaration. Apply the same DNA, not the same words.`,
-                            `- Do NOT copy these posts. Generate genuinely new content that shares their voice and instincts.`,
+                            `1. PROOF OF VOICE: Pattern-match new content to the voice and energy of these proven posts. Notice opening lines, hook structures, sentence rhythm, vocabulary. Generate content that shares this DNA.`,
+                            ``,
+                            `2. CATALOG OF EXISTING MATERIAL: These captions reveal stories she's told, frameworks she uses, illustrations she's known for, concepts from her teachings, moments from her personal journey. When generating brand_police_questions for Reels, ANCHOR IN THIS CATALOG. Prompt her to retell or reapply or expand on things she already has — don't invent topics from scratch.`,
+                            ``,
+                            `Specifically look for and use:`,
+                            `  • Named frameworks/concepts she's introduced (use these by name in questions)`,
+                            `  • Personal stories she's told (prompt her to retell with fresh framing)`,
+                            `  • Illustrations she's used (ask her to break them down again)`,
+                            `  • Recurring themes/topics that get strong engagement (do new angles on them)`,
+                            `  • Specific moments she references (ask her to take us back there)`,
+                            ``,
+                            `Do NOT copy these posts. Generate genuinely new content that draws from her existing well.`,
                             ``,
                             `THE PROOF CORPUS:`,
                             ``];
@@ -2490,9 +2837,14 @@
     }
 
     parts.push(`
+═══════════════════════════════════════════
+PLAN STRUCTURE
+═══════════════════════════════════════════
+
 Structure: Week 1 is RECORDING (the client films / produces). Week 2 is EDITING. Plan covers 14 distinct posts (one per day) split 7/7 across the two weeks.
-Variety: balance pillars, post types (Reel, Carousel, Quote post, Static post, Story series), and tones across the plan.
-Hooks: first three words must earn the scroll. No clichés.
+Variety: balance across the listed pillars. Mix Reels, Carousels, Quote posts, and Static posts so production isn't all the same shape.
+Hooks: first three words must earn the scroll. First-person, lived-in, conversational. No clichés. No "did you know" openings.
+
 Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exactly:
 
 {
@@ -2505,17 +2857,35 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       "week": "Week 1" or "Week 2",
       "day_number": 1-14,
       "day_label": "Mon · Day 1" or similar short label,
-      "post_type": "Reel" | "Carousel" | "Quote" | "Static" | "Story",
-      "pillar": "string",
+      "post_type": "Reel" | "Carousel" | "Quote" | "Static",
+      "pillar": "MUST be exactly one of the listed pillar labels",
       "title": "the working title for this post",
-      "hook": "the opening 1-2 lines that earn the scroll",
-      "body": "the body / caption draft, 2-4 sentences",
-      "visual_direction": "what this looks like visually, 1-2 sentences",
+      "hook": "the opening line(s) of the finished post",
+      "brand_police_question": "for Reels only — the question her brand police should ask her, anchored in her existing content catalog",
+      "talking_head_points": "for Reels only — 2-4 bullet points of what her answer should hit (use \\n between bullets)",
+      "b_roll_direction": "for Reels only — what footage to cut in",
+      "photo_direction": "for Reels only — what stills to intercut",
+      "carousel_type": "for Carousels only — must be exactly: 'declaration' | 'repurposed_reel' | 'original_teaching'",
+      "slides": "for Carousels only — array of slide objects. Each slide: { slide_number: 1, role: 'hook'|'declaration'|'teaching'|'cta', content: 'the actual text/copy that appears on this slide' }. Typically 5-7 slides.",
+      "body": "for Statics/Quotes — the caption or post content. NOT used for Carousels (use slides instead).",
+      "visual_direction": "for Statics/Carousels/Quotes — what this looks like (typography, imagery, treatment)",
       "cta": "the call to action",
-      "notes": "optional production notes"
+      "notes": "optional production notes",
+      "proof_post_refs": [array of integers — the post numbers from the PROOF CORPUS above (1-20) that you specifically drew from for this day. For repurposed_reel carousels this is REQUIRED and must cite the source Reel. For other days, cite ONLY posts that genuinely shaped this brief — the story it retells, the framework it reapplies, the voice it pattern-matches, the topic cluster it extends. Use [] only for posts that are genuinely net-new with no proof anchor. Most days SHOULD reference 1-3 proof posts. This is how the user verifies you mined her catalog instead of making things up.]
     }
   ]
-}`);
+}
+
+For Reels: brand_police_question, talking_head_points, b_roll_direction, photo_direction are required. body/visual_direction can be omitted or brief.
+For Carousels: carousel_type and slides are required. visual_direction describes typography/treatment.
+For Quotes/Statics: body, visual_direction, cta are required. Slide-related fields can be omitted.
+For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels it MUST be non-empty.
+
+CAROUSEL TYPE MIX TARGET for the 14-day plan:
+- If the plan includes ~3-4 carousels total, aim for: 1 declaration / 2 repurposed-reel / 1 original-teaching
+- Repurposed-reel carousels should always pull from teaching pillars only (Business / Spiritual / Personal Development)
+- Pick the highest-performing TEACHING Reels in the proof corpus as the source material for repurposed carousels`);
+
     return parts.join('\n\n');
   }
 
@@ -2542,7 +2912,8 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
     refreshPlannerScreen();
 
     try {
-      const topPerformers = await fetchTopPerformers(activeClient.id, 15);
+      const topPerformers = await fetchTopPerformers(activeClient.id, 20);
+      planState.proofCorpus = topPerformers;
       const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages, topPerformers });
       // Replace plan
       planState.plan = { ...planState.plan, ...updated };
@@ -2688,7 +3059,14 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         body: d.body || d.copy || null,
         visual_direction: d.visual_direction || d.visual || null,
         cta: d.cta || null,
-        notes: d.notes || null
+        notes: d.notes || null,
+        brand_police_question: d.brand_police_question || null,
+        talking_head_points: d.talking_head_points || null,
+        b_roll_direction: d.b_roll_direction || null,
+        photo_direction: d.photo_direction || null,
+        proof_post_refs: Array.isArray(d.proof_post_refs) ? d.proof_post_refs : null,
+        carousel_type: d.carousel_type || null,
+        slides: Array.isArray(d.slides) ? d.slides : null
       }));
 
       if (dayRows.length) {
@@ -2726,6 +3104,8 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       planState.showBalance = false;
       planState.refineMessages = [];
       planState.generating = false;
+      planState.proofCorpus = [];
+      planState.expandedProofRef = null;
       perfState.posts = [];
       perfState.scores = [];
       perfState.loaded = false;
@@ -3581,7 +3961,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
   }
 
   // Fetch top performers for the planner
-  async function fetchTopPerformers(clientId, limit = 15) {
+  async function fetchTopPerformers(clientId, limit = 20) {
     try {
       const scores = await sbGet(`performance_scores?client_id=eq.${clientId}&order=composite_score.desc&limit=${limit}&select=post_id,composite_score,save_rate,share_rate,engagement_rate,tier`);
       if (!scores || scores.length === 0) return [];
@@ -3614,6 +3994,9 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     document.getElementById('ac-brand-voice').value = '';
     document.getElementById('ac-audience').value = '';
     document.getElementById('ac-brand-avoid').value = '';
+    document.getElementById('ac-pillars').value = '';
+    document.getElementById('ac-reel-model').value = '';
+    document.getElementById('ac-static-model').value = '';
     const err = document.getElementById('add-client-error');
     err.textContent = ''; err.classList.remove('show');
     setTimeout(() => document.getElementById('ac-brand-name').focus(), 50);
@@ -3629,6 +4012,9 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     const brandVoice = document.getElementById('ac-brand-voice').value.trim();
     const audience = document.getElementById('ac-audience').value.trim();
     const brandAvoid = document.getElementById('ac-brand-avoid').value.trim();
+    const pillarsRaw = document.getElementById('ac-pillars').value.trim();
+    const reelModel = document.getElementById('ac-reel-model').value.trim();
+    const staticModel = document.getElementById('ac-static-model').value.trim();
 
     const errEl = document.getElementById('add-client-error');
     errEl.textContent = ''; errEl.classList.remove('show');
@@ -3654,6 +4040,11 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       if (brandVoice) payload.brand_voice = brandVoice;
       if (audience) payload.audience = audience;
       if (brandAvoid) payload.brand_avoid = brandAvoid;
+      if (pillarsRaw) {
+        payload.pillars = pillarsRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      }
+      if (reelModel) payload.reel_production_model = reelModel;
+      if (staticModel) payload.static_production_model = staticModel;
 
       const created = await sbPost('clients', [payload]);
       const newClient = Array.isArray(created) ? created[0] : created;
