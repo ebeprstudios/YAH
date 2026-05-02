@@ -3032,19 +3032,27 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
   function detectCsvFormat(headers) {
     const set = new Set(headers.map(h => h.toLowerCase().trim()));
 
-    // Reels format (FB Reels, IG Reels — same shape from Metricool)
+    // Instagram Reels (Metricool's IG Reels export — has Organic suffix on engagement columns)
+    if (set.has('saved (organic)') && set.has('avg watch time (organic)') && set.has('reach (organic)')) return 'instagram-reels';
+
+    // Facebook Reels
     if (set.has('reel link') && set.has('video views') && set.has('avg. time watched (seconds)')) return 'reels';
 
-    // Standard per-platform formats
+    // Facebook Posts (Metricool's full FB Posts export — uses PostLink, Reactions, Shared, etc.)
+    if (set.has('postlink') && set.has('reactions') && set.has('shared')) return 'facebook-posts';
+
+    // YouTube (camel-case columns: videoId, watchUrl, etc.)
+    if (set.has('videoid') && set.has('watchurl') && set.has('averageviewduration')) return 'youtube';
+
+    // Instagram Posts (the original IG export with Saved + Shares, no Organic suffix)
     if (set.has('saved') && set.has('shares') && set.has('reach (organic)')) return 'instagram';
-    if (set.has('shares') && set.has('reach') && set.has('reactions')) return 'facebook';
-    if (set.has('plays') || (set.has('shares') && set.has('comments') && set.has('likes') && set.has('views'))) return 'tiktok';
 
-    // YouTube — Metricool's youtube export typically has these
-    if ((set.has('video') || set.has('title')) && (set.has('views') || set.has('plays')) && (set.has('subscribers gained') || set.has('watch time') || set.has('avg view duration'))) return 'youtube';
-    if (set.has('youtube') || (set.has('video') && set.has('views'))) return 'youtube';
+    // TikTok
+    if (set.has('plays') || (set.has('shares') && set.has('comments') && set.has('likes') && set.has('views') && !set.has('postlink'))) return 'tiktok';
 
+    // Combined Brand Summary
     if (set.has('network') && set.has('impressions') && set.has('interactions')) return 'combined';
+
     return 'unknown';
   }
 
@@ -3201,6 +3209,93 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     };
     const trim = (s) => (s ?? '').trim();
 
+    if (format === 'instagram-reels') {
+      // Real IG Reels export — best data we get. Has Saved, Shares, watch retention.
+      const url = trim(r['URL']);
+      const externalId = trim(r['Id']) || extractIgShortcode(url);
+      if (!externalId) return null;
+      const caption = trim(r['title']);
+      return {
+        external_id: externalId,
+        network: 'instagram',
+        post_type: 'reel',
+        caption: caption || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['image']) || null,
+        published_at: parseDate(trim(r['date'])),
+        views: num(r['Views']),
+        reach: num(r['Reach (Organic)']) || num(r['Views']),
+        likes: num(r['Likes (Organic)']),
+        saves: num(r['Saved (Organic)']),
+        shares: num(r['Shares (Organic)']),
+        comments: num(r['Comments (Organic)']),
+        impressions: num(r['Views']),
+        avg_watch_seconds: numF(r['Avg Watch Time (Organic)']) / 1000 || null, // Metricool reports in milliseconds for IG Reels
+        total_watch_seconds: numF(r['Video View Total Time (Organic)']) / 1000 || null,
+        caption_hash: caption ? hashCaption(caption) : null,
+        source: 'csv'
+      };
+    }
+
+    if (format === 'facebook-posts') {
+      // Full FB Posts export — PostLink, Reactions, Shared, Type
+      const url = trim(r['PostLink']);
+      const externalId = extractFacebookId(url) || extractFbReelId(url);
+      if (!externalId) return null;
+      const caption = trim(r['Content']);
+      const fbType = trim(r['Type']).toLowerCase(); // 'album', 'video', 'photo', 'status', etc.
+      // Map FB types to our normalized post_type
+      let postType = fbType;
+      if (fbType === 'album') postType = 'carousel';
+      else if (fbType === 'video') postType = 'video';
+      else if (fbType === 'photo') postType = 'static';
+      return {
+        external_id: externalId,
+        network: 'facebook',
+        post_type: postType || null,
+        caption: caption || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['Image']) || null,
+        published_at: parseDate(trim(r['Date'])),
+        reach: num(r['Reach (Organic)']) || num(r['Reach']),
+        impressions: num(r['Impressions (Organic)']) || num(r['Impressions']),
+        likes: num(r['Reactions']),
+        shares: num(r['Shared']),
+        comments: num(r['Comments']),
+        views: num(r['VideoViews (Organic)']) || num(r['VideoViews']),
+        total_watch_seconds: numF(r['VideoTimeWatched']) || null,
+        caption_hash: caption ? hashCaption(caption) : null,
+        source: 'csv'
+      };
+    }
+
+    if (format === 'youtube') {
+      // YouTube — camel-case field names
+      const url = trim(r['watchUrl']);
+      const externalId = trim(r['videoId']) || extractYoutubeId(url);
+      if (!externalId) return null;
+      const caption = trim(r['title']);
+      return {
+        external_id: externalId,
+        network: 'youtube',
+        post_type: 'video',
+        caption: caption || null,
+        permalink: url || null,
+        thumbnail_url: trim(r['thumbnailUrl']) || null,
+        published_at: parseDate(trim(r['publishedAt'])),
+        views: num(r['views']),
+        reach: num(r['views']),
+        impressions: num(r['views']),
+        likes: num(r['likes']),
+        shares: num(r['shares']),
+        comments: num(r['comments']),
+        avg_watch_seconds: numF(r['averageViewDuration']) || null,
+        total_watch_seconds: numF(r['watchMinutes']) * 60 || null,
+        caption_hash: caption ? hashCaption(caption) : null,
+        source: 'csv'
+      };
+    }
+
     if (format === 'reels') {
       // Metricool Reels export — works for both FB Reels and IG Reels (same shape)
       const url = trim(r['Reel Link']) || trim(r['URL']);
@@ -3225,32 +3320,6 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         impressions: num(r['Reach']) || num(r['Video Views']),
         avg_watch_seconds: numF(r['Avg. time watched (Seconds)']) || null,
         total_watch_seconds: numF(r['Video View time (Seconds)']) || null,
-        caption_hash: caption ? hashCaption(caption) : null,
-        source: 'csv'
-      };
-    }
-
-    if (format === 'youtube') {
-      const url = trim(r['URL']) || trim(r['Video URL']) || trim(r['Link']);
-      const externalId = extractYoutubeId(url) || trim(r['Video ID']) || trim(r['Id']);
-      if (!externalId) return null;
-      const caption = trim(r['Title']) || trim(r['Video']) || trim(r['Content']);
-      return {
-        external_id: externalId,
-        network: 'youtube',
-        post_type: 'video',
-        caption: caption || null,
-        permalink: url || null,
-        thumbnail_url: trim(r['Thumbnail']) || trim(r['Thumbnail URL']) || trim(r['image']) || null,
-        published_at: parseDate(trim(r['Date']) || trim(r['Published']) || trim(r['Timestamp'])),
-        views: num(r['Views']) || num(r['Plays']),
-        reach: num(r['Views']) || num(r['Plays']),
-        likes: num(r['Likes']),
-        comments: num(r['Comments']),
-        shares: num(r['Shares']),
-        impressions: num(r['Views']) || num(r['Plays']),
-        avg_watch_seconds: numF(r['Avg view duration']) || numF(r['Avg. time watched (Seconds)']) || null,
-        total_watch_seconds: numF(r['Watch time']) || numF(r['Watch Time (hours)']) ? numF(r['Watch Time (hours)']) * 3600 : null,
         caption_hash: caption ? hashCaption(caption) : null,
         source: 'csv'
       };
@@ -3358,12 +3427,22 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     return null;
   }
 
-  // Caption hash for cross-platform dedup. Normalizes whitespace and casing.
+  // Caption hash for cross-platform dedup. Strips hashtags, URLs, emojis, and platform-specific suffixes.
   function hashCaption(s) {
-    const normalized = String(s).toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 500);
+    let cleaned = String(s)
+      .toLowerCase()
+      .replace(/https?:\/\/\S+/g, '')                    // URLs
+      .replace(/#\w+/g, '')                              // hashtags
+      .replace(/@\w+/g, '')                              // mentions
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '') // most emoji ranges
+      .replace(/[^\w\s]/g, ' ')                          // punctuation → space
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 100);                                    // first 100 normalized chars
+    if (cleaned.length < 20) return null; // too short to dedupe reliably
     let h = 5381;
-    for (let i = 0; i < normalized.length; i++) {
-      h = ((h << 5) + h) + normalized.charCodeAt(i);
+    for (let i = 0; i < cleaned.length; i++) {
+      h = ((h << 5) + h) + cleaned.charCodeAt(i);
       h = h & h;
     }
     return 'h' + Math.abs(h).toString(36);
