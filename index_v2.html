@@ -1379,6 +1379,24 @@
   .carousel-type-badge.declaration { background: var(--terracotta); }
   .carousel-type-badge.repurposed_reel { background: var(--olive); }
   .carousel-type-badge.original_teaching { background: var(--pit); }
+
+  .reel-format-badge {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: white;
+    vertical-align: middle;
+    background: var(--olive);
+  }
+  .reel-format-badge.talking_head { background: var(--skin); }
+  .reel-format-badge.voiceover { background: var(--turmeric); }
+  .reel-format-badge.b_roll_only { background: var(--pit); }
+  .reel-format-badge.hybrid { background: var(--olive); }
   .carousel-slides {
     display: flex;
     gap: 10px;
@@ -1563,6 +1581,35 @@
     line-height: 1.55;
     color: var(--text-1);
     font-style: italic;
+  }
+
+  /* Sources strip on plan header */
+  .plan-sources-strip {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .plan-source-pill {
+    background: var(--surface);
+    border: 0.5px solid var(--bd-soft);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    color: var(--text-2);
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: default;
+  }
+  .plan-source-pill strong {
+    color: var(--olive);
+    font-weight: 700;
   }
 
   /* Skills cards */
@@ -3186,8 +3233,25 @@
     refineMessages: [], // { role: 'user' | 'assistant', content: string }
     refining: false,
     proofCorpus: [],   // top performers used in last generation, for reference rendering
+    knowledgeUsed: [], // knowledge docs injected into last generation
     expandedProofRef: null  // { dayId, postIndex } for proof popover state
   };
+
+  function renderPlanSourcesStrip() {
+    const proof = (planState.proofCorpus || []).length;
+    const knowledge = planState.knowledgeUsed || [];
+    if (!proof && !knowledge.length) return '';
+
+    const parts = [];
+    if (proof) {
+      parts.push(`<span class="plan-source-pill"><strong>${proof}</strong> proof posts</span>`);
+    }
+    if (knowledge.length) {
+      const docList = knowledge.map(d => esc(d.title || 'doc')).join(' · ');
+      parts.push(`<span class="plan-source-pill" title="${esc(docList)}"><strong>${knowledge.length}</strong> knowledge ${knowledge.length === 1 ? 'doc' : 'docs'}</span>`);
+    }
+    return `<div class="plan-sources-strip">Sources used: ${parts.join('')}</div>`;
+  }
 
   function renderPlannerContent() {
     if (!activeClient) {
@@ -3267,6 +3331,7 @@
           <div class="plan-header-meta">${esc(p.created_label || 'Just now')}</div>
           <h2 class="plan-header-title">${esc(p.week_of || 'Two-week plan')}</h2>
           ${p.planning_note ? `<p class="plan-header-sub">${esc(p.planning_note)}</p>` : ''}
+          ${renderPlanSourcesStrip()}
         </div>
         <div class="plan-actions">
           <button class="btn btn-ghost btn-sm" onclick="togglePlanBalance()">${planState.showBalance ? 'Hide' : 'Show'} pillar balance</button>
@@ -3319,7 +3384,7 @@
             <a onclick="collapsePlanCard()" style="cursor:pointer; font-size:11px; color:var(--olive); font-weight:700">Close</a>
           </div>
         </div>
-        <div class="plan-card-title">${esc(d.title || '')}${d.post_type === 'Carousel' && d.carousel_type ? `<span class="carousel-type-badge ${esc(d.carousel_type)}">${esc(formatCarouselType(d.carousel_type))}</span>` : ''}</div>
+        <div class="plan-card-title">${esc(d.title || '')}${d.post_type === 'Carousel' && d.carousel_type ? `<span class="carousel-type-badge ${esc(d.carousel_type)}">${esc(formatCarouselType(d.carousel_type))}</span>` : ''}${d.post_type === 'Reel' && d.reel_format ? `<span class="reel-format-badge ${esc(d.reel_format)}">${esc(formatReelFormat(d.reel_format))}</span>` : ''}</div>
         ${d.pillar ? `<div class="plan-card-pillar">${esc(d.pillar)}</div>` : ''}
         <div class="plan-card-expanded-body">
           ${d.strategic_reasoning ? `<div class="strategic-reasoning"><div class="strategic-reasoning-label">Strategic note</div><p>${esc(d.strategic_reasoning)}</p></div>` : ''}
@@ -3370,6 +3435,10 @@
 
   function formatCarouselType(t) {
     return ({ declaration: 'Declaration', repurposed_reel: 'Repurposed Reel', original_teaching: 'Original Teaching' })[t] || t;
+  }
+
+  function formatReelFormat(f) {
+    return ({ talking_head: 'Talking head', voiceover: 'Voiceover', b_roll_only: 'B-roll only', hybrid: 'Hybrid' })[f] || f;
   }
 
   function renderQuoteExtraction(d) {
@@ -3603,16 +3672,24 @@
     refreshPlannerScreen();
 
     try {
-      // Fetch top performers as proof corpus
-      const topPerformers = await fetchTopPerformers(activeClient.id, 20);
-      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers });
+      // Fetch top performers as proof corpus AND knowledge docs in parallel
+      const [topPerformers, knowledgeDocs] = await Promise.all([
+        fetchTopPerformers(activeClient.id, 20),
+        fetchKnowledgeForPlan(activeClient.id)
+      ]);
+      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers, knowledgeDocs });
       planState.plan = result;
       planState.plan.created_label = 'Just now';
       planState.proofCorpus = topPerformers;
+      planState.knowledgeUsed = knowledgeDocs;
       planState.generating = false;
       refreshPlannerScreen();
       const proofCount = topPerformers.length;
-      toast(proofCount > 0 ? `Plan ready · used ${proofCount} top performers as proof` : 'Plan ready', 'success');
+      const kbCount = knowledgeDocs.length;
+      const parts = [];
+      if (proofCount > 0) parts.push(`${proofCount} proof posts`);
+      if (kbCount > 0) parts.push(`${kbCount} knowledge ${kbCount === 1 ? 'doc' : 'docs'}`);
+      toast(parts.length ? `Plan ready · used ${parts.join(' + ')}` : 'Plan ready', 'success');
     } catch (e) {
       planState.generating = false;
       refreshPlannerScreen();
@@ -3620,8 +3697,52 @@
     }
   }
 
-  async function callClaudeForPlan({ apiKey, client, brief, weekOf, topPerformers = [] }) {
-    const systemPrompt = buildPlannerSystemPrompt(client, topPerformers);
+  // Fetch active knowledge docs for this client, filtered + budget-capped
+  async function fetchKnowledgeForPlan(clientId) {
+    try {
+      const docs = await sbGet(`knowledge_documents?client_id=eq.${clientId}&is_active=eq.true&select=id,title,doc_type,source_format,prompt_text,was_truncated,word_count,persona_tags&limit=50`);
+      if (!docs || docs.length === 0) return [];
+
+      // Filter: keep doc if persona_tags is empty (all personas) OR if any tagged persona is currently active
+      const activeSlugs = new Set((window.__activeSkills || []).filter(s => s.is_active).map(s => s.slug));
+      const filtered = docs.filter(d => {
+        const tags = Array.isArray(d.persona_tags) ? d.persona_tags : [];
+        if (tags.length === 0) return true; // empty = all personas can read
+        return tags.some(t => activeSlugs.has(t));
+      });
+
+      // Budget cap: max ~12,000 words across all knowledge docs
+      // Priority order: brand_voice > strategy_doc > audience_research > transcript > performance_report > document > note
+      const priority = { brand_voice: 1, strategy_doc: 2, audience_research: 3, transcript: 4, performance_report: 5, document: 6, note: 7 };
+      const sorted = [...filtered].sort((a, b) => (priority[a.doc_type] || 9) - (priority[b.doc_type] || 9));
+
+      const BUDGET = 12000;
+      let used = 0;
+      const selected = [];
+      for (const doc of sorted) {
+        const words = (doc.prompt_text || '').split(/\s+/).filter(Boolean).length;
+        if (used + words > BUDGET) {
+          // Try to fit a partial — if remaining budget gives us at least 500 words, include truncated
+          const remaining = BUDGET - used;
+          if (remaining >= 500 && doc.prompt_text) {
+            const partialWords = doc.prompt_text.split(/\s+/).slice(0, remaining).join(' ');
+            selected.push({ ...doc, prompt_text: partialWords + '\n\n[...truncated to fit prompt budget...]', _budget_truncated: true });
+            used += remaining;
+          }
+          break;
+        }
+        selected.push(doc);
+        used += words;
+      }
+      return selected;
+    } catch (e) {
+      console.warn('fetchKnowledgeForPlan failed:', e);
+      return [];
+    }
+  }
+
+  async function callClaudeForPlan({ apiKey, client, brief, weekOf, topPerformers = [], knowledgeDocs = [] }) {
+    const systemPrompt = buildPlannerSystemPrompt(client, topPerformers, knowledgeDocs);
     const userPrompt = buildPlannerUserPrompt({ brief, weekOf });
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3664,7 +3785,7 @@
     return parsed;
   }
 
-  function buildPlannerSystemPrompt(client, topPerformers = []) {
+  function buildPlannerSystemPrompt(client, topPerformers = [], knowledgeDocs = []) {
     const parts = [];
 
     // ---- Skills team intro (only if skills are loaded) ----
@@ -3824,15 +3945,22 @@ QUOTE POSTS — STRICT EXTRACTION RULES
 Quote posts work fundamentally differently from every other post type. They are NOT generated content. They are EXTRACTED content.
 
 WHAT A QUOTE POST IS:
-A single memorable sentence or short phrase pulled VERBATIM from one of her existing captions in the proof corpus, paired with strong visual treatment. The quote IS the post. Your job is curation, not authoring.
+A single memorable sentence or short phrase pulled VERBATIM from her existing material — either from her social captions in the proof corpus OR from her transcripts, brand voice samples, and copy context in the KNOWLEDGE LIBRARY. Quote posts pair this exact phrase with strong visual treatment. The quote IS the post. Your job is curation, not authoring.
 
 THE CARDINAL RULE — VERBATIM ONLY:
-The quote text MUST be the EXACT words from her caption. Do not rewrite. Do not "polish." Do not fix grammar. Do not combine two phrases. Do not paraphrase to make it cleaner. If you cannot find a clean extractable quote in the proof corpus that meets the criteria below, return fewer Quote posts in the plan. It is FAR better to have zero Quote posts than to fabricate one.
+The quote text MUST be the EXACT words from her actual material. Do not rewrite. Do not "polish." Do not fix grammar. Do not combine two phrases. Do not paraphrase to make it cleaner. If you cannot find a clean extractable quote that meets the criteria below, return fewer Quote posts in the plan. It is FAR better to have zero Quote posts than to fabricate one.
+
+WHERE TO LOOK (in priority order):
+1. Knowledge library transcripts (her actual spoken teaching — gold mine for quotes)
+2. Knowledge library brand voice / copy context docs (her actual written voice)
+3. Proof corpus captions (her recent published posts)
+
+Knowledge transcripts are typically the strongest source because they capture her real teaching voice in long-form. Captions are tighter but already-published — quoting them re-packages content the audience saw. Transcripts are unmined territory.
 
 QUOTE QUALIFICATION CRITERIA:
 Every quote you extract must pass ALL of these:
 
-✓ Verbatim from her caption (her exact words, no rewriting)
+✓ Verbatim from her material (her exact words, no rewriting)
 ✓ Under 25 words (10-18 words ideal)
 ✓ Stands alone (a stranger reading it cold understands it)
 ✓ Declarative or imperative tone (says something, doesn't explain)
@@ -3841,7 +3969,7 @@ Every quote you extract must pass ALL of these:
 
 DISQUALIFIERS — never use as a quote:
 
-✗ Bible verses (those aren't her quotes)
+✗ Bible verses (those aren't her quotes — those are scripture)
 ✗ Anything requiring context to understand
 ✗ Anything over 25 words
 ✗ Generic motivation ("believe in yourself" / "trust the process" / "your time is now")
@@ -3849,20 +3977,72 @@ DISQUALIFIERS — never use as a quote:
 ✗ Anything you had to alter from the source caption
 
 EXTRACTION PROCESS:
-1. Scan the proof corpus captions for sentences that pass all criteria
-2. Select the strongest candidate
-3. Set body field to the EXACT extracted text — character-for-character matching the source
-4. Set proof_post_refs to the post number you extracted it from (REQUIRED for Quote posts)
-5. Set visual_direction to typography/layout/color treatment (since the words are locked, visual is your only creative degree of freedom)
-6. Set hook to a brief description of why this quote stops the scroll (for the team's reference)
+1. Scan the knowledge library transcripts FIRST for sentences that pass all criteria
+2. Then scan brand voice / copy context docs
+3. Then scan the proof corpus captions
+4. Select the strongest candidate across all sources
+5. Set body field to the EXACT extracted text — character-for-character matching the source
+6. If extracted from PROOF CORPUS: set proof_post_refs to the post number (e.g., [3])
+7. If extracted from KNOWLEDGE LIBRARY: include in notes field "Extracted from [DOC #N: title]" for traceability. proof_post_refs may be empty for knowledge-sourced quotes.
+8. Set visual_direction to typography/layout/color treatment (since the words are locked, visual is your only creative degree of freedom)
+9. Set hook to a brief description of why this quote stops the scroll (for the team's reference)
 
 IF YOU CAN'T FIND A QUALIFYING QUOTE:
-Skip the Quote post. Replace it with a different post type (Reel, Carousel, Static). Tell the user via the planning_note that fewer Quote posts were generated because the proof corpus didn't yield enough qualifying extractions. This is honest and correct behavior. Do NOT fabricate quotes to fill the slot.
+Skip the Quote post. Replace it with a different post type (Reel, Carousel, Static). Tell the user via the planning_note that fewer Quote posts were generated because the source material didn't yield enough qualifying extractions. This is honest and correct behavior. Do NOT fabricate quotes to fill the slot.
 
 For single Static images (post_type = Static, NOT Quote): standard body + visual_direction + cta. Caption can be original.`);
       }
 
       parts.push(productionParts.join('\n'));
+    }
+
+    // ---- KNOWLEDGE LIBRARY — client-specific context the personas should consult ----
+    if (knowledgeDocs && knowledgeDocs.length > 0) {
+      const kbParts = [
+        '',
+        '═══════════════════════════════════════════',
+        'CLIENT KNOWLEDGE LIBRARY — READ AND USE',
+        '═══════════════════════════════════════════',
+        '',
+        `Below are ${knowledgeDocs.length} document${knowledgeDocs.length === 1 ? '' : 's'} from this client's knowledge base. These contain authoritative context: brand guidelines, transcripts of her actual teaching, voice samples, audience research, strategy briefs, and other material the team has captured.`,
+        '',
+        'CRITICAL — How each persona uses this:',
+        '  • Theo (Copywriter): For Quote posts, you may extract verbatim phrases from the TRANSCRIPTS and brand voice samples below — not just from the proof corpus. This is where her actual spoken/written teaching lives. ANY quote you extract must be word-for-word from one of these documents OR from the proof corpus. Cite which knowledge doc it came from.',
+        '  • Magnus (Brand Voice Linguist): The transcripts and copy context below show how she ACTUALLY talks — her catchphrases, her cadence, her punctuation patterns. Match this voice DNA exactly.',
+        '  • Sloane (Brand Steward): Brand guidelines documents below are authoritative. Read them to gate every brief.',
+        '  • Iris (Interview Director): Mine the transcripts for teachings she has named, frameworks she owns, stories she has told. Build interview questions that EXTEND these into new territory.',
+        '  • Whit (Performance Analyst): Audience research and strategy docs below tell you who you are directing for and what they need.',
+        '  • Dominic (Strategist): Strategy documents below describe the client team\'s direction. Honor them in sequencing.',
+        '',
+        'FORMATTING: Each document is presented with [DOC #N: title (type)] header. When you cite or quote from a knowledge doc, reference it by its number (e.g., "verbatim from [DOC #2]") so the team can verify in the UI.',
+        ''
+      ];
+
+      knowledgeDocs.forEach((doc, i) => {
+        const num = i + 1;
+        const typeLabel = ({
+          brand_voice: 'Brand voice / guidelines',
+          audience_research: 'Audience research',
+          transcript: 'Transcript',
+          performance_report: 'Performance report',
+          strategy_doc: 'Strategy document',
+          note: 'Note',
+          document: 'Document'
+        })[doc.doc_type] || doc.doc_type;
+
+        kbParts.push(`--- [DOC #${num}: ${doc.title} (${typeLabel}${doc.was_truncated ? ', truncated' : ''})] ---`);
+        kbParts.push(doc.prompt_text || '');
+        if (doc._budget_truncated) {
+          kbParts.push('[This doc was further truncated to fit prompt budget. The user has the full text.]');
+        }
+        kbParts.push('');
+      });
+
+      kbParts.push('═══════════════════════════════════════════');
+      kbParts.push('END KNOWLEDGE LIBRARY');
+      kbParts.push('═══════════════════════════════════════════');
+
+      parts.push(kbParts.join('\n'));
     }
 
     if (topPerformers && topPerformers.length > 0) {
@@ -3965,7 +4145,8 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       "photo_direction": "for Reels only — what stills to intercut",
       "carousel_type": "for Carousels only — must be exactly: 'declaration' | 'repurposed_reel' | 'original_teaching'",
       "slides": "for Carousels only — array of slide objects. Each slide: { slide_number: 1, role: 'hook'|'declaration'|'teaching'|'cta', content: 'the actual text/copy that appears on this slide' }. Typically 5-7 slides.",
-      "body": "for Statics — original caption content. For QUOTES — the EXACT VERBATIM text extracted from the proof corpus caption (no rewording allowed). NOT used for Carousels (use slides instead).",
+      "body": "THE CAPTION that accompanies the post on IG/FB/TikTok. REQUIRED for ALL post types: Reels, Carousels, Statics, and Quotes. For Reels: the caption that sits below the Reel — should complement the spoken content, not transcribe it. For Carousels: the caption that sits below the carousel — should add framing or context, NOT recap the slides. For Statics: the caption itself. For QUOTES: the EXACT VERBATIM text extracted from the source (no rewording). The caption is Theo's primary deliverable — every post needs one.",
+      "reel_format": "for Reels only — must be exactly one of: 'talking_head' | 'voiceover' | 'b_roll_only' | 'hybrid'. talking_head = face-to-camera primary visual, her speaking on screen. voiceover = her voice as the audio (often pulled from a talking-head recording's audio track) paired with b-roll visuals. b_roll_only = silent storytelling, no voice, text overlays. hybrid = talking head with significant b-roll cut-ins.",
       "visual_direction": "for Statics/Carousels/Quotes — what this looks like (typography, imagery, treatment). For Quotes specifically: this is your ONLY creative degree of freedom since the words are locked.",
       "cta": "the call to action",
       "strategic_reasoning": "OPTIONAL — only populate this field for high-stakes or non-obvious choices (e.g. unusual pillar weighting, non-obvious format choice, sequencing rationale). Leave empty/omit for routine cards. Most cards do NOT need this field. Be sparse.",
@@ -3975,11 +4156,25 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
   ]
 }
 
-For Reels: brand_police_question, brand_police_question_alternatives (2 items), talking_head_points, b_roll_direction, photo_direction, hook, hook_alternatives (2 items) are required.
-For Carousels: carousel_type, slides, hook, and hook_alternatives (2 items) are required. visual_direction describes typography/treatment.
-For Quote posts: body MUST be the verbatim extracted phrase from a proof corpus caption, proof_post_refs MUST cite the source post (single integer in array), visual_direction describes typography/imagery treatment. If no qualifying quote can be extracted from the proof corpus, do NOT include a Quote post in the plan — substitute a different post type instead. hook_alternatives not required for Quotes (the words are locked).
+For Reels: brand_police_question, brand_police_question_alternatives (2 items), talking_head_points, b_roll_direction, photo_direction, hook, hook_alternatives (2 items), reel_format, AND body (the caption) are required.
+For Carousels: carousel_type, slides, hook, hook_alternatives (2 items), AND body (the caption) are required. visual_direction describes typography/treatment.
+For Quote posts: body MUST be the verbatim extracted phrase, proof_post_refs MUST cite the source post if from proof corpus, visual_direction describes typography/imagery treatment. If no qualifying quote can be extracted, do NOT include a Quote post in the plan. hook_alternatives not required for Quotes (the words are locked).
 For Statics: body, visual_direction, cta are required. hook_alternatives optional.
-For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels and Quote posts it MUST be non-empty.
+For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels and Quote posts (when sourced from proof corpus) it MUST be non-empty. body (the caption) is REQUIRED for ALL post types — no exceptions.
+
+CRITICAL CAPTION RULE FOR REPURPOSED-REEL CAROUSELS:
+When carousel_type = 'repurposed_reel', the SLIDES convert the source Reel's teaching into a new format (this is the format's purpose). BUT the CAPTION must be NEW writing — it must NOT recap, transcribe, or copy the source Reel's caption. The caption's job is to add framing for the carousel (why this teaching deserves a re-read, what the swipe will reveal, what to do with what they learn). Failing this — pasting the source Reel's caption verbatim or paraphrasing it — wastes the format and disrespects the audience who already saw the original.
+
+CRITICAL CAPTION RULE FOR ALL POST TYPES:
+The caption is Theo's most-judged deliverable. For Tiffany specifically (and any client with strong voice rules), captions must:
+- Match her cadence verbatim where possible (use catchphrases from the Knowledge Library / Brand Bible)
+- Honor every voice rule in her voice_instructions and brand profile
+- Drive the right CTA (book / video / community / no-CTA-attract — read the strategy brief)
+- Have a strong opening line that earns the first second of attention
+- NEVER feel like generic content marketing for the niche
+
+REEL FORMAT — set this on every Reel:
+Look at how the post is meant to be produced. If it's pure b-roll with text overlays and no voice, that's b_roll_only (silent storytelling, attract format). If she's speaking on camera as the primary visual, that's talking_head. If her voice is the audio but visuals are b-roll cut-ins, that's voiceover (this is common — voiceover Reels often pull audio from talking-head recordings, freeing the visual layer). If it's a mix of face-to-camera with significant b-roll cut-ins, that's hybrid. Set this field accurately so the production team knows what they're shooting/editing.
 
 CAROUSEL TYPE MIX TARGET for the 14-day plan:
 - If the plan includes ~3-4 carousels total, aim for: 1 declaration / 2 repurposed-reel / 1 original-teaching
@@ -4012,9 +4207,13 @@ CAROUSEL TYPE MIX TARGET for the 14-day plan:
     refreshPlannerScreen();
 
     try {
-      const topPerformers = await fetchTopPerformers(activeClient.id, 20);
+      const [topPerformers, knowledgeDocs] = await Promise.all([
+        fetchTopPerformers(activeClient.id, 20),
+        fetchKnowledgeForPlan(activeClient.id)
+      ]);
       planState.proofCorpus = topPerformers;
-      const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages, topPerformers });
+      planState.knowledgeUsed = knowledgeDocs;
+      const updated = await callClaudeForRefine({ apiKey, client: activeClient, plan: planState.plan, history: planState.refineMessages, topPerformers, knowledgeDocs });
       // Replace plan
       planState.plan = { ...planState.plan, ...updated };
       planState.plan.days = (updated.days || planState.plan.days).map((d, idx) => ({
@@ -4042,11 +4241,11 @@ CAROUSEL TYPE MIX TARGET for the 14-day plan:
     }
   }
 
-  async function callClaudeForRefine({ apiKey, client, plan, history, topPerformers = [] }) {
+  async function callClaudeForRefine({ apiKey, client, plan, history, topPerformers = [], knowledgeDocs = [] }) {
     const lastMsg = history[history.length - 1].content;
     const priorTurns = history.slice(0, -1);
 
-    const systemPrompt = `${buildPlannerSystemPrompt(client, topPerformers)}
+    const systemPrompt = `${buildPlannerSystemPrompt(client, topPerformers, knowledgeDocs)}
 
 REFINE MODE — STRICT BEHAVIOR:
 
@@ -4169,7 +4368,8 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         photo_direction: d.photo_direction || null,
         proof_post_refs: Array.isArray(d.proof_post_refs) ? d.proof_post_refs : null,
         carousel_type: d.carousel_type || null,
-        slides: Array.isArray(d.slides) ? d.slides : null
+        slides: Array.isArray(d.slides) ? d.slides : null,
+        reel_format: d.reel_format || null
       }));
 
       if (dayRows.length) {
