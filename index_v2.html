@@ -1595,7 +1595,243 @@
     justify-content: flex-end;
     align-items: center;
   }
+
+  /* Knowledge tab */
+  .kb-empty {
+    background: white;
+    border: 0.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 36px 28px;
+    text-align: center;
+  }
+  .kb-empty h3 { margin: 0 0 6px; color: var(--text-1); font-size: 18px; font-weight: 700; }
+  .kb-empty p { margin: 0 auto 18px; color: var(--text-2); font-size: 14px; line-height: 1.55; max-width: 480px; }
+
+  .kb-drop-zone {
+    background: white;
+    border: 1.5px dashed var(--bd-strong);
+    border-radius: var(--r-lg);
+    padding: 32px 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 120ms, background 120ms;
+    margin-bottom: 16px;
+  }
+  .kb-drop-zone:hover, .kb-drop-zone.dragover {
+    border-color: var(--olive);
+    background: var(--flesh-pale);
+  }
+  .kb-drop-zone.dragover { border-style: solid; }
+  .kb-drop-zone h4 { margin: 0 0 4px; color: var(--text-1); font-size: 15px; font-weight: 700; }
+  .kb-drop-zone p { margin: 0; color: var(--text-3); font-size: 13px; }
+
+  .kb-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .kb-toolbar .kb-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    font-size: 13px;
+    background: white;
+    color: var(--text-1);
+  }
+  .kb-toolbar .kb-search:focus { outline: none; border-color: var(--olive); }
+  .kb-toolbar .kb-filter {
+    padding: 8px 12px;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    font-size: 12px;
+    background: white;
+    color: var(--text-1);
+    cursor: pointer;
+  }
+
+  .kb-doc-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .kb-doc-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 120ms;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+  }
+  .kb-doc-card:hover { border-color: var(--olive); }
+  .kb-doc-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .kb-doc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.35;
+    margin: 0;
+    word-break: break-word;
+  }
+  .kb-doc-format-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: var(--surface);
+    color: var(--text-2);
+    flex-shrink: 0;
+  }
+  .kb-doc-format-badge.pdf { background: #FEE2E2; color: #7F1D1D; }
+  .kb-doc-format-badge.docx { background: #DBEAFE; color: #1E3A8A; }
+  .kb-doc-format-badge.txt, .kb-doc-format-badge.note { background: var(--surface); color: var(--text-2); }
+  .kb-doc-format-badge.vtt { background: #E9D5FF; color: #581C87; }
+  .kb-doc-format-badge.csv, .kb-doc-format-badge.xlsx, .kb-doc-format-badge.xls { background: #D1FAE5; color: #065F46; }
+
+  .kb-doc-meta {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kb-doc-preview {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .kb-doc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 6px;
+  }
+  .kb-doc-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--flesh-pale);
+    color: var(--olive);
+  }
+  .kb-doc-truncated-flag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  /* Knowledge document edit modal */
+  .kb-edit-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 42, 26, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .kb-edit-overlay.open { display: flex; }
+  .kb-edit-box {
+    background: var(--cream);
+    border-radius: var(--r-lg);
+    width: 100%;
+    max-width: 900px;
+    max-height: 92vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  }
+  .kb-edit-head {
+    padding: 18px 24px;
+    border-bottom: 0.5px solid var(--bd-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .kb-edit-body {
+    padding: 18px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .kb-edit-foot {
+    padding: 14px 24px;
+    border-top: 0.5px solid var(--bd-soft);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .kb-tag-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .kb-tag-checkboxes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    background: white;
+    user-select: none;
+  }
+  .kb-tag-checkboxes label:has(input:checked) {
+    background: var(--flesh-pale);
+    color: var(--olive);
+    border-color: var(--flesh-dk);
+  }
+  .kb-tag-checkboxes input { width: auto; margin: 0; }
+  .kb-import-feedback {
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .kb-import-feedback.ok { background: var(--flesh-pale); color: var(--olive); border: 0.5px solid var(--flesh-dk); }
+  .kb-import-feedback.err { background: #F8DDD0; color: var(--terracotta); border: 0.5px solid #E8B8A0; }
+  .kb-import-feedback.working { background: var(--surface); color: var(--text-2); border: 0.5px solid var(--bd-soft); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Configure pdf.js worker
+  if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1833,6 +2069,24 @@
         <span id="skill-edit-status" style="color:var(--text-3); font-size:12px; margin-right:auto"></span>
         <button class="btn btn-ghost" onclick="closeSkillEdit()">Cancel</button>
         <button class="btn btn-primary" id="skill-edit-save-btn" onclick="saveSkillEdit()">Save expertise</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="kb-edit-overlay" class="kb-edit-overlay" onclick="if(event.target===this) closeKbEdit()">
+    <div class="kb-edit-box">
+      <div class="kb-edit-head">
+        <div>
+          <h3 class="modal-title" id="kb-edit-title">Edit document</h3>
+          <p class="modal-sub" id="kb-edit-sub">—</p>
+        </div>
+        <button class="modal-close" onclick="closeKbEdit()" aria-label="Close">×</button>
+      </div>
+      <div class="kb-edit-body" id="kb-edit-body"></div>
+      <div class="kb-edit-foot">
+        <button class="btn btn-ghost" style="color:var(--terracotta); margin-right:auto" onclick="deleteKbDoc()" id="kb-edit-delete-btn">Delete</button>
+        <button class="btn btn-ghost" onclick="closeKbEdit()">Cancel</button>
+        <button class="btn btn-primary" id="kb-edit-save-btn" onclick="saveKbDoc()">Save</button>
       </div>
     </div>
   </div>
@@ -2415,8 +2669,11 @@
       return subnavWrap + renderPerformanceContent();
     }
 
+    if (sub === 'kb') {
+      return subnavWrap + renderKnowledgeContent();
+    }
+
     const map = {
-      kb: { title: 'Knowledge library — coming next', body: 'Note-style document library. Drag-and-drop transcripts, brand docs, META reports — feels like Notes app, not a database form.' },
       history: { title: 'Plan timeline — coming next', body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.' },
       ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
       reports: { title: 'Monthly reports — coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
@@ -3883,7 +4140,535 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     return ({ all: 'All formats', reel: 'Reels', carousel: 'Carousels', story: 'Stories', video: 'Videos', static: 'Static' })[f] || f;
   }
 
-  async function loadPerformanceData() {
+  // ============================================================================
+  // KNOWLEDGE TAB
+  // ============================================================================
+  const kbState = {
+    docs: [],
+    loaded: false,
+    importing: false,
+    importMessage: null,
+    importMessageKind: null,
+    searchTerm: '',
+    formatFilter: 'all',
+    typeFilter: 'all',
+    editingDoc: null
+  };
+
+  // Reset on client switch — wire into existing openClient wrapper
+  const _origOpenClientForKb = openClient;
+  openClient = async function(clientId, subpage) {
+    if (clientId !== activeClient?.id) {
+      kbState.docs = [];
+      kbState.loaded = false;
+      kbState.importMessage = null;
+      kbState.searchTerm = '';
+      kbState.formatFilter = 'all';
+      kbState.typeFilter = 'all';
+    }
+    return _origOpenClientForKb.call(this, clientId, subpage);
+  };
+
+  function renderKnowledgeContent() {
+    if (!activeClient) {
+      return `<div class="placeholder"><h3>No client selected</h3><p>Pick a client from the rail.</p></div>`;
+    }
+    if (!kbState.loaded) {
+      loadKnowledgeData();
+      return `<div class="kb-empty"><h3>Loading knowledge…</h3><p>Fetching your documents.</p></div>`;
+    }
+
+    const dropZone = `
+      <div class="kb-drop-zone"
+           id="kb-drop-zone"
+           onclick="document.getElementById('kb-file-input').click()"
+           ondragover="event.preventDefault(); this.classList.add('dragover');"
+           ondragleave="this.classList.remove('dragover');"
+           ondrop="event.preventDefault(); this.classList.remove('dragover'); handleKbFiles(event.dataTransfer.files);">
+        <h4>Drop documents here or click to browse</h4>
+        <p>PDF, DOCX, TXT, VTT, CSV, XLS — transcripts, brand guidelines, audience research, performance reports. We'll extract the text and tag it for the right personas.</p>
+        <input type="file" id="kb-file-input" accept=".pdf,.docx,.txt,.vtt,.csv,.xls,.xlsx" multiple style="display:none" onchange="handleKbFiles(event.target.files)">
+      </div>
+      ${kbState.importMessage ? `<div class="kb-import-feedback ${kbState.importMessageKind}">${esc(kbState.importMessage)}</div>` : ''}
+      <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center">
+        <button class="btn btn-skin btn-sm" onclick="openKbNewNote()">+ Add note</button>
+        <span style="color:var(--text-3); font-size:12px">For quick observations, calls with the client, ideas worth capturing.</span>
+      </div>
+    `;
+
+    if (kbState.docs.length === 0) {
+      return dropZone + `
+        <div class="kb-empty" style="margin-top:20px">
+          <h3>No documents yet</h3>
+          <p>Upload brand guidelines, transcripts, audience research, META reports — anything your personas should know about ${esc(activeClient.brand_name || activeClient.name)}.</p>
+        </div>
+      `;
+    }
+
+    return dropZone + renderKnowledgeLoaded();
+  }
+
+  function renderKnowledgeLoaded() {
+    const docs = kbState.docs;
+    const types = ['all', ...new Set(docs.map(d => d.doc_type).filter(Boolean))];
+    const formats = ['all', ...new Set(docs.map(d => d.source_format).filter(Boolean))];
+
+    const filtered = docs.filter(d => {
+      if (kbState.typeFilter !== 'all' && d.doc_type !== kbState.typeFilter) return false;
+      if (kbState.formatFilter !== 'all' && d.source_format !== kbState.formatFilter) return false;
+      if (kbState.searchTerm) {
+        const term = kbState.searchTerm.toLowerCase();
+        const haystack = `${d.title} ${d.notes || ''} ${(d.raw_text || '').slice(0, 500)}`.toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      return true;
+    });
+
+    const totalWords = docs.reduce((sum, d) => sum + (d.word_count || 0), 0);
+    const truncatedCount = docs.filter(d => d.was_truncated).length;
+
+    return `
+      <div class="perf-summary" style="margin-bottom:16px">
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Documents</div>
+          <div class="perf-summary-num">${docs.length}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Total words</div>
+          <div class="perf-summary-num">${totalWords.toLocaleString()}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Doc types</div>
+          <div class="perf-summary-num">${new Set(docs.map(d => d.doc_type)).size}</div>
+        </div>
+        <div class="perf-summary-box">
+          <div class="perf-summary-lbl">Truncated</div>
+          <div class="perf-summary-num">${truncatedCount}</div>
+        </div>
+      </div>
+
+      <div class="kb-toolbar">
+        <input class="kb-search" type="text" placeholder="Search documents…" value="${esc(kbState.searchTerm)}" oninput="kbSetSearch(this.value)">
+        <select class="kb-filter" onchange="kbSetTypeFilter(this.value)">
+          ${types.map(t => `<option value="${esc(t)}" ${kbState.typeFilter === t ? 'selected' : ''}>${t === 'all' ? 'All types' : esc(formatDocTypeLabel(t))}</option>`).join('')}
+        </select>
+        <select class="kb-filter" onchange="kbSetFormatFilter(this.value)">
+          ${formats.map(f => `<option value="${esc(f)}" ${kbState.formatFilter === f ? 'selected' : ''}>${f === 'all' ? 'All formats' : esc(f.toUpperCase())}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="kb-doc-list">
+        ${filtered.length === 0 ?
+          '<p style="color:var(--text-3); font-size:13px; grid-column:1/-1">No documents match these filters.</p>' :
+          filtered.map(d => renderKbDocCard(d)).join('')}
+      </div>
+    `;
+  }
+
+  function renderKbDocCard(d) {
+    const fmt = (d.source_format || 'note').toLowerCase();
+    const date = d.created_at
+      ? new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : '';
+    const preview = (d.raw_text || d.notes || '').slice(0, 200);
+    const tags = Array.isArray(d.persona_tags) ? d.persona_tags : [];
+    const skillByName = Object.fromEntries((window.__activeSkills || []).map(s => [s.slug, s]));
+    return `
+      <div class="kb-doc-card" onclick='openKbDocEdit(${JSON.stringify(d.id)})'>
+        <div class="kb-doc-card-header">
+          <h5 class="kb-doc-title">${esc(d.title)}</h5>
+          <span class="kb-doc-format-badge ${esc(fmt)}">${esc(fmt)}</span>
+        </div>
+        <div class="kb-doc-meta">${esc(formatDocTypeLabel(d.doc_type))} · ${esc(date)} · ${(d.word_count || 0).toLocaleString()} words${d.was_truncated ? ' · <span class="kb-doc-truncated-flag">truncated</span>' : ''}</div>
+        ${preview ? `<p class="kb-doc-preview">${esc(preview)}</p>` : ''}
+        ${tags.length > 0 ? `
+          <div class="kb-doc-tags">
+            ${tags.map(t => `<span class="kb-doc-tag">${esc(skillByName[t]?.name || t)}</span>`).join('')}
+          </div>
+        ` : '<div class="kb-doc-tags"><span style="color:var(--text-3); font-size:10px; text-transform:uppercase; letter-spacing:0.5px">All personas</span></div>'}
+      </div>
+    `;
+  }
+
+  function formatDocTypeLabel(t) {
+    return ({
+      brand_voice: 'Brand voice',
+      audience_research: 'Audience research',
+      transcript: 'Transcript',
+      performance_report: 'Performance report',
+      strategy_doc: 'Strategy doc',
+      note: 'Note',
+      document: 'Document'
+    })[t] || t;
+  }
+
+  function kbSetSearch(v) { kbState.searchTerm = v; refreshKbScreen(); }
+  function kbSetTypeFilter(v) { kbState.typeFilter = v; refreshKbScreen(); }
+  function kbSetFormatFilter(v) { kbState.formatFilter = v; refreshKbScreen(); }
+
+  function refreshKbScreen() {
+    if (currentScreen !== 'studio' || activeSubpage !== 'kb') return;
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage('kb');
+  }
+
+  async function loadKnowledgeData() {
+    if (!activeClient) return;
+    try {
+      const docs = await sbGet(`knowledge_documents?client_id=eq.${activeClient.id}&is_active=eq.true&order=created_at.desc&select=*&limit=200`);
+      kbState.docs = docs || [];
+      kbState.loaded = true;
+      refreshKbScreen();
+    } catch (e) {
+      kbState.loaded = true;
+      kbState.importMessage = 'Could not load knowledge: ' + e.message;
+      kbState.importMessageKind = 'err';
+      refreshKbScreen();
+    }
+  }
+
+  // ----------- File handling -----------
+  async function handleKbFiles(fileList) {
+    if (!activeClient) return toast('No client selected', 'error');
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    kbState.importing = true;
+    kbState.importMessage = `Processing ${files.length} file${files.length > 1 ? 's' : ''}…`;
+    kbState.importMessageKind = 'working';
+    refreshKbScreen();
+
+    let processed = 0;
+    let truncated = 0;
+    const errors = [];
+
+    for (const file of files) {
+      try {
+        const result = await processKbFile(file);
+        if (result.was_truncated) truncated++;
+        processed++;
+      } catch (e) {
+        errors.push(`${file.name}: ${e.message}`);
+        console.error('KB file failed:', file.name, e);
+      }
+    }
+
+    kbState.importing = false;
+    if (errors.length && processed === 0) {
+      kbState.importMessage = 'Import failed: ' + errors.join(' · ');
+      kbState.importMessageKind = 'err';
+    } else {
+      const parts = [];
+      if (processed) parts.push(`${processed} document${processed > 1 ? 's' : ''} added`);
+      if (truncated) parts.push(`${truncated} truncated to fit prompt budget`);
+      if (errors.length) parts.push(`${errors.length} failed`);
+      kbState.importMessage = parts.join(' · ');
+      kbState.importMessageKind = errors.length ? 'err' : 'ok';
+    }
+
+    await loadKnowledgeData();
+  }
+
+  async function processKbFile(file) {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    let rawText = '';
+
+    if (ext === 'txt' || ext === 'vtt' || ext === 'md') {
+      rawText = await file.text();
+      if (ext === 'vtt') {
+        // Strip VTT timing markers and metadata
+        rawText = parseVtt(rawText);
+      }
+    } else if (ext === 'pdf') {
+      rawText = await parsePdf(file);
+    } else if (ext === 'docx') {
+      rawText = await parseDocx(file);
+    } else if (ext === 'csv') {
+      rawText = await parseCsvForKb(file);
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      rawText = await parseXlsx(file);
+    } else {
+      throw new Error(`Unsupported file format: .${ext}`);
+    }
+
+    rawText = (rawText || '').trim();
+    if (!rawText) throw new Error('No text extracted from file');
+
+    // Word count
+    const words = rawText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    // Truncate for prompt budget — first 3000 words
+    const PROMPT_BUDGET_WORDS = 3000;
+    let promptText = rawText;
+    let wasTruncated = false;
+    if (wordCount > PROMPT_BUDGET_WORDS) {
+      promptText = words.slice(0, PROMPT_BUDGET_WORDS).join(' ');
+      promptText += '\n\n[...document truncated — only first ' + PROMPT_BUDGET_WORDS.toLocaleString() + ' of ' + wordCount.toLocaleString() + ' words shown to personas...]';
+      wasTruncated = true;
+    }
+
+    // Heuristic doc_type guess from filename
+    const lower = file.name.toLowerCase();
+    let docType = 'document';
+    if (lower.includes('transcript') || ext === 'vtt') docType = 'transcript';
+    else if (lower.includes('brand') && (lower.includes('voice') || lower.includes('guideline'))) docType = 'brand_voice';
+    else if (lower.includes('audience')) docType = 'audience_research';
+    else if (lower.includes('meta') || lower.includes('performance') || lower.includes('insights')) docType = 'performance_report';
+    else if (lower.includes('strateg')) docType = 'strategy_doc';
+
+    // Insert
+    const payload = {
+      client_id: activeClient.id,
+      title: file.name.replace(/\.[^.]+$/, ''),
+      doc_type: docType,
+      source_filename: file.name,
+      source_format: ext,
+      raw_text: rawText,
+      prompt_text: promptText,
+      was_truncated: wasTruncated,
+      word_count: wordCount,
+      persona_tags: [],
+      is_active: true
+    };
+    await sbPost('knowledge_documents', payload);
+    return { was_truncated: wasTruncated };
+  }
+
+  function parseVtt(text) {
+    // Strip WEBVTT header, timestamps, cue identifiers
+    const lines = text.split(/\r?\n/);
+    const content = [];
+    for (const line of lines) {
+      // Skip empty, WEBVTT, NOTE, timing lines
+      if (!line.trim()) continue;
+      if (/^WEBVTT/i.test(line)) continue;
+      if (/^NOTE/i.test(line)) continue;
+      if (/^\d{2}:\d{2}/.test(line)) continue; // timing
+      if (/-->/.test(line)) continue; // timing arrow
+      if (/^\d+$/.test(line.trim())) continue; // cue number
+      // Strip inline VTT tags
+      const cleaned = line.replace(/<[^>]+>/g, '').trim();
+      if (cleaned) content.push(cleaned);
+    }
+    return content.join(' ');
+  }
+
+  async function parsePdf(file) {
+    if (!window.pdfjsLib) throw new Error('PDF parser not loaded — refresh the page');
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const texts = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => item.str).join(' ');
+      texts.push(pageText);
+      // Hard cap: don't try to parse more than 1000 pages
+      if (i >= 1000) {
+        texts.push('\n\n[PDF capped at 1000 pages]');
+        break;
+      }
+    }
+    return texts.join('\n\n');
+  }
+
+  async function parseDocx(file) {
+    if (!window.mammoth) throw new Error('DOCX parser not loaded — refresh the page');
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await window.mammoth.extractRawText({ arrayBuffer });
+    return result.value || '';
+  }
+
+  async function parseCsvForKb(file) {
+    const text = await file.text();
+    // Simple flat representation — header row, then each data row as "k: v" pairs
+    const rows = parseCsv(text);
+    if (rows.length === 0) return '';
+    const headers = rows[0];
+    const lines = [`Columns: ${headers.join(', ')}`, ''];
+    rows.slice(1).forEach((row, i) => {
+      const pairs = headers.map((h, j) => `${h}: ${row[j] || ''}`).join(' · ');
+      lines.push(`Row ${i + 1}: ${pairs}`);
+    });
+    return lines.join('\n');
+  }
+
+  async function parseXlsx(file) {
+    if (!window.XLSX) throw new Error('Excel parser not loaded — refresh the page');
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = window.XLSX.read(arrayBuffer, { type: 'array' });
+    const texts = [];
+    workbook.SheetNames.forEach(name => {
+      const sheet = workbook.Sheets[name];
+      const csv = window.XLSX.utils.sheet_to_csv(sheet);
+      texts.push(`=== Sheet: ${name} ===\n${csv}`);
+    });
+    return texts.join('\n\n');
+  }
+
+  // ----------- Notes (quick text capture) -----------
+  function openKbNewNote() {
+    kbState.editingDoc = {
+      id: null,
+      title: '',
+      doc_type: 'note',
+      source_format: 'note',
+      raw_text: '',
+      prompt_text: '',
+      word_count: 0,
+      was_truncated: false,
+      persona_tags: [],
+      notes: ''
+    };
+    renderKbEditModal();
+    document.getElementById('kb-edit-overlay').classList.add('open');
+  }
+
+  function openKbDocEdit(docId) {
+    const doc = kbState.docs.find(d => d.id === docId);
+    if (!doc) return;
+    kbState.editingDoc = { ...doc };
+    renderKbEditModal();
+    document.getElementById('kb-edit-overlay').classList.add('open');
+  }
+
+  function renderKbEditModal() {
+    const d = kbState.editingDoc;
+    if (!d) return;
+    const isNote = d.source_format === 'note' || d.id === null;
+    const skills = window.__activeSkills || [];
+    const tags = Array.isArray(d.persona_tags) ? d.persona_tags : [];
+
+    const docTypeOptions = ['note', 'brand_voice', 'audience_research', 'transcript', 'performance_report', 'strategy_doc', 'document'];
+
+    document.getElementById('kb-edit-title').textContent = d.id ? 'Edit document' : 'Add note';
+    document.getElementById('kb-edit-sub').textContent = d.id
+      ? `${(d.source_format || '').toUpperCase()} · ${(d.word_count || 0).toLocaleString()} words${d.was_truncated ? ' · truncated for prompt budget' : ''}`
+      : 'Quick text capture for ideas, observations, call notes';
+
+    const body = `
+      <div style="margin-bottom:14px">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Title</label>
+        <input type="text" id="kb-edit-doc-title" class="modal-input" value="${esc(d.title || '')}" placeholder="What is this document about?">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Type</label>
+        <select id="kb-edit-doc-type" class="kb-filter" style="width:100%">
+          ${docTypeOptions.map(t => `<option value="${esc(t)}" ${d.doc_type === t ? 'selected' : ''}>${esc(formatDocTypeLabel(t))}</option>`).join('')}
+        </select>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:6px">Personas who should read this</label>
+        <p style="color:var(--text-3); font-size:12px; margin:0 0 10px">Leave all unchecked = all personas can read it. Check specific personas to limit.</p>
+        <div class="kb-tag-checkboxes">
+          ${skills.map(s => `
+            <label>
+              <input type="checkbox" value="${esc(s.slug)}" ${tags.includes(s.slug) ? 'checked' : ''}>
+              ${esc(s.name)} <span style="color:var(--text-3); font-size:10px">— ${esc(s.role)}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">${isNote ? 'Note content' : 'Document content (extracted text)'}</label>
+        <textarea id="kb-edit-content" class="modal-textarea" style="min-height:300px; font-family:${isNote ? 'inherit' : 'ui-monospace, \'SF Mono\', Menlo, monospace'}; font-size:13px; line-height:1.6">${esc(d.raw_text || d.prompt_text || '')}</textarea>
+        ${d.was_truncated ? `<p style="color:var(--turmeric); font-size:11px; margin-top:6px">⚠ This document was truncated for prompt budget. Personas only see the first 3,000 words. Full text is preserved here.</p>` : ''}
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">User notes (optional)</label>
+        <textarea id="kb-edit-notes" class="modal-textarea" style="min-height:60px" placeholder="Optional: notes for yourself about this document">${esc(d.notes || '')}</textarea>
+      </div>
+    `;
+    document.getElementById('kb-edit-body').innerHTML = body;
+    // Hide delete button for new (unsaved) docs
+    const delBtn = document.getElementById('kb-edit-delete-btn');
+    if (delBtn) delBtn.style.display = d.id ? '' : 'none';
+  }
+
+  function closeKbEdit() {
+    document.getElementById('kb-edit-overlay').classList.remove('open');
+    kbState.editingDoc = null;
+  }
+
+  async function saveKbDoc() {
+    const d = kbState.editingDoc;
+    if (!d) return;
+
+    const title = document.getElementById('kb-edit-doc-title').value.trim();
+    const docType = document.getElementById('kb-edit-doc-type').value;
+    const content = document.getElementById('kb-edit-content').value.trim();
+    const notes = document.getElementById('kb-edit-notes').value.trim();
+    const tags = Array.from(document.querySelectorAll('.kb-tag-checkboxes input:checked')).map(el => el.value);
+
+    if (!title) return toast('Title is required', 'error');
+    if (!content) return toast('Content is required', 'error');
+
+    const words = content.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    const PROMPT_BUDGET_WORDS = 3000;
+    let promptText = content;
+    let wasTruncated = false;
+    if (wordCount > PROMPT_BUDGET_WORDS) {
+      promptText = words.slice(0, PROMPT_BUDGET_WORDS).join(' ') + '\n\n[...document truncated — only first ' + PROMPT_BUDGET_WORDS.toLocaleString() + ' of ' + wordCount.toLocaleString() + ' words shown to personas...]';
+      wasTruncated = true;
+    }
+
+    const updates = {
+      title,
+      doc_type: docType,
+      raw_text: content,
+      prompt_text: promptText,
+      was_truncated: wasTruncated,
+      word_count: wordCount,
+      persona_tags: tags,
+      notes: notes || null,
+      updated_at: new Date().toISOString()
+    };
+
+    const btn = document.getElementById('kb-edit-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      if (d.id) {
+        await sbPatch(`knowledge_documents?id=eq.${d.id}`, updates);
+      } else {
+        await sbPost('knowledge_documents', {
+          ...updates,
+          client_id: activeClient.id,
+          source_format: 'note',
+          is_active: true
+        });
+      }
+      toast('Saved', 'success');
+      closeKbEdit();
+      await loadKnowledgeData();
+    } catch (e) {
+      toast('Save failed: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    }
+  }
+
+  async function deleteKbDoc() {
+    const d = kbState.editingDoc;
+    if (!d?.id) return;
+    if (!confirm(`Delete "${d.title}"? This cannot be undone.`)) return;
+    try {
+      await fetch(`${SB_URL}/rest/v1/knowledge_documents?id=eq.${d.id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      toast('Deleted', 'success');
+      closeKbEdit();
+      await loadKnowledgeData();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+    }
+  }
+
+
     if (!activeClient) return;
     try {
       const [posts, scores] = await Promise.all([
