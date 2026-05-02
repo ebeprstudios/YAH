@@ -1493,6 +1493,78 @@
     border: 0.5px solid #E8B8A0;
   }
 
+  /* Hook + brand-police-question alternatives */
+  .alt-count {
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+  }
+  .alt-primary, .alt-option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 12px;
+    border-radius: var(--r-md);
+    margin-bottom: 6px;
+  }
+  .alt-primary {
+    background: var(--flesh-pale);
+    border-left: 3px solid var(--olive);
+  }
+  .alt-option {
+    background: var(--surface);
+    border-left: 3px solid var(--bd-soft);
+  }
+  .alt-label {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: var(--olive);
+    background: white;
+    padding: 3px 6px;
+    border-radius: var(--r-pill);
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .alt-option .alt-label {
+    color: var(--text-3);
+  }
+  .alt-primary p, .alt-option p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-1);
+    flex: 1;
+  }
+
+  /* Strategic reasoning callout */
+  .strategic-reasoning {
+    background: var(--flesh-pale);
+    border: 0.5px solid var(--flesh-dk);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .strategic-reasoning-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--olive);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+  .strategic-reasoning p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-1);
+    font-style: italic;
+  }
+
   /* Skills cards */
   .skill-card {
     background: white;
@@ -2896,6 +2968,16 @@
     }
     document.getElementById('test-api-result').textContent = '';
     document.getElementById('test-api-result').className = 'test-result';
+
+    // Defensive: if skills aren't loaded yet, re-fetch before rendering
+    if ((!window.__activeSkills || window.__activeSkills.length === 0) && currentAgency?.id) {
+      try {
+        const skills = await sbGet(`skills?agency_id=eq.${currentAgency.id}&order=sort_order.asc&select=*`);
+        window.__activeSkills = skills || [];
+      } catch (e) {
+        console.warn('Settings: skills re-fetch failed:', e);
+      }
+    }
     renderSkillsList();
   }
 
@@ -2923,7 +3005,10 @@
     if (!container) return;
     const skills = window.__activeSkills || [];
     if (skills.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-3); font-size:13px; grid-column:1/-1">No skills loaded. Run the skills migration in Supabase to seed your team.</p>';
+      const hint = !currentAgency
+        ? 'No agency loaded yet. Try refreshing the page.'
+        : `Agency loaded (${currentAgency.name}) but no skills found. The skills migration may not have run, or RLS may be blocking the query. Check the browser console for errors and confirm the skills table has rows for agency_id = ${currentAgency.id}.`;
+      container.innerHTML = `<p style="color:var(--text-3); font-size:13px; grid-column:1/-1; line-height:1.5">${esc(hint)} <button class="btn btn-skin btn-sm" style="margin-top:8px" onclick="reloadSkills()">↻ Try reloading skills</button></p>`;
       return;
     }
     container.innerHTML = skills.map(s => `
@@ -2945,6 +3030,19 @@
         </div>
       </div>
     `).join('');
+  }
+
+  async function reloadSkills() {
+    if (!currentAgency?.id) return toast('No agency loaded', 'error');
+    try {
+      const skills = await sbGet(`skills?agency_id=eq.${currentAgency.id}&order=sort_order.asc&select=*`);
+      window.__activeSkills = skills || [];
+      renderSkillsList();
+      toast(`Loaded ${skills.length} agents`, 'success');
+    } catch (e) {
+      toast('Reload failed: ' + e.message, 'error');
+      console.error('reloadSkills error:', e);
+    }
   }
 
   async function toggleSkillActive(skillId, isActive) {
@@ -3224,8 +3322,9 @@
         <div class="plan-card-title">${esc(d.title || '')}${d.post_type === 'Carousel' && d.carousel_type ? `<span class="carousel-type-badge ${esc(d.carousel_type)}">${esc(formatCarouselType(d.carousel_type))}</span>` : ''}</div>
         ${d.pillar ? `<div class="plan-card-pillar">${esc(d.pillar)}</div>` : ''}
         <div class="plan-card-expanded-body">
-          ${d.hook ? `<div class="plan-card-field"><h5>Hook</h5><p>${esc(d.hook)}</p></div>` : ''}
-          ${d.brand_police_question ? `<div class="plan-card-field"><h5>Question for brand police to ask</h5><p>${esc(d.brand_police_question)}</p></div>` : ''}
+          ${d.strategic_reasoning ? `<div class="strategic-reasoning"><div class="strategic-reasoning-label">Strategic note</div><p>${esc(d.strategic_reasoning)}</p></div>` : ''}
+          ${d.hook ? renderHookWithAlternatives(d) : ''}
+          ${d.brand_police_question ? renderQuestionWithAlternatives(d) : ''}
           ${d.talking_head_points ? `<div class="plan-card-field"><h5>Talking-head answer points</h5><p style="white-space:pre-wrap">${esc(d.talking_head_points)}</p></div>` : ''}
           ${d.b_roll_direction ? `<div class="plan-card-field"><h5>B-roll direction</h5><p>${esc(d.b_roll_direction)}</p></div>` : ''}
           ${d.photo_direction ? `<div class="plan-card-field"><h5>Photo direction</h5><p>${esc(d.photo_direction)}</p></div>` : ''}
@@ -3237,6 +3336,34 @@
           ${d.notes ? `<div class="plan-card-field"><h5>Notes</h5><p>${esc(d.notes)}</p></div>` : ''}
           ${renderProofRefs(d)}
         </div>
+      </div>
+    `;
+  }
+
+  function renderHookWithAlternatives(d) {
+    const alts = Array.isArray(d.hook_alternatives) ? d.hook_alternatives.filter(Boolean) : [];
+    if (alts.length === 0) {
+      return `<div class="plan-card-field"><h5>Hook</h5><p>${esc(d.hook)}</p></div>`;
+    }
+    return `
+      <div class="plan-card-field">
+        <h5>Hook <span class="alt-count">primary + ${alts.length} alternative${alts.length > 1 ? 's' : ''}</span></h5>
+        <div class="alt-primary"><span class="alt-label">PRIMARY</span><p>${esc(d.hook)}</p></div>
+        ${alts.map((a, i) => `<div class="alt-option"><span class="alt-label">ALT ${i + 1}</span><p>${esc(a)}</p></div>`).join('')}
+      </div>
+    `;
+  }
+
+  function renderQuestionWithAlternatives(d) {
+    const alts = Array.isArray(d.brand_police_question_alternatives) ? d.brand_police_question_alternatives.filter(Boolean) : [];
+    if (alts.length === 0) {
+      return `<div class="plan-card-field"><h5>Question for brand police to ask</h5><p>${esc(d.brand_police_question)}</p></div>`;
+    }
+    return `
+      <div class="plan-card-field">
+        <h5>Question for brand police to ask <span class="alt-count">primary + ${alts.length} alternative${alts.length > 1 ? 's' : ''}</span></h5>
+        <div class="alt-primary"><span class="alt-label">PRIMARY</span><p>${esc(d.brand_police_question)}</p></div>
+        ${alts.map((a, i) => `<div class="alt-option"><span class="alt-label">ALT ${i + 1}</span><p>${esc(a)}</p></div>`).join('')}
       </div>
     `;
   }
@@ -3545,9 +3672,34 @@
     if (activeSkills.length > 0) {
       parts.push(`You are an agency content team operating as ${activeSkills.length} expert collaborators. Each persona below has 25-35 years of generic-industry experience. They are NOT specialists in this particular client — they bring industry expertise and adapt it to the SPECIFIC client profile, performance data, and knowledge layers below.
 
-Every persona's first move is the same: read the client's brand profile, voice, audience, brand_avoid, pillars, production model, and proof corpus carefully. Apply your expertise to THIS client's specific reality. Never produce generic best-practice output — produce work that's been adapted to this brand.
+═══════════════════════════════════════════
+WORKFLOW CONTEXT — READ CAREFULLY
+═══════════════════════════════════════════
 
-The personas operate together. Dominic plans the arc; Whit reads the data; Marlowe selects formats; Iris writes interview questions; Theo writes copy; Magnus polishes voice; Cora gut-checks for the audience; Ezra confirms production realism; Sloane stewards the brand at the gate. The output of plan generation is the synthesis of their collaboration.
+This plan is the UPSTREAM document in the agency workflow. It is NOT a finished publishable plan. It is a strategic seed document that goes to the agency team (Brittany, Diana, and the rest) for them to SHAPE with the client BEFORE any production happens.
+
+The chain of custody:
+1. THIS plan generates → goes to Brittany & Diana
+2. Brittany & Diana shape and adapt it
+3. They workshop it with the client
+4. Client batches/films based on the workshopped plan
+5. Polished version eventually reaches the client (and audience)
+
+This means EVERY brief in this plan is a production directive going TO the team — telling them what to direct the client to make next, not back-fitting plans to footage already shot. Personas like Whit (Performance), Marlowe (Creative Direction), and Ezra (Production) are forward-directive: they recommend what to make NEXT based on what's worked, not describe what was made.
+
+Tone: clinical, team-directive, internal-team document. Not client-facing. The team will polish before client delivery. So produce confident, specific briefs the team can refine — not finished consumer-ready content.
+
+REASONING VISIBILITY: Personas surface their strategic reasoning ONLY for high-stakes or non-obvious choices (in the planning_note). Most cards just present the directive cleanly — no per-card reasoning bloat. Reasoning belongs at the strategic-move level, not the line level.
+
+ALTERNATIVES: Iris (Interview Director) and Theo (Copywriter) provide PRIMARY + 2 alternatives for brand_police_questions on Reels and for hooks generally. This gives Brittany & Diana material to workshop with — three confident options, not three half-considered drafts.
+
+═══════════════════════════════════════════
+END WORKFLOW CONTEXT
+═══════════════════════════════════════════
+
+Every persona's first move is the same: read the client's brand profile, voice, audience, brand_avoid, pillars, production model, and proof corpus carefully. Apply your expertise to THIS client's specific reality. Never produce generic best-practice output — produce briefs that have been adapted to this brand and that direct production the team can actually execute.
+
+The personas operate together. Dominic plans the arc; Whit reads the data and recommends what to direct next; Marlowe selects formats; Iris writes interview questions with alternatives; Theo writes copy with alternative hooks; Magnus polishes voice fidelity in the briefs; Cora gut-checks each brief from the audience perspective; Ezra confirms each brief is realistically producible; Sloane stewards the brand at the gate. The output of plan generation is the synthesis of their collaboration.
 
 ═══════════════════════════════════════════
 THE TEAM
@@ -3804,8 +3956,10 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       "post_type": "Reel" | "Carousel" | "Quote" | "Static",
       "pillar": "MUST be exactly one of the listed pillar labels",
       "title": "the working title for this post",
-      "hook": "the opening line(s) of the finished post",
-      "brand_police_question": "for Reels only — the question her brand police should ask her, anchored in her existing content catalog",
+      "hook": "the primary opening line(s) — Theo's strongest single recommendation",
+      "hook_alternatives": "for Reels and Carousels — array of 2 alternative hook strings written by Theo. Each must be a different DNA pattern from the primary (e.g. if primary is first-person revelation, alternatives might be counterintuitive claim and direct address). Strings only.",
+      "brand_police_question": "for Reels only — Iris's primary recommended question her brand police should ask her, anchored in her existing content catalog",
+      "brand_police_question_alternatives": "for Reels only — array of 2 alternative questions written by Iris. Each must be a different question type from the primary (e.g. if primary is application, alternatives might be provocation and future-pacing). Strings only.",
       "talking_head_points": "for Reels only — 2-4 bullet points of what her answer should hit (use \\n between bullets)",
       "b_roll_direction": "for Reels only — what footage to cut in",
       "photo_direction": "for Reels only — what stills to intercut",
@@ -3814,16 +3968,17 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       "body": "for Statics — original caption content. For QUOTES — the EXACT VERBATIM text extracted from the proof corpus caption (no rewording allowed). NOT used for Carousels (use slides instead).",
       "visual_direction": "for Statics/Carousels/Quotes — what this looks like (typography, imagery, treatment). For Quotes specifically: this is your ONLY creative degree of freedom since the words are locked.",
       "cta": "the call to action",
+      "strategic_reasoning": "OPTIONAL — only populate this field for high-stakes or non-obvious choices (e.g. unusual pillar weighting, non-obvious format choice, sequencing rationale). Leave empty/omit for routine cards. Most cards do NOT need this field. Be sparse.",
       "notes": "optional production notes",
       "proof_post_refs": [array of integers — the post numbers from the PROOF CORPUS above (1-20) that you specifically drew from for this day. For repurposed_reel carousels this is REQUIRED and must cite the source Reel. For other days, cite ONLY posts that genuinely shaped this brief — the story it retells, the framework it reapplies, the voice it pattern-matches, the topic cluster it extends. Use [] only for posts that are genuinely net-new with no proof anchor. Most days SHOULD reference 1-3 proof posts. This is how the user verifies you mined her catalog instead of making things up.]
     }
   ]
 }
 
-For Reels: brand_police_question, talking_head_points, b_roll_direction, photo_direction are required. body/visual_direction can be omitted or brief.
-For Carousels: carousel_type and slides are required. visual_direction describes typography/treatment.
-For Quote posts: body MUST be the verbatim extracted phrase from a proof corpus caption, proof_post_refs MUST cite the source post (single integer in array), visual_direction describes typography/imagery treatment. If no qualifying quote can be extracted from the proof corpus, do NOT include a Quote post in the plan — substitute a different post type instead.
-For Statics: body, visual_direction, cta are required. Slide-related fields can be omitted.
+For Reels: brand_police_question, brand_police_question_alternatives (2 items), talking_head_points, b_roll_direction, photo_direction, hook, hook_alternatives (2 items) are required.
+For Carousels: carousel_type, slides, hook, and hook_alternatives (2 items) are required. visual_direction describes typography/treatment.
+For Quote posts: body MUST be the verbatim extracted phrase from a proof corpus caption, proof_post_refs MUST cite the source post (single integer in array), visual_direction describes typography/imagery treatment. If no qualifying quote can be extracted from the proof corpus, do NOT include a Quote post in the plan — substitute a different post type instead. hook_alternatives not required for Quotes (the words are locked).
+For Statics: body, visual_direction, cta are required. hook_alternatives optional.
 For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels and Quote posts it MUST be non-empty.
 
 CAROUSEL TYPE MIX TARGET for the 14-day plan:
@@ -4001,11 +4156,14 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         pillar: d.pillar || null,
         title: d.title || null,
         hook: d.hook || null,
+        hook_alternatives: Array.isArray(d.hook_alternatives) ? d.hook_alternatives.filter(Boolean) : [],
         body: d.body || d.copy || null,
         visual_direction: d.visual_direction || d.visual || null,
         cta: d.cta || null,
         notes: d.notes || null,
+        strategic_reasoning: d.strategic_reasoning || null,
         brand_police_question: d.brand_police_question || null,
+        brand_police_question_alternatives: Array.isArray(d.brand_police_question_alternatives) ? d.brand_police_question_alternatives.filter(Boolean) : [],
         talking_head_points: d.talking_head_points || null,
         b_roll_direction: d.b_roll_direction || null,
         photo_direction: d.photo_direction || null,
