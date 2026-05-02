@@ -2826,13 +2826,22 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     if (p.likes)    stats.push(`<span><strong>${p.likes}</strong> likes</span>`);
     if (p.reach || p.impressions) stats.push(`<span><strong>${(p.reach || p.impressions).toLocaleString()}</strong> reach</span>`);
 
+    // Build network badges — show all platforms this post appears on
+    const networks = Array.isArray(p.cross_posted_to) && p.cross_posted_to.length
+      ? p.cross_posted_to
+      : [network];
+    const networkBadges = networks.map(n => {
+      const nLower = (n || '').toLowerCase();
+      return `<span class="perf-network-badge ${esc(nLower)}">${esc(nLower)}</span>`;
+    }).join('');
+
     return `
       <div class="perf-card">
         <div class="perf-card-thumb" style="${p.thumbnail_url ? `background-image: url('${esc(p.thumbnail_url)}')` : ''}"></div>
         <div class="perf-card-body">
           <div class="perf-card-meta">
             <span class="perf-card-rank">#${rank}</span>
-            <span class="perf-network-badge ${esc(network)}">${esc(network)}</span>
+            ${networkBadges}
             ${p.post_type ? `<span class="perf-card-meta-date">${esc(formatLabel(normalizeFormat(p.post_type, network)))}</span>` : ''}
             <span class="perf-card-meta-date">${esc(date)}</span>
           </div>
@@ -2857,12 +2866,14 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     document.getElementById('studio-body').innerHTML = renderStudioSubpage('performance');
   }
 
-  function normalizeFormat(postType, network) {
+  function normalizeFormat(postType, network, p) {
     if (!postType) return null;
     const t = String(postType).toLowerCase();
     if (t.includes('reel'))     return 'reel';
     if (t.includes('carousel') || t.includes('album')) return 'carousel';
     if (t.includes('story'))    return 'story';
+    // TikTok "video" is short-form vertical content — same as a Reel
+    if (network === 'tiktok' && t === 'video') return 'reel';
     if (t.includes('video') && network === 'youtube') return 'video';
     if (t.includes('video'))    return 'video';
     if (t.includes('image') || t === 'feed_image' || t === 'feed_photo' || t === 'photo') return 'static';
@@ -2959,7 +2970,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
     let totalInserted = 0;
     let totalSkipped = 0;
-    let totalCrossPlatformSkipped = 0;
+    let totalMerged = 0;
     const errors = [];
 
     for (const file of files) {
@@ -2968,25 +2979,25 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
         const result = await importMetricoolCsv(text, file.name);
         totalInserted += result.inserted;
         totalSkipped += result.skipped;
-        totalCrossPlatformSkipped += (result.crossPlatformSkipped || 0);
+        totalMerged += (result.merged || 0);
       } catch (e) {
         errors.push(`${file.name}: ${e.message}`);
       }
     }
 
-    if (totalInserted > 0) {
+    if (totalInserted > 0 || totalMerged > 0) {
       await recomputeAllScores(activeClient.id);
     }
 
     perfState.importing = false;
-    if (errors.length && totalInserted === 0) {
+    if (errors.length && totalInserted === 0 && totalMerged === 0) {
       perfState.importMessage = 'Import failed: ' + errors.join(' · ');
       perfState.importMessageKind = 'err';
     } else {
       const parts = [];
-      if (totalInserted) parts.push(`${totalInserted} new post${totalInserted > 1 ? 's' : ''} imported`);
+      if (totalInserted) parts.push(`${totalInserted} new post${totalInserted > 1 ? 's' : ''}`);
+      if (totalMerged) parts.push(`${totalMerged} cross-platform merge${totalMerged > 1 ? 's' : ''}`);
       if (totalSkipped) parts.push(`${totalSkipped} duplicate${totalSkipped > 1 ? 's' : ''} skipped`);
-      if (totalCrossPlatformSkipped) parts.push(`${totalCrossPlatformSkipped} cross-platform reel${totalCrossPlatformSkipped > 1 ? 's' : ''} deduplicated`);
       if (errors.length) parts.push(`${errors.length} file error${errors.length > 1 ? 's' : ''}`);
       perfState.importMessage = parts.join(' · ');
       perfState.importMessageKind = errors.length ? 'err' : 'ok';
@@ -3065,32 +3076,56 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       return true;
     });
 
-    // Pull existing posts for both ID-based and content-based dedup
-    const existing = await sbGet(`social_posts?client_id=eq.${activeClient.id}&select=external_id,network,caption_hash,post_type&limit=2000`);
-    const existingIdKeys = new Set((existing || []).map(p => `${p.network}|${p.external_id}`));
-    // Cross-platform content dedup: same caption_hash for a Reel cross-posted to FB and IG
-    const existingHashKeys = new Set(
-      (existing || [])
-        .filter(p => p.caption_hash && p.post_type === 'reel')
-        .map(p => p.caption_hash)
-    );
+    // Pull existing posts for both ID-based dedup and caption-hash merge
+    const existing = await sbGet(`social_posts?client_id=eq.${activeClient.id}&select=*&limit=2000`);
+    const existingByIdKey = new Map();
+    const existingByHash = new Map();
+    (existing || []).forEach(p => {
+      existingByIdKey.set(`${p.network}|${p.external_id}`, p);
+      if (p.caption_hash && (p.post_type === 'reel' || p.post_type === 'video')) {
+        // Use the most recent / first one we see for this hash
+        if (!existingByHash.has(p.caption_hash)) existingByHash.set(p.caption_hash, p);
+      }
+    });
 
     const toInsert = [];
-    let crossPlatformSkipped = 0;
+    const toMerge = [];   // { existingRow, incomingRow }
+    let exactDuplicates = 0;
+
     for (const p of unique) {
       if (!p.external_id) continue;
       const idKey = `${p.network}|${p.external_id}`;
-      if (existingIdKeys.has(idKey)) continue;
-      // For reels: skip if same caption_hash already exists as a reel in another network
-      if (p.post_type === 'reel' && p.caption_hash && existingHashKeys.has(p.caption_hash)) {
-        crossPlatformSkipped++;
+
+      // Already imported this exact post (same network + external_id) → skip
+      if (existingByIdKey.has(idKey)) {
+        exactDuplicates++;
         continue;
       }
-      toInsert.push({ ...p, client_id: activeClient.id });
-      if (p.caption_hash && p.post_type === 'reel') existingHashKeys.add(p.caption_hash);
+
+      // Same content (caption_hash) already exists from another platform → MERGE
+      if (p.caption_hash && (p.post_type === 'reel' || p.post_type === 'video') && existingByHash.has(p.caption_hash)) {
+        toMerge.push({ existingRow: existingByHash.get(p.caption_hash), incomingRow: p });
+        continue;
+      }
+
+      // New content — insert fresh, mark primary network
+      toInsert.push({
+        ...p,
+        client_id: activeClient.id,
+        primary_network: p.network,
+        cross_posted_to: [p.network]
+      });
+      // Track in our local maps so subsequent rows in this same import can merge against it
+      if (p.caption_hash && (p.post_type === 'reel' || p.post_type === 'video')) {
+        // We don't have an ID yet, but we'll handle in-batch merging below by caption_hash
+        existingByHash.set(p.caption_hash, { ...p, _isPending: true });
+      }
     }
 
     let inserted = 0;
+    let merged = 0;
+
+    // Insert new rows
     if (toInsert.length) {
       for (let i = 0; i < toInsert.length; i += 100) {
         const chunk = toInsert.slice(i, i + 100);
@@ -3099,13 +3134,60 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       }
     }
 
+    // Merge into existing rows: sum engagement, append to cross_posted_to
+    for (const { existingRow, incomingRow } of toMerge) {
+      if (existingRow._isPending) {
+        // Was just created in this same batch; we'd need the new id from DB
+        // Re-fetch the row by external_id to get its ID
+        const found = await sbGet(`social_posts?client_id=eq.${activeClient.id}&network=eq.${existingRow.network}&external_id=eq.${encodeURIComponent(existingRow.external_id)}&select=*&limit=1`);
+        if (found && found[0]) {
+          await mergeIntoRow(found[0], incomingRow);
+          merged++;
+        }
+        continue;
+      }
+      await mergeIntoRow(existingRow, incomingRow);
+      merged++;
+    }
+
     return {
       format,
       total: records.length,
       inserted,
-      skipped: unique.length - toInsert.length,
-      crossPlatformSkipped
+      merged,
+      exactDuplicates,
+      skipped: exactDuplicates
     };
+  }
+
+  async function mergeIntoRow(existingRow, incoming) {
+    // Sum engagement, append the new network to cross_posted_to
+    const xpostList = Array.isArray(existingRow.cross_posted_to) ? [...existingRow.cross_posted_to] : (existingRow.cross_posted_to ? [existingRow.cross_posted_to] : []);
+    if (!xpostList.includes(incoming.network)) xpostList.push(incoming.network);
+
+    const sumNum = (a, b) => (Number(a) || 0) + (Number(b) || 0);
+    const maxNum = (a, b) => Math.max(Number(a) || 0, Number(b) || 0);
+
+    const updates = {
+      reach:        sumNum(existingRow.reach, incoming.reach),
+      impressions:  sumNum(existingRow.impressions, incoming.impressions),
+      views:        sumNum(existingRow.views, incoming.views),
+      likes:        sumNum(existingRow.likes, incoming.likes),
+      saves:        sumNum(existingRow.saves, incoming.saves),
+      shares:       sumNum(existingRow.shares, incoming.shares),
+      comments:     sumNum(existingRow.comments, incoming.comments),
+      cross_posted_to: xpostList
+    };
+
+    // Watch time: sum total, take max for avg (we can't truly avg without knowing each post's view count)
+    if (incoming.total_watch_seconds) {
+      updates.total_watch_seconds = sumNum(existingRow.total_watch_seconds, incoming.total_watch_seconds);
+    }
+    if (incoming.avg_watch_seconds) {
+      updates.avg_watch_seconds = maxNum(existingRow.avg_watch_seconds, incoming.avg_watch_seconds);
+    }
+
+    await sbPatch(`social_posts?id=eq.${existingRow.id}`, updates);
   }
 
   function mapRowToPost(r, format) {
