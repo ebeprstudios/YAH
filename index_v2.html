@@ -2768,11 +2768,16 @@ REEL PRODUCTION MODEL:
 ${reelModel}
 
 For every Reel in the plan, output the brief in this exact structure:
-  • brand_police_question: the specific question her brand police should ask her on camera. This question should anchor in something specific from her existing content — a story she's told, a framework she uses, a concept from a past teaching, an illustration she's known for. AVOID generic questions like "what's your biggest tip on X" — instead use prompts like "tell us about [specific thing from her catalog]" or "walk us through your [specific concept]" or "take us back to [specific moment in her story]." The proof corpus shows you what stories and frameworks she already has — surface those.
-  • talking_head_points: 2-4 bullet points covering what her talking-head answer should hit. Specific, not vague.
+  • brand_police_question: the specific question her brand police should ask her on camera. The question should provoke her to teach something NEW, not retell something she has already published. If you reference a landmark from her catalog (a known framework, a story she has told before, a concept she has named), the question must EXTEND or APPLY that landmark to new territory — not ask her to recap it. Examples of good question structures:
+      - "How does [her named framework] apply when [new context]?"
+      - "What would you tell someone who is [new specific situation] given what you have learned?"
+      - "Take us deeper into [aspect she has only touched on briefly]."
+      - "What is the [opposite/inverse/next layer] of [thing she has talked about]?"
+    AVOID generic questions like "what's your biggest tip on X." AVOID retelling questions like "tell us about your empty room moment again" — she already told that story; her audience saw it. Ask her about something she hasn't published yet.
+  • talking_head_points: 2-4 bullet points covering what her talking-head answer should hit. Specific, not vague. NEW thoughts, not paraphrases of past posts.
   • b_roll_direction: what supporting footage should be cut in (lifestyle shots, environment, action footage, etc.)
   • photo_direction: what still images should be intercut for emphasis and pacing
-  • hook: the opening 1-2 lines of the finished Reel — first-person, conversational, lived-in. Examples of the energy: "They told me to be realistic. So I am." / "I was driving to my job making not enough money." / "This is the prayer I pray over my money." NOT generic "did you know..." or "let me tell you about..."`);
+  • hook: the opening 1-2 lines of the finished Reel — first-person, conversational, lived-in. Match the voice DNA of her top performers WITHOUT replicating their actual hooks. Generate a NEW hook that sounds like her.`);
       }
 
       if (staticModel) {
@@ -2796,23 +2801,48 @@ For Quote posts and single Static images: standard body + visual_direction + cta
 
     if (topPerformers && topPerformers.length > 0) {
       const proofSection = ['', `═══════════════════════════════════════════`,
-                            `TOP-PERFORMING POSTS — USE AS PROOF AND AS A CATALOG`,
+                            `TOP-PERFORMING POSTS — VOICE REFERENCE, NOT CONTENT TO COPY`,
                             `═══════════════════════════════════════════`,
                             ``,
-                            `Below are this creator's actual top-performing posts. These serve TWO purposes:`,
+                            `Below are the creator's actual top-performing posts. CRITICAL — READ THIS CAREFULLY:`,
                             ``,
-                            `1. PROOF OF VOICE: Pattern-match new content to the voice and energy of these proven posts. Notice opening lines, hook structures, sentence rhythm, vocabulary. Generate content that shares this DNA.`,
+                            `These posts are the GOLD STANDARD of HOW she sounds, NOT a script of WHAT to say next.`,
                             ``,
-                            `2. CATALOG OF EXISTING MATERIAL: These captions reveal stories she's told, frameworks she uses, illustrations she's known for, concepts from her teachings, moments from her personal journey. When generating brand_police_questions for Reels, ANCHOR IN THIS CATALOG. Prompt her to retell or reapply or expand on things she already has — don't invent topics from scratch.`,
+                            `Your job is NOT to retell, summarize, paraphrase, or regurgitate these posts. The user has already published them. Republishing them in slightly different words wastes the plan and disrespects her audience who already saw them.`,
                             ``,
-                            `Specifically look for and use:`,
-                            `  • Named frameworks/concepts she's introduced (use these by name in questions)`,
-                            `  • Personal stories she's told (prompt her to retell with fresh framing)`,
-                            `  • Illustrations she's used (ask her to break them down again)`,
-                            `  • Recurring themes/topics that get strong engagement (do new angles on them)`,
-                            `  • Specific moments she references (ask her to take us back there)`,
+                            `Your job IS to study these posts to understand:`,
+                            `  • Her hook patterns (what kinds of opening lines earn the scroll)`,
+                            `  • Her sentence rhythm and vocabulary`,
+                            `  • The shape of her teaching (how she sets up an idea, where she lands the punch)`,
+                            `  • Recurring frameworks/concepts she has named (these are LANDMARKS in her catalog — you can REFERENCE them by name in new content, not retell them)`,
+                            `  • Personal stories she has told (these are LANDMARKS — you can REFERENCE them, not retell them)`,
+                            `  • What topics resonate with her audience`,
                             ``,
-                            `Do NOT copy these posts. Generate genuinely new content that draws from her existing well.`,
+                            `WHAT GOOD LOOKS LIKE — concrete examples:`,
+                            ``,
+                            `  Example A — BAD (regurgitation):`,
+                            `    Proof post says: "I was driving to my job to make not enough money. Then I had this empty room moment where I realized..."`,
+                            `    Bad new post: "I was driving to my job making not enough money. I had a moment where I realized..." [SAME STORY RETOLD]`,
+                            ``,
+                            `  Example B — GOOD (voice DNA, new content):`,
+                            `    Proof post above`,
+                            `    Good new post hook: "They gave me the promotion and I cried. Not because I was happy."`,
+                            `    Why it's good: same first-person lived-in voice, same kind of surprising emotional pivot, totally different story she has not told yet.`,
+                            ``,
+                            `  Example C — GOOD (referencing a landmark, not retelling):`,
+                            `    Proof corpus reveals she has talked about her "empty room moment" before.`,
+                            `    Good new brand_police_question: "How does what you learned in your empty room moment apply when someone is in the middle of a different kind of breaking point?"`,
+                            `    Why it's good: anchors in the named landmark she has, but asks for a NEW application/extension, not the original telling.`,
+                            ``,
+                            `THE ONLY EXCEPTION — REPURPOSED-REEL CAROUSELS:`,
+                            ``,
+                            `When (and ONLY when) you generate a carousel with carousel_type="repurposed_reel", that specific carousel is meant to convert one identified Reel from this corpus into a carousel format. In that one specific case, the slide content should map directly to the source Reel's teaching — same message, different format. proof_post_refs MUST cite the exact source Reel. This is the only place direct repetition is correct, because the goal of that format is conversion, not net-new content.`,
+                            ``,
+                            `For ALL OTHER posts in the plan (Reels, Declaration carousels, Original Teaching carousels, Quotes, Statics): voice DNA only. Net-new content. Do not retell stories. Do not paraphrase teachings. Reference catalog landmarks by name when extending into new territory.`,
+                            ``,
+                            `proof_post_refs usage:`,
+                            `  • For repurposed_reel carousels — REQUIRED, cites the source Reel being converted.`,
+                            `  • For all other posts — cite the proof posts whose VOICE PATTERN you applied (e.g. "drew from #3 and #7 for hook structure and vocabulary"), or whose LANDMARK you referenced (e.g. "extended #4's empty room concept into a new application"). It signals what voice/concept you used, not what you retold.`,
                             ``,
                             `THE PROOF CORPUS:`,
                             ``];
