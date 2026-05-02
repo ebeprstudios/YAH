@@ -129,14 +129,38 @@
   .auth-cta { width: 100%; margin-top: 8px; justify-content: center; }
   .auth-error, .auth-message {
     margin-top: 12px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     border-radius: var(--r-md);
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
     display: none;
   }
-  .auth-error { background: #F8DDD0; color: var(--terracotta); border: 0.5px solid #E8B8A0; }
-  .auth-message { background: var(--flesh-pale); color: var(--olive); border: 0.5px solid var(--flesh-dk); }
-  .auth-error.show, .auth-message.show { display: block; }
+  .auth-error {
+    background: #F8DDD0;
+    color: var(--terracotta);
+    border: 1px solid #E8B8A0;
+  }
+  .auth-message {
+    background: var(--flesh-pale);
+    color: var(--olive);
+    border: 1px solid var(--flesh-dk);
+  }
+  .auth-error.show, .auth-message.show {
+    display: block;
+    animation: auth-shake 280ms ease-out;
+  }
+  @keyframes auth-shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
   .auth-divider {
     display: flex; align-items: center; gap: 12px;
     margin: 18px 0;
@@ -1855,10 +1879,10 @@
         <input class="auth-input" type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn btn-primary auth-cta" onclick="doSignIn()">Sign in</button>
-      <div class="auth-divider">or</div>
-      <button class="btn btn-ghost auth-secondary" onclick="doMagicLink('signin')">Email me a magic link</button>
       <div class="auth-error" id="signin-error"></div>
       <div class="auth-message" id="signin-message"></div>
+      <div class="auth-divider">or</div>
+      <button class="btn btn-ghost auth-secondary" onclick="doMagicLink('signin')">Email me a magic link</button>
       <div class="auth-foot">
         <a onclick="showAuthView('forgot')">Forgot password?</a>
         <span style="color:var(--bd-strong); margin: 0 8px">·</span>
@@ -2225,45 +2249,97 @@
   async function doSignIn() {
     const email = document.getElementById('signin-email').value.trim();
     const password = document.getElementById('signin-password').value;
+    const btn = document.querySelector('#auth-view-signin .auth-cta');
+    const errEl = document.getElementById('signin-error');
+    const msgEl = document.getElementById('signin-message');
+
+    // Clear prior states
+    errEl.textContent = ''; errEl.classList.remove('show');
+    msgEl.textContent = ''; msgEl.classList.remove('show');
+
     if (!email || !password) return showAuthError('signin', 'Enter your email and password.');
+
+    // Loading state
+    const origLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
     try {
       const data = await authCall('/token?grant_type=password', { email, password });
       const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
       saveSession({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at });
       currentUser = data.user;
+      btn.textContent = 'Signed in ✓';
       enterApp();
     } catch (e) {
-      const msg = /invalid login|invalid_grant/i.test(e.message)
-        ? 'Wrong email or password.'
-        : /email not confirmed/i.test(e.message)
-          ? 'Check your inbox to confirm your email first.'
-          : e.message;
+      const raw = (e && e.message) || '';
+      let msg;
+      if (/invalid login|invalid_grant|invalid credentials/i.test(raw)) {
+        msg = 'Wrong email or password. Try again or use the magic link below.';
+      } else if (/email not confirmed/i.test(raw)) {
+        msg = 'Check your inbox to confirm your email first.';
+      } else if (/rate limit|too many/i.test(raw)) {
+        msg = 'Too many attempts. Wait a minute and try again.';
+      } else if (/failed to fetch|network|networkerror|load failed/i.test(raw)) {
+        msg = 'Could not reach the server. Check your internet connection or try again in a moment.';
+      } else if (/user not found/i.test(raw)) {
+        msg = 'No account with that email. Use "Create an account" below.';
+      } else {
+        msg = raw || 'Sign in failed. Try the magic link or refresh the page.';
+      }
       showAuthError('signin', msg);
+      btn.disabled = false;
+      btn.textContent = origLabel;
     }
   }
 
   async function doSignUp() {
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
+    const btn = document.querySelector('#auth-view-signup .auth-cta');
+    const errEl = document.getElementById('signup-error');
+    const msgEl = document.getElementById('signup-message');
+
+    errEl.textContent = ''; errEl.classList.remove('show');
+    msgEl.textContent = ''; msgEl.classList.remove('show');
+
     if (!email || !password) return showAuthError('signup', 'Enter your email and password.');
     if (password.length < 6) return showAuthError('signup', 'Password must be at least 6 characters.');
+
+    const origLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
     try {
       const data = await authCall('/signup', { email, password });
       if (data.access_token) {
         const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
         saveSession({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at });
         currentUser = data.user;
+        btn.textContent = 'Signed up ✓';
         enterApp();
       } else {
         showAuthMessage('signup', 'Account created. Check your email to confirm and then sign in.');
         document.getElementById('signup-email').value = '';
         document.getElementById('signup-password').value = '';
+        btn.disabled = false;
+        btn.textContent = origLabel;
       }
     } catch (e) {
-      const msg = /already registered|already exists/i.test(e.message)
-        ? 'That email is already registered. Try signing in instead.'
-        : e.message;
+      const raw = (e && e.message) || '';
+      let msg;
+      if (/already registered|already exists/i.test(raw)) {
+        msg = 'That email is already registered. Try signing in instead.';
+      } else if (/failed to fetch|network|networkerror|load failed/i.test(raw)) {
+        msg = 'Could not reach the server. Check your connection and try again.';
+      } else if (/rate limit|too many/i.test(raw)) {
+        msg = 'Too many attempts. Wait a minute and try again.';
+      } else {
+        msg = raw || 'Sign up failed. Try again or refresh the page.';
+      }
       showAuthError('signup', msg);
+      btn.disabled = false;
+      btn.textContent = origLabel;
     }
   }
 
@@ -4669,6 +4745,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
   }
 
 
+  async function loadPerformanceData() {
     if (!activeClient) return;
     try {
       const [posts, scores] = await Promise.all([
