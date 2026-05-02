@@ -784,6 +784,48 @@
     border-color: var(--flesh-dk);
   }
 
+  .plan-brief-help {
+    margin-top: 4px;
+    margin-bottom: 14px;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    padding: 0;
+    overflow: hidden;
+  }
+  .plan-brief-help summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--olive);
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .plan-brief-help summary::-webkit-details-marker { display: none; }
+  .plan-brief-help summary::before {
+    content: '+';
+    font-size: 14px;
+    transition: transform 120ms;
+    display: inline-block;
+    width: 12px;
+  }
+  .plan-brief-help[open] summary::before { content: '−'; }
+  .plan-brief-help summary:hover { background: var(--flesh-pale); }
+  .plan-brief-help-body {
+    padding: 0 14px 14px;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .plan-brief-help-body p { margin: 0 0 8px; }
+  .plan-brief-help-body ul { margin: 0; padding-left: 20px; }
+  .plan-brief-help-body li { margin-bottom: 6px; }
+  .plan-brief-help-body strong { color: var(--text-1); }
+
   .plan-loading {
     background: white;
     border: 0.5px solid var(--bd-soft);
@@ -1365,6 +1407,66 @@
     font-size: 12px;
     line-height: 1.45;
     white-space: pre-wrap;
+  }
+
+  /* Quote post — verbatim extraction display */
+  .quote-extraction {
+    margin: 14px 0;
+    padding: 18px 20px;
+    background: var(--surface);
+    border-left: 3px solid var(--olive);
+    border-radius: var(--r-md);
+  }
+  .quote-extraction-label {
+    font-size: 10px;
+    color: var(--olive);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+  .quote-extraction-text {
+    margin: 0 0 12px;
+    color: var(--text-1);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+    font-style: italic;
+  }
+  .quote-extraction-source {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .quote-extraction-source a {
+    color: var(--olive);
+    text-decoration: none;
+    margin-left: auto;
+  }
+  .quote-extraction-source a:hover { text-decoration: underline; }
+  .quote-verification {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: var(--r-md);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .quote-verification.ok {
+    background: var(--flesh-pale);
+    color: var(--olive);
+    border: 0.5px solid var(--flesh-dk);
+  }
+  .quote-verification.fail {
+    background: #F8DDD0;
+    color: var(--terracotta);
+    border: 0.5px solid #E8B8A0;
   }
 </style>
 </head>
@@ -2407,17 +2509,38 @@
 
     return `
       <div class="plan-empty">
-        <h3>What's the focus for the next two weeks?</h3>
-        <p>Type a quick brief — themes, campaigns, key dates, anything Claude should weight. Or just hit generate and we'll work from the brand profile alone.</p>
+        <h3>Strategy brief</h3>
+        <p>Brief Claude on what these two weeks should do. Strategic context, recent shoot footage, what to lean into, what to avoid. The richer the brief, the more specific the plan.</p>
 
-        <textarea id="plan-brief" class="plan-brief-textarea" placeholder="Optional brief — e.g. 'Lean into the new podcast launch the second week. First week focus on rest and the soul. Drop a Reels series on Sabbath.'"></textarea>
+        <textarea id="plan-brief" class="plan-brief-textarea" placeholder="e.g. 'Two weeks leading into her Millions Conference launch. Week 1: she just batched 8 Reels on calling and entrepreneurship — plan around that footage. Week 2: pivot to spiritual content. Avoid Personal Development pillar this cycle, audience has had a lot of that lately.'"></textarea>
+
+        <details class="plan-brief-help">
+          <summary>What good input looks like</summary>
+          <div class="plan-brief-help-body">
+            <p>The most useful briefs include 1-3 of these:</p>
+            <ul>
+              <li><strong>Campaign or theme focus</strong> — "Two weeks leading into her launch. Lean Business Development."</li>
+              <li><strong>What just shot or what's available</strong> — "She batched 10 Reels on Spiritual Development last week. Plan around that footage."</li>
+              <li><strong>What did or didn't work recently</strong> — "Last cycle's carousels underperformed. Lean Reels-heavy this round."</li>
+              <li><strong>Audience moment or season</strong> — "Entering Lent. Lean toward surrender, dependence, prayer — but not explicitly Lenten."</li>
+              <li><strong>Specific stories or frameworks to mine</strong> — "She has a new teaching on 'rest as resistance.' Build a few posts that develop that concept."</li>
+              <li><strong>What to avoid for THIS plan</strong> — "Skip Personal Development. She's been heavy on it lately."</li>
+              <li><strong>Production constraints</strong> — "She's traveling Week 2. All 14 posts must be filmable in one batch day during Week 1."</li>
+              <li><strong>People or events to weave in</strong> — "Diana being introduced as brand director. Include 2-3 posts featuring her naturally."</li>
+            </ul>
+            <p style="margin-top:10px">The starter templates below give you working drafts — click one and edit.</p>
+          </div>
+        </details>
 
         <div class="plan-suggestions">
-          <span class="plan-chip" onclick="appendPlanBriefChip('Lean harder into reels this cycle.')">More reels</span>
-          <span class="plan-chip" onclick="appendPlanBriefChip('Sharper hooks. First three words must hit.')">Punchier hooks</span>
-          <span class="plan-chip" onclick="appendPlanBriefChip('More humor and personality, less didactic.')">More humor</span>
-          <span class="plan-chip" onclick="appendPlanBriefChip('Lead with story before teaching.')">Story-first</span>
-          <span class="plan-chip" onclick="appendPlanBriefChip('Build toward an offer at the end of week two.')">Build to an offer</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('She just batched [X] Reels covering [pillar/topic]. Plan this two weeks around using that footage. Most posts should map to what she actually filmed.')">Repurpose recent shoot</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Two weeks leading into [event/launch/announcement]. Lean into [pillar]. Build momentum toward the moment without making every post explicitly about it.')">Build to a moment</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Push variety in formats this cycle — mix Reels, Carousels, Quotes, Statics across the 14 days. No more than 2 of any one format in a row.')">Mix the formats</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Lean heavily into [pillar name] this cycle. At least 60% of posts should fall under that pillar. Other pillars round out the variety but stay supporting.')">Lean one pillar</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Audience season: [describe what they''re experiencing right now — back to school, end of fiscal year, Lent, summer slowdown, election anxiety, etc.]. Match the moment without naming it directly.')">Match the season</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Develop her recent teaching on [specific concept]. Build 3-5 posts that explore different angles of that concept. Brand police questions should extend it into new territory.')">Develop a teaching</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Production constraint: only one batch day available, on [day]. All 14 posts must be filmable in that single session.')">Production constraint</span>
+          <span class="plan-chip" onclick="appendPlanBriefChip('Lighter cycle. Mix in more humor and personality, less didactic teaching. Audience is fatigued.')">Lighter tone</span>
         </div>
 
         <div class="plan-brief-row">
@@ -2500,7 +2623,8 @@
           ${d.b_roll_direction ? `<div class="plan-card-field"><h5>B-roll direction</h5><p>${esc(d.b_roll_direction)}</p></div>` : ''}
           ${d.photo_direction ? `<div class="plan-card-field"><h5>Photo direction</h5><p>${esc(d.photo_direction)}</p></div>` : ''}
           ${renderCarouselSlides(d)}
-          ${d.body || d.copy ? `<div class="plan-card-field"><h5>Body / caption</h5><p>${esc(d.body || d.copy)}</p></div>` : ''}
+          ${renderQuoteExtraction(d)}
+          ${d.body || d.copy ? (d.post_type === 'Quote' ? '' : `<div class="plan-card-field"><h5>Body / caption</h5><p>${esc(d.body || d.copy)}</p></div>`) : ''}
           ${d.visual_direction || d.visual ? `<div class="plan-card-field"><h5>Visual direction</h5><p>${esc(d.visual_direction || d.visual)}</p></div>` : ''}
           ${d.cta ? `<div class="plan-card-field"><h5>CTA</h5><p>${esc(d.cta)}</p></div>` : ''}
           ${d.notes ? `<div class="plan-card-field"><h5>Notes</h5><p>${esc(d.notes)}</p></div>` : ''}
@@ -2512,6 +2636,37 @@
 
   function formatCarouselType(t) {
     return ({ declaration: 'Declaration', repurposed_reel: 'Repurposed Reel', original_teaching: 'Original Teaching' })[t] || t;
+  }
+
+  function renderQuoteExtraction(d) {
+    if (d.post_type !== 'Quote') return '';
+    const quote = d.body || d.copy || '';
+    if (!quote) return '';
+    const corpus = planState.proofCorpus || [];
+    const refs = Array.isArray(d.proof_post_refs) ? d.proof_post_refs : [];
+    const sourcePostNum = refs[0];
+    const sourcePost = sourcePostNum ? corpus[sourcePostNum - 1] : null;
+
+    // Verify the quote actually appears verbatim in the source — flag if not
+    let verified = null;
+    if (sourcePost?.caption) {
+      verified = sourcePost.caption.includes(quote.trim());
+    }
+
+    return `
+      <div class="quote-extraction">
+        <div class="quote-extraction-label">Extracted quote · verbatim from her caption</div>
+        <blockquote class="quote-extraction-text">"${esc(quote)}"</blockquote>
+        ${sourcePost ? `
+          <div class="quote-extraction-source">
+            <span>Source: post #${sourcePostNum} · ${esc((sourcePost.network || '').toUpperCase())} · ${sourcePost.published_at ? esc(new Date(sourcePost.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) : ''}</span>
+            ${sourcePost.permalink ? `<a href="${esc(sourcePost.permalink)}" target="_blank" rel="noopener">View original ↗</a>` : ''}
+          </div>
+          ${verified === false ? `<div class="quote-verification fail">⚠ This quote does NOT appear verbatim in the cited source caption. Claude may have paraphrased — verify before publishing.</div>` : ''}
+          ${verified === true ? `<div class="quote-verification ok">✓ Verified: matches source caption exactly.</div>` : ''}
+        ` : `<div class="quote-verification fail">⚠ No source post cited. Cannot verify this quote is verbatim from her catalog.</div>`}
+      </div>
+    `;
   }
 
   function renderCarouselSlides(d) {
@@ -2856,7 +3011,49 @@ For declaration carousels: 5 slides total — hook / 3 declarations over differe
 
 For original_teaching carousels: 5-7 slides with whatever shape fits (contrast/comparison, list, framework, step-by-step). The brief should make the shape obvious from the slide structure.
 
-For Quote posts and single Static images: standard body + visual_direction + cta. No slides array needed.`);
+═══════════════════════════════════════════
+QUOTE POSTS — STRICT EXTRACTION RULES
+═══════════════════════════════════════════
+
+Quote posts work fundamentally differently from every other post type. They are NOT generated content. They are EXTRACTED content.
+
+WHAT A QUOTE POST IS:
+A single memorable sentence or short phrase pulled VERBATIM from one of her existing captions in the proof corpus, paired with strong visual treatment. The quote IS the post. Your job is curation, not authoring.
+
+THE CARDINAL RULE — VERBATIM ONLY:
+The quote text MUST be the EXACT words from her caption. Do not rewrite. Do not "polish." Do not fix grammar. Do not combine two phrases. Do not paraphrase to make it cleaner. If you cannot find a clean extractable quote in the proof corpus that meets the criteria below, return fewer Quote posts in the plan. It is FAR better to have zero Quote posts than to fabricate one.
+
+QUOTE QUALIFICATION CRITERIA:
+Every quote you extract must pass ALL of these:
+
+✓ Verbatim from her caption (her exact words, no rewriting)
+✓ Under 25 words (10-18 words ideal)
+✓ Stands alone (a stranger reading it cold understands it)
+✓ Declarative or imperative tone (says something, doesn't explain)
+✓ Specific (concrete imagery or unexpected word — NOT generic abstraction)
+✓ Reflects her actual voice and theology (not generic Christian content)
+
+DISQUALIFIERS — never use as a quote:
+
+✗ Bible verses (those aren't her quotes)
+✗ Anything requiring context to understand
+✗ Anything over 25 words
+✗ Generic motivation ("believe in yourself" / "trust the process" / "your time is now")
+✗ Self-referential ("I'm Tiffany and I help women...") — quotes don't bio
+✗ Anything you had to alter from the source caption
+
+EXTRACTION PROCESS:
+1. Scan the proof corpus captions for sentences that pass all criteria
+2. Select the strongest candidate
+3. Set body field to the EXACT extracted text — character-for-character matching the source
+4. Set proof_post_refs to the post number you extracted it from (REQUIRED for Quote posts)
+5. Set visual_direction to typography/layout/color treatment (since the words are locked, visual is your only creative degree of freedom)
+6. Set hook to a brief description of why this quote stops the scroll (for the team's reference)
+
+IF YOU CAN'T FIND A QUALIFYING QUOTE:
+Skip the Quote post. Replace it with a different post type (Reel, Carousel, Static). Tell the user via the planning_note that fewer Quote posts were generated because the proof corpus didn't yield enough qualifying extractions. This is honest and correct behavior. Do NOT fabricate quotes to fill the slot.
+
+For single Static images (post_type = Static, NOT Quote): standard body + visual_direction + cta. Caption can be original.`);
       }
 
       parts.push(productionParts.join('\n'));
@@ -2960,8 +3157,8 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
       "photo_direction": "for Reels only — what stills to intercut",
       "carousel_type": "for Carousels only — must be exactly: 'declaration' | 'repurposed_reel' | 'original_teaching'",
       "slides": "for Carousels only — array of slide objects. Each slide: { slide_number: 1, role: 'hook'|'declaration'|'teaching'|'cta', content: 'the actual text/copy that appears on this slide' }. Typically 5-7 slides.",
-      "body": "for Statics/Quotes — the caption or post content. NOT used for Carousels (use slides instead).",
-      "visual_direction": "for Statics/Carousels/Quotes — what this looks like (typography, imagery, treatment)",
+      "body": "for Statics — original caption content. For QUOTES — the EXACT VERBATIM text extracted from the proof corpus caption (no rewording allowed). NOT used for Carousels (use slides instead).",
+      "visual_direction": "for Statics/Carousels/Quotes — what this looks like (typography, imagery, treatment). For Quotes specifically: this is your ONLY creative degree of freedom since the words are locked.",
       "cta": "the call to action",
       "notes": "optional production notes",
       "proof_post_refs": [array of integers — the post numbers from the PROOF CORPUS above (1-20) that you specifically drew from for this day. For repurposed_reel carousels this is REQUIRED and must cite the source Reel. For other days, cite ONLY posts that genuinely shaped this brief — the story it retells, the framework it reapplies, the voice it pattern-matches, the topic cluster it extends. Use [] only for posts that are genuinely net-new with no proof anchor. Most days SHOULD reference 1-3 proof posts. This is how the user verifies you mined her catalog instead of making things up.]
@@ -2971,8 +3168,9 @@ Output: return ONLY JSON, no preamble, no closing remarks. Match this shape exac
 
 For Reels: brand_police_question, talking_head_points, b_roll_direction, photo_direction are required. body/visual_direction can be omitted or brief.
 For Carousels: carousel_type and slides are required. visual_direction describes typography/treatment.
-For Quotes/Statics: body, visual_direction, cta are required. Slide-related fields can be omitted.
-For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels it MUST be non-empty.
+For Quote posts: body MUST be the verbatim extracted phrase from a proof corpus caption, proof_post_refs MUST cite the source post (single integer in array), visual_direction describes typography/imagery treatment. If no qualifying quote can be extracted from the proof corpus, do NOT include a Quote post in the plan — substitute a different post type instead.
+For Statics: body, visual_direction, cta are required. Slide-related fields can be omitted.
+For ALL post types: proof_post_refs is required (use empty array if genuinely no proof anchor). For repurposed_reel carousels and Quote posts it MUST be non-empty.
 
 CAROUSEL TYPE MIX TARGET for the 14-day plan:
 - If the plan includes ~3-4 carousels total, aim for: 1 declaration / 2 repurposed-reel / 1 original-teaching
@@ -2985,8 +3183,8 @@ CAROUSEL TYPE MIX TARGET for the 14-day plan:
   function buildPlannerUserPrompt({ brief, weekOf }) {
     let s = `Plan label: ${weekOf}\n\n`;
     s += brief
-      ? `Director's notes for this cycle:\n${brief}\n\nGenerate the two-week plan as JSON.`
-      : `No additional director's notes — generate the two-week plan based on the brand profile alone.`;
+      ? `STRATEGY BRIEF for this cycle:\n${brief}\n\nThis is your strategic direction for these two weeks. Honor what it specifies — campaigns, themes, footage available, what to lean into, what to avoid. Then generate the two-week plan as JSON.`
+      : `No strategy brief provided — generate the two-week plan based on the brand profile, pillars, and proof corpus alone.`;
     return s;
   }
 
