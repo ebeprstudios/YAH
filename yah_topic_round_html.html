@@ -1,0 +1,141 @@
+<!--
+  ============================================================
+  YAH — Topic Round UI (drop-in)
+  ============================================================
+  WHERE THIS GOES:
+  Find this block in your existing index.html:
+
+      <div class="client-body" id="ctab-planner">
+        ...your existing planner content...
+      </div>
+
+  REPLACE the entire div with the markup below.
+
+  Your existing Weekly Planner content lives inside the new
+  <div id="planner-calendar"> placeholder near the bottom — copy
+  your current planner UI INTO that div so nothing breaks.
+  ============================================================
+-->
+
+<div class="client-body" id="ctab-planner">
+
+  <!-- Sub-tab toggle: Topics | Calendar -->
+  <div class="planner-subnav">
+    <button class="planner-subtab active" id="subtab-topics" onclick="switchPlannerSub('topics')">
+      <span class="subtab-label">Topics</span>
+      <span class="subtab-status" id="subtab-status-topics">No round yet</span>
+    </button>
+    <button class="planner-subtab" id="subtab-calendar" onclick="switchPlannerSub('calendar')" disabled>
+      <span class="subtab-label">Calendar</span>
+      <span class="subtab-status" id="subtab-status-calendar">Locked until topics approved</span>
+    </button>
+  </div>
+
+  <!-- ============================================================
+       TOPICS PANEL
+       ============================================================ -->
+  <div class="planner-panel active" id="planner-topics">
+
+    <!-- Empty state — shown before any round exists -->
+    <div class="topic-empty" id="topic-empty-state">
+      <div class="topic-empty-icon">●</div>
+      <h2 class="topic-empty-title">Start a topic round</h2>
+      <p class="topic-empty-sub">
+        Generate a month's worth of topics. Send to the client for approval.
+        Once approved, build the calendar against approved topics only.
+      </p>
+
+      <!-- Director's Notes -->
+      <div class="topic-form">
+        <div class="topic-form-row">
+          <label class="topic-form-label">Month label</label>
+          <input type="text" id="topic-month-label" class="topic-input" placeholder="e.g. May 2026" />
+        </div>
+
+        <div class="topic-form-row">
+          <label class="topic-form-label">Topic count</label>
+          <select id="topic-count" class="topic-input topic-select">
+            <option value="16">16 topics (light cycle)</option>
+            <option value="24">24 topics (standard)</option>
+            <option value="32" selected>32 topics (full month)</option>
+            <option value="40">40 topics (heavy / surplus)</option>
+          </select>
+        </div>
+
+        <div class="topic-form-row">
+          <label class="topic-form-label">
+            Director's notes
+            <span class="topic-form-hint">What should this round emphasize?</span>
+          </label>
+          <textarea id="topic-director-notes" class="topic-textarea"
+            placeholder="What's the focus of this round? Anchors, constraints, what to lean into or avoid..."></textarea>
+          <div class="topic-chips" id="topic-chips">
+            <button type="button" class="topic-chip" onclick="addDirectorChip(this)" data-chip="Mother's Day moment mid-month — tie at least 2 topics to her motherhood story.">+ Mother's Day moment</button>
+            <button type="button" class="topic-chip" onclick="addDirectorChip(this)" data-chip="Lean repurposed-reel carousels — pull from her highest-performing teaching Reels.">+ Repurpose teaching Reels</button>
+            <button type="button" class="topic-chip" onclick="addDirectorChip(this)" data-chip="Pillar lean: Spiritual Development heavy this cycle. Drop in Humor mid-cycle.">+ Pillar lean</button>
+            <button type="button" class="topic-chip" onclick="addDirectorChip(this)" data-chip="Pre-launch energy — book promotion ramp. Save 'comment BOOK' CTAs for the second half of the cycle.">+ Pre-launch ramp</button>
+            <button type="button" class="topic-chip" onclick="addDirectorChip(this)" data-chip="Behind the brand — mix in lifestyle/family folder content for breathing room.">+ Behind the brand</button>
+          </div>
+        </div>
+
+        <div class="topic-form-actions">
+          <button class="btn btn-primary" onclick="generateTopicRound()" id="topic-generate-btn">
+            Generate topic round →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round view — shown once a round exists -->
+    <div class="topic-round" id="topic-round-view" style="display:none;">
+
+      <!-- Round header -->
+      <div class="topic-round-header">
+        <div>
+          <div class="topic-round-meta">
+            <span class="topic-round-status" id="topic-round-status-pill">DRAFT</span>
+            <span class="topic-round-month" id="topic-round-month-label"></span>
+            <span class="topic-round-count" id="topic-round-count-label"></span>
+          </div>
+          <h2 class="topic-round-title">Topic round</h2>
+          <p class="topic-round-sub" id="topic-round-director-notes-display"></p>
+        </div>
+        <div class="topic-round-actions" id="topic-round-actions">
+          <!-- Buttons render dynamically based on status -->
+        </div>
+      </div>
+
+      <!-- Topic grid -->
+      <div class="topic-grid" id="topic-grid">
+        <!-- Topic cards rendered here by renderTopicCards() -->
+      </div>
+
+      <!-- Round footer (sticky during review) -->
+      <div class="topic-round-footer" id="topic-round-footer" style="display:none;">
+        <div class="topic-footer-summary" id="topic-footer-summary"></div>
+        <button class="btn btn-primary" onclick="sendTopicRoundForApproval()" id="topic-send-btn">
+          Send for approval →
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="topic-loading" id="topic-loading" style="display:none;">
+      <div class="topic-loading-spinner"></div>
+      <div class="topic-loading-text">Generating <span id="topic-loading-count">32</span> topics…</div>
+      <div class="topic-loading-sub">Reading her knowledge library, mining proof corpus, surfacing angles.</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       CALENDAR PANEL — your existing weekly planner UI goes here
+       ============================================================ -->
+  <div class="planner-panel" id="planner-calendar">
+    <!--
+      ⬇  COPY YOUR EXISTING WEEKLY PLANNER CONTENT INTO THIS DIV.  ⬇
+      Everything that USED to live in <div id="ctab-planner"> goes here.
+    -->
+  </div>
+
+</div>
