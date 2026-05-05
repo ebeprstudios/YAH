@@ -5401,42 +5401,244 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     const files = Array.from(fileList || []);
     if (!files.length) return;
 
+    // Need API key for Claude classification
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      toast('Set your Anthropic API key in Settings before uploading docs', 'error');
+      return;
+    }
+
     kbState.importing = true;
-    kbState.importMessage = `Processing ${files.length} file${files.length > 1 ? 's' : ''}…`;
+    kbState.importMessage = `Processing ${files.length} file${files.length > 1 ? 's' : ''}\u2026`;
     kbState.importMessageKind = 'working';
     refreshKbScreen();
 
-    let processed = 0;
-    let truncated = 0;
-    const errors = [];
+    // Queue: process one at a time, each opens modal for user confirm
+    kbState.uploadQueue = [...files];
+    kbState.uploadProcessed = 0;
+    kbState.uploadErrors = [];
+    kbState.uploadTruncated = 0;
 
-    for (const file of files) {
-      try {
-        const result = await processKbFile(file);
-        if (result.was_truncated) truncated++;
-        processed++;
-      } catch (e) {
-        errors.push(`${file.name}: ${e.message}`);
-        console.error('KB file failed:', file.name, e);
-      }
-    }
+    await processNextUploadInQueue();
+  }
 
-    kbState.importing = false;
-    if (errors.length && processed === 0) {
-      kbState.importMessage = 'Import failed: ' + errors.join(' · ');
-      kbState.importMessageKind = 'err';
-    } else {
+  async function processNextUploadInQueue() {
+    if (!kbState.uploadQueue || kbState.uploadQueue.length === 0) {
+      // Queue done. Show summary.
+      const processed = kbState.uploadProcessed || 0;
+      const truncated = kbState.uploadTruncated || 0;
+      const errors = kbState.uploadErrors || [];
+      kbState.importing = false;
       const parts = [];
       if (processed) parts.push(`${processed} document${processed > 1 ? 's' : ''} added`);
       if (truncated) parts.push(`${truncated} truncated to fit prompt budget`);
       if (errors.length) parts.push(`${errors.length} failed`);
-      kbState.importMessage = parts.join(' · ');
+      kbState.importMessage = parts.length ? parts.join(' \u00b7 ') : 'No files imported';
       kbState.importMessageKind = errors.length ? 'err' : 'ok';
+      kbState.uploadQueue = null;
+      await loadKnowledgeData();
+      return;
     }
 
-    await loadKnowledgeData();
+    const file = kbState.uploadQueue.shift();
+    const remainingMsg = kbState.uploadQueue.length > 0
+      ? ` (${kbState.uploadQueue.length} more queued)`
+      : '';
+
+    try {
+      kbState.importMessage = `Reading ${file.name}${remainingMsg}\u2026`;
+      kbState.importMessageKind = 'working';
+      refreshKbScreen();
+
+      // Extract text + figure out doc properties
+      const extracted = await extractKbFileContent(file);
+
+      // Classify with Claude
+      kbState.importMessage = `Auto-tagging ${file.name}${remainingMsg}\u2026`;
+      refreshKbScreen();
+      const suggestion = await classifyKbDoc(extracted.rawText, file.name);
+
+      // Open edit modal pre-populated with extracted content + Claude's suggestions
+      kbState.editingDoc = {
+        id: null,
+        title: file.name.replace(/\.[^.]+$/, ''),
+        doc_type: suggestion.doc_type,
+        source_format: extracted.ext,
+        source_filename: file.name,
+        raw_text: extracted.rawText,
+        prompt_text: extracted.promptText,
+        word_count: extracted.wordCount,
+        was_truncated: extracted.wasTruncated,
+        persona_tags: suggestion.persona_tags,
+        notes: suggestion.notes || '',
+        // Track that this came from upload (so save handler routes it correctly)
+        _isUpload: true,
+        _suggestion_reason: suggestion.reason || ''
+      };
+      if (extracted.wasTruncated) kbState.uploadTruncated++;
+
+      // Show modal
+      renderKbEditModal();
+      document.getElementById('kb-edit-overlay').classList.add('open');
+
+      // Wait - the user will close the modal via Save or Cancel, which advances the queue
+    } catch (e) {
+      kbState.uploadErrors.push(`${file.name}: ${e.message}`);
+      console.error('KB upload failed:', file.name, e);
+      // Move on to next
+      await processNextUploadInQueue();
+    }
   }
 
+  // Extract text from file without saving - used by auto-tag flow
+  async function extractKbFileContent(file) {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    let rawText = '';
+
+    if (ext === 'txt' || ext === 'vtt' || ext === 'md') {
+      rawText = await file.text();
+      if (ext === 'vtt') rawText = parseVtt(rawText);
+    } else if (ext === 'pdf') {
+      rawText = await parsePdf(file);
+    } else if (ext === 'docx') {
+      rawText = await parseDocx(file);
+    } else if (ext === 'csv') {
+      rawText = await parseCsvForKb(file);
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      rawText = await parseXlsx(file);
+    } else {
+      throw new Error(`Unsupported file format: .${ext}`);
+    }
+
+    rawText = (rawText || '').trim();
+    if (!rawText) throw new Error('No text extracted from file');
+
+    const words = rawText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    const PROMPT_BUDGET_WORDS = 3000;
+    let promptText = rawText;
+    let wasTruncated = false;
+    if (wordCount > PROMPT_BUDGET_WORDS) {
+      promptText = words.slice(0, PROMPT_BUDGET_WORDS).join(' ');
+      promptText += '\n\n[...document truncated \u2014 only first ' + PROMPT_BUDGET_WORDS.toLocaleString() + ' of ' + wordCount.toLocaleString() + ' words shown to personas...]';
+      wasTruncated = true;
+    }
+
+    return { ext, rawText, promptText, wordCount, wasTruncated };
+  }
+
+  // Ask Claude to classify the doc + recommend persona tags
+  async function classifyKbDoc(rawText, filename) {
+    const apiKey = getApiKey();
+    if (!apiKey) throw new Error('No API key');
+
+    // Sample: first 2000 words (or full doc if shorter) - enough for classification
+    const words = rawText.split(/\s+/).filter(Boolean);
+    const sample = words.slice(0, 2000).join(' ');
+
+    const skills = window.__activeSkills || [];
+    // Use slugs as the canonical persona identifier - that's what persona_tags stores
+    const personaList = skills.length
+      ? skills.map(s => `- ${s.slug} (${s.name || s.full_name || s.slug}, role: ${s.role || s.short_role || 'persona'})`).join('\n')
+      : '(no personas configured yet)';
+    const validSlugs = skills.map(s => s.slug);
+
+    const systemPrompt = `You are a document classifier for a content planning agency tool. Your job is to read the first ~2000 words of a document and classify what KIND of doc it is, then recommend which agency personas should read it when generating content plans.
+
+DOC TYPES (pick exactly one):
+- transcript: spoken-word content. Podcast/YouTube transcripts, interview transcripts, speech transcripts. Long-form content captured from recording.
+- brand_voice: brand guidelines, voice rules, copy context, brand bibles, tone-of-voice docs. Authoritative brand standards.
+- audience_research: customer interviews, audience surveys, persona docs, market research, who-is-the-audience material.
+- performance_report: META insights, analytics exports, post performance data, engagement reports.
+- strategy_doc: strategic plans, business plans, content strategy briefs, campaign plans, launch plans.
+- document: general reference docs that don't fit the above (catch-all).
+- note: short observations, call notes, quick captures.
+
+PERSONA TAGGING - use the SLUG (first column) when listing personas:
+${personaList}
+
+GUIDELINES:
+- Brand bibles, voice docs, and master strategy docs typically get EMPTY persona_tags (= all personas read them). Don't tag specific personas unless the doc is clearly specialized.
+- Transcripts of the client speaking → tag for personas whose role involves writing copy, extracting voice/teachings, directing creative, or interview/question prep.
+- Audience research → personas focused on performance, audience advocacy.
+- Performance reports → performance-focused personas.
+- Strategy docs → strategist personas.
+- Brand visual guidelines (design specs) → strategist, creative direction, copy, voice, brand QC personas.
+- General documents that touch many areas → empty (all personas).
+
+When in doubt, prefer EMPTY persona_tags. Better to over-share than to silently hide a doc from a persona who needed it.
+
+Return ONLY a JSON object with this exact shape:
+{
+  "doc_type": "<one of the types above>",
+  "persona_tags": [<array of persona SLUGS from the list above; empty array means all personas read it>],
+  "reason": "<one short sentence explaining the classification>",
+  "notes": "<optional 1-2 sentence summary of what's in the doc; null if not useful>"
+}
+
+Do not include any other text. Just the JSON object.`;
+
+    const userPrompt = `Filename: ${filename}\n\nFirst ${Math.min(words.length, 2000).toLocaleString()} words of the document:\n\n${sample}`;
+
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await r.json();
+    if (!r.ok) {
+      console.error('Classifier API error:', data);
+      // Fall back to safe defaults instead of failing the upload
+      return {
+        doc_type: 'document',
+        persona_tags: [],
+        reason: 'Auto-classification unavailable; defaulted to general document with no persona filter.',
+        notes: null
+      };
+    }
+
+    const text = (data.content?.[0]?.text || '').trim();
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```$/g, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (e) {
+      console.error('Could not parse classifier response:', cleaned);
+      return {
+        doc_type: 'document',
+        persona_tags: [],
+        reason: 'Auto-classification returned invalid format; defaulted to general document.',
+        notes: null
+      };
+    }
+
+    // Validate shape
+    const validTypes = ['transcript', 'brand_voice', 'audience_research', 'performance_report', 'strategy_doc', 'document', 'note'];
+    if (!validTypes.includes(parsed.doc_type)) parsed.doc_type = 'document';
+    if (!Array.isArray(parsed.persona_tags)) parsed.persona_tags = [];
+
+    // Filter out any tags that aren't valid slugs (Claude might hallucinate or use a name instead of slug)
+    if (validSlugs.length > 0) {
+      parsed.persona_tags = parsed.persona_tags.filter(tag => validSlugs.includes(tag));
+    }
+
+    return parsed;
+  }
+
+  // Legacy single-file flow kept for reference / future use; new flow uses extractKbFileContent + classifyKbDoc + modal
   async function processKbFile(file) {
     const ext = (file.name.split('.').pop() || '').toLowerCase();
     let rawText = '';
@@ -5610,12 +5812,24 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
     const docTypeOptions = ['note', 'brand_voice', 'audience_research', 'transcript', 'performance_report', 'strategy_doc', 'document'];
 
-    document.getElementById('kb-edit-title').textContent = d.id ? 'Edit document' : 'Add note';
+    document.getElementById('kb-edit-title').textContent = d.id
+      ? 'Edit document'
+      : (d._isUpload ? 'Review auto-tagged document' : 'Add note');
     document.getElementById('kb-edit-sub').textContent = d.id
-      ? `${(d.source_format || '').toUpperCase()} · ${(d.word_count || 0).toLocaleString()} words${d.was_truncated ? ' · truncated for prompt budget' : ''}`
-      : 'Quick text capture for ideas, observations, call notes';
+      ? `${(d.source_format || '').toUpperCase()} \u00b7 ${(d.word_count || 0).toLocaleString()} words${d.was_truncated ? ' \u00b7 truncated for prompt budget' : ''}`
+      : (d._isUpload
+          ? `${(d.source_format || '').toUpperCase()} \u00b7 ${(d.word_count || 0).toLocaleString()} words${d.was_truncated ? ' \u00b7 truncated' : ''} \u00b7 review tags below and click Save`
+          : 'Quick text capture for ideas, observations, call notes');
 
-    const body = `
+    // Auto-tag suggestion banner (shows up only on upload flow)
+    const suggestionBanner = d._isUpload && d._suggestion_reason
+      ? `<div style="background:var(--bg-soft, #f7f5f0); border-left: 3px solid var(--olive, #5a6c4a); padding:10px 14px; margin-bottom:16px; border-radius:6px; font-size:13px; line-height:1.5;">
+          <strong style="color:var(--text-1);">Auto-tag suggestion:</strong>
+          <span style="color:var(--text-2);">${esc(d._suggestion_reason)}</span>
+        </div>`
+      : '';
+
+    const body = suggestionBanner + `
       <div style="margin-bottom:14px">
         <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-3); font-weight:700; margin-bottom:4px">Title</label>
         <input type="text" id="kb-edit-doc-title" class="modal-input" value="${esc(d.title || '')}" placeholder="What is this document about?">
@@ -5654,9 +5868,16 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     if (delBtn) delBtn.style.display = d.id ? '' : 'none';
   }
 
-  function closeKbEdit() {
+  function closeKbEdit(skipQueueAdvance) {
+    const wasUpload = kbState.editingDoc && kbState.editingDoc._isUpload;
     document.getElementById('kb-edit-overlay').classList.remove('open');
     kbState.editingDoc = null;
+
+    // If we cancelled out of an upload (X or Cancel button), treat as skipped and process next file.
+    // skipQueueAdvance=true means saveKbDoc is closing on success and will advance the queue itself.
+    if (wasUpload && kbState.uploadQueue && !skipQueueAdvance) {
+      processNextUploadInQueue();
+    }
   }
 
   async function saveKbDoc() {
@@ -5678,7 +5899,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
     let promptText = content;
     let wasTruncated = false;
     if (wordCount > PROMPT_BUDGET_WORDS) {
-      promptText = words.slice(0, PROMPT_BUDGET_WORDS).join(' ') + '\n\n[...document truncated — only first ' + PROMPT_BUDGET_WORDS.toLocaleString() + ' of ' + wordCount.toLocaleString() + ' words shown to personas...]';
+      promptText = words.slice(0, PROMPT_BUDGET_WORDS).join(' ') + '\n\n[...document truncated \u2014 only first ' + PROMPT_BUDGET_WORDS.toLocaleString() + ' of ' + wordCount.toLocaleString() + ' words shown to personas...]';
       wasTruncated = true;
     }
 
@@ -5696,27 +5917,43 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
     const btn = document.getElementById('kb-edit-save-btn');
     btn.disabled = true;
-    btn.textContent = 'Saving…';
+    btn.textContent = 'Saving\u2026';
 
     try {
       if (d.id) {
+        // Editing existing doc
         await sbPatch(`knowledge_documents?id=eq.${d.id}`, updates);
       } else {
-        await sbPost('knowledge_documents', {
+        // New doc: pull source_format and source_filename from editingDoc if set (upload flow), else default to 'note'
+        const sourceFormat = d.source_format || 'note';
+        const payload = {
           ...updates,
           client_id: activeClient.id,
-          source_format: 'note',
+          source_format: sourceFormat,
           is_active: true
-        });
+        };
+        if (d.source_filename) payload.source_filename = d.source_filename;
+        await sbPost('knowledge_documents', payload);
       }
       toast('Saved', 'success');
-      closeKbEdit();
-      await loadKnowledgeData();
+
+      // If this came from the upload queue, count it and process next
+      const wasUpload = d._isUpload;
+      closeKbEdit(true);
+
+      if (wasUpload) {
+        kbState.uploadProcessed = (kbState.uploadProcessed || 0) + 1;
+        await processNextUploadInQueue();
+      } else {
+        await loadKnowledgeData();
+      }
     } catch (e) {
       toast('Save failed: ' + e.message, 'error');
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Save';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
     }
   }
 
