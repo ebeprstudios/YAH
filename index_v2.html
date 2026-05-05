@@ -3755,7 +3755,7 @@
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
+        max_tokens: 16000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
@@ -3771,7 +3771,15 @@
     try {
       parsed = JSON.parse(cleaned);
     } catch (e) {
-      throw new Error('Claude returned non-JSON. Try again or simplify the brief.');
+      // Diagnostic: show what we got back so user knows if it was truncation, refusal, or malformed
+      const preview = cleaned.slice(0, 200);
+      const tailPreview = cleaned.slice(-200);
+      const looksLikeTruncation = !cleaned.trim().endsWith(']}') && !cleaned.trim().endsWith('}');
+      const hint = looksLikeTruncation
+        ? 'Output appears truncated — the model hit max_tokens before finishing the JSON. Try simplifying the brief or reducing knowledge docs.'
+        : 'Model returned non-JSON content. May have refused, written prose, or returned malformed output.';
+      console.error('JSON parse failed. Preview:', preview, '\n...tail:', tailPreview);
+      throw new Error(hint);
     }
 
     // Normalize day shape
@@ -4569,7 +4577,7 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
+        max_tokens: 16000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
