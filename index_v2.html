@@ -976,6 +976,69 @@
     white-space: pre-wrap;
   }
 
+  /* History tab */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .history-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    transition: border-color 120ms;
+  }
+  .history-card:hover { border-color: var(--olive); }
+  .history-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .history-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+  .history-meta {
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .history-meta-sep {
+    color: var(--text-4, #ccc);
+  }
+  .history-note {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    background: var(--bg-soft, #f7f5f0);
+    border-radius: var(--r-md, 6px);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-2);
+    font-style: italic;
+  }
+  .history-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .btn-danger {
+    background: #c43d3d;
+    color: white;
+    border-color: #c43d3d;
+  }
+  .btn-danger:hover {
+    background: #a82e2e;
+    border-color: #a82e2e;
+  }
+
   /* Pillar balance toggle */
   .plan-balance {
     background: white;
@@ -2872,8 +2935,11 @@
       return subnavWrap + renderKnowledgeContent();
     }
 
+    if (sub === 'history') {
+      return subnavWrap + renderHistoryContent();
+    }
+
     const map = {
-      history: { title: 'Plan timeline — coming next', body: 'Visual cadence of past plans. See your rhythm at a glance — which weeks shipped, which weeks went off-script, which themes recurred.' },
       ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
       reports: { title: 'Monthly reports — coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
     };
@@ -3650,6 +3716,11 @@
   function refreshPlannerScreen() {
     if (currentScreen !== 'studio' || activeSubpage !== 'planner') return;
     document.getElementById('studio-body').innerHTML = renderStudioSubpage('planner');
+  }
+
+  function refreshHistoryScreen() {
+    if (currentScreen !== 'studio' || activeSubpage !== 'history') return;
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage('history');
   }
 
   // ---- Plan generation via Anthropic API ----
@@ -4914,6 +4985,257 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       kbState.typeFilter = 'all';
     }
     return _origOpenClientForKb.call(this, clientId, subpage);
+  };
+
+  // ============================================================
+  // HISTORY TAB
+  // ============================================================
+  // List view of past saved plans for the active client.
+  // Actions: View (load into planner), Duplicate (clone as new), Delete (with confirm).
+
+  const historyState = {
+    plans: [],          // [{id, week_of, planning_note, status, created_at, day_count}]
+    loaded: false,
+    loading: false,
+    pendingDeleteId: null
+  };
+
+  // Reset history state when client switches
+  const _origOpenClientForHistory = window.openClient || function(){};
+  window.openClient = function(clientId, subpage) {
+    if (clientId !== (activeClient && activeClient.id)) {
+      historyState.plans = [];
+      historyState.loaded = false;
+      historyState.pendingDeleteId = null;
+    }
+    return _origOpenClientForHistory.call(this, clientId, subpage);
+  };
+
+  async function loadHistoryPlans() {
+    if (!activeClient || historyState.loading) return;
+    historyState.loading = true;
+    try {
+      // Fetch plans for active client, newest first
+      const plans = await sbGet(`plans?client_id=eq.${activeClient.id}&order=created_at.desc&select=*`);
+
+      // For each plan, count its days so we can show "14 posts" etc.
+      const plansWithCounts = await Promise.all(plans.map(async (p) => {
+        try {
+          const days = await sbGet(`plan_days?plan_id=eq.${p.id}&select=id`);
+          return { ...p, day_count: days.length };
+        } catch (e) {
+          return { ...p, day_count: 0 };
+        }
+      }));
+
+      historyState.plans = plansWithCounts;
+      historyState.loaded = true;
+    } catch (e) {
+      toast('Failed to load plan history: ' + e.message, 'error');
+    } finally {
+      historyState.loading = false;
+      refreshHistoryScreen();
+    }
+  }
+
+  function renderHistoryContent() {
+    if (!activeClient) {
+      return `<div class="placeholder"><h3>No client selected</h3><p>Pick a client from the rail.</p></div>`;
+    }
+
+    if (!historyState.loaded) {
+      // Trigger load on first render
+      setTimeout(loadHistoryPlans, 10);
+      return `<div class="placeholder"><h3>Loading plan history…</h3><p>Pulling past plans for ${esc(activeClient.brand_name || activeClient.name || 'this client')}.</p></div>`;
+    }
+
+    if (historyState.plans.length === 0) {
+      return `
+        <div class="placeholder">
+          <h3>No saved plans yet</h3>
+          <p>Plans you save in the Planner tab will appear here. Each one is a snapshot you can view, duplicate, or delete.</p>
+          <button class="btn btn-skin" onclick="setSubpage('planner')">Go to Planner</button>
+        </div>
+      `;
+    }
+
+    const cards = historyState.plans.map(renderHistoryCard).join('');
+
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+        <h3 style="margin:0;">Past plans for ${esc(activeClient.brand_name || activeClient.name)}</h3>
+        <button class="btn btn-ghost btn-sm" onclick="historyRefresh()">Refresh</button>
+      </div>
+      <div class="history-list">${cards}</div>
+    `;
+  }
+
+  function renderHistoryCard(plan) {
+    const created = plan.created_at ? new Date(plan.created_at) : null;
+    const dateStr = created ? created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const timeStr = created ? created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+    const status = plan.status || 'draft';
+    const statusColor = status === 'published' ? 'var(--accent-emerald, #10b981)' : 'var(--text-3, #888)';
+    const note = plan.planning_note ? `<p class="history-note">${esc(plan.planning_note.slice(0, 220))}${plan.planning_note.length > 220 ? '…' : ''}</p>` : '';
+    const isDeleting = historyState.pendingDeleteId === plan.id;
+
+    return `
+      <div class="history-card" data-plan-id="${esc(plan.id)}">
+        <div class="history-card-head">
+          <div>
+            <h4 class="history-title">${esc(plan.week_of || 'Untitled plan')}</h4>
+            <div class="history-meta">
+              <span>${dateStr} · ${timeStr}</span>
+              <span class="history-meta-sep">·</span>
+              <span>${plan.day_count} ${plan.day_count === 1 ? 'post' : 'posts'}</span>
+              <span class="history-meta-sep">·</span>
+              <span style="color:${statusColor}; text-transform:uppercase; font-weight:600; font-size:11px; letter-spacing:0.5px;">${esc(status)}</span>
+            </div>
+          </div>
+        </div>
+        ${note}
+        <div class="history-actions">
+          <button class="btn btn-skin btn-sm" onclick="historyView('${esc(plan.id)}')">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="historyDuplicate('${esc(plan.id)}')">Duplicate</button>
+          ${isDeleting
+            ? `<button class="btn btn-danger btn-sm" onclick="historyConfirmDelete('${esc(plan.id)}')">Confirm delete</button>
+               <button class="btn btn-ghost btn-sm" onclick="historyCancelDelete()">Cancel</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="historyAskDelete('${esc(plan.id)}')">Delete</button>`
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- History action handlers ----
+
+  window.historyRefresh = async function() {
+    historyState.loaded = false;
+    historyState.plans = [];
+    refreshHistoryScreen();
+    await loadHistoryPlans();
+  };
+
+  window.historyView = async function(planId) {
+    if (!planId) return;
+    try {
+      // Load plan + its days from DB
+      const planRows = await sbGet(`plans?id=eq.${planId}&select=*`);
+      if (!planRows || !planRows.length) {
+        toast('Plan not found', 'error');
+        return;
+      }
+      const plan = planRows[0];
+      const days = await sbGet(`plan_days?plan_id=eq.${planId}&order=day_number.asc&select=*`);
+
+      // Reconstruct the in-memory plan structure the planner expects
+      planState.plan = {
+        client_id: plan.client_id,
+        week_of: plan.week_of,
+        planning_note: plan.planning_note,
+        days: (days || []).map(d => ({
+          ...d,
+          // Normalize array fields that may come back as strings or null
+          hook_alternatives: Array.isArray(d.hook_alternatives) ? d.hook_alternatives : [],
+          brand_police_question_alternatives: Array.isArray(d.brand_police_question_alternatives) ? d.brand_police_question_alternatives : [],
+          proof_post_refs: Array.isArray(d.proof_post_refs) ? d.proof_post_refs : [],
+          slides: Array.isArray(d.slides) ? d.slides : null
+        }))
+      };
+      planState.planId = plan.id;
+      planState.refineMessages = [];
+      planState.expandedDay = null;
+      planState.showBalance = false;
+      // Note: proofCorpus and knowledgeUsed are not persisted, so the Sources Used strip won't show on restored plans
+
+      setSubpage('planner');
+      toast('Plan loaded into Planner', 'success');
+    } catch (e) {
+      toast('Failed to load plan: ' + e.message, 'error');
+    }
+  };
+
+  window.historyDuplicate = async function(planId) {
+    if (!planId) return;
+    try {
+      const planRows = await sbGet(`plans?id=eq.${planId}&select=*`);
+      if (!planRows || !planRows.length) {
+        toast('Plan not found', 'error');
+        return;
+      }
+      const plan = planRows[0];
+      const days = await sbGet(`plan_days?plan_id=eq.${planId}&order=day_number.asc&select=*`);
+
+      // Same as View, but clear the planId so save creates a NEW plan
+      planState.plan = {
+        client_id: plan.client_id,
+        week_of: (plan.week_of || 'Plan') + ' (duplicate)',
+        planning_note: plan.planning_note,
+        days: (days || []).map(d => {
+          // Strip the day's id and plan_id so new ones get created on save
+          const { id, plan_id, created_at, ...rest } = d;
+          return {
+            ...rest,
+            hook_alternatives: Array.isArray(rest.hook_alternatives) ? rest.hook_alternatives : [],
+            brand_police_question_alternatives: Array.isArray(rest.brand_police_question_alternatives) ? rest.brand_police_question_alternatives : [],
+            proof_post_refs: Array.isArray(rest.proof_post_refs) ? rest.proof_post_refs : [],
+            slides: Array.isArray(rest.slides) ? rest.slides : null
+          };
+        })
+      };
+      planState.planId = null;  // null so save creates new
+      planState.refineMessages = [];
+      planState.expandedDay = null;
+      planState.showBalance = false;
+
+      setSubpage('planner');
+      toast('Plan duplicated. Save to keep the copy.', 'success');
+    } catch (e) {
+      toast('Failed to duplicate plan: ' + e.message, 'error');
+    }
+  };
+
+  window.historyAskDelete = function(planId) {
+    historyState.pendingDeleteId = planId;
+    refreshHistoryScreen();
+  };
+
+  window.historyCancelDelete = function() {
+    historyState.pendingDeleteId = null;
+    refreshHistoryScreen();
+  };
+
+  window.historyConfirmDelete = async function(planId) {
+    if (!planId) return;
+    try {
+      // Delete plan_days first (FK), then the plan itself
+      await fetch(SB_URL + '/rest/v1/plan_days?plan_id=eq.' + planId, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      await fetch(SB_URL + '/rest/v1/plans?id=eq.' + planId, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+
+      // Remove from local state without full refetch
+      historyState.plans = historyState.plans.filter(p => p.id !== planId);
+      historyState.pendingDeleteId = null;
+
+      // If the active planner is showing this plan, clear it
+      if (planState.planId === planId) {
+        planState.plan = null;
+        planState.planId = null;
+        planState.refineMessages = [];
+      }
+
+      toast('Plan deleted', 'success');
+      refreshHistoryScreen();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+      historyState.pendingDeleteId = null;
+      refreshHistoryScreen();
+    }
   };
 
   function renderKnowledgeContent() {
