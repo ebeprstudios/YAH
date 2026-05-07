@@ -1039,6 +1039,222 @@
     border-color: #a82e2e;
   }
 
+  /* Ideation tab */
+  .ideation-capture {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .ideation-capture-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ideation-capture-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ideation-capture-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ideation-capture-row > * {
+    flex: 1;
+    min-width: 200px;
+  }
+  .ideation-capture-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .ideation-input {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md, 6px);
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-1);
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 120ms;
+  }
+  .ideation-input:focus {
+    outline: none;
+    border-color: var(--olive, #5a6c4a);
+  }
+  .ideation-textarea {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md, 6px);
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-1);
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 60px;
+    resize: vertical;
+    line-height: 1.55;
+    transition: border-color 120ms;
+  }
+  .ideation-textarea:focus {
+    outline: none;
+    border-color: var(--olive, #5a6c4a);
+  }
+  .ideation-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .ideation-search {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md, 6px);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text-1);
+    font-family: inherit;
+    flex: 1;
+    min-width: 220px;
+    max-width: 340px;
+  }
+  .ideation-search:focus {
+    outline: none;
+    border-color: var(--olive, #5a6c4a);
+  }
+  .ideation-status-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .ideation-status-tab {
+    background: transparent;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-md, 6px);
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 120ms;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ideation-status-tab:hover {
+    border-color: var(--olive, #5a6c4a);
+  }
+  .ideation-status-tab.active {
+    background: var(--olive, #5a6c4a);
+    color: white;
+    border-color: var(--olive, #5a6c4a);
+  }
+  .ideation-count {
+    background: rgba(0,0,0,0.08);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .ideation-status-tab.active .ideation-count {
+    background: rgba(255,255,255,0.25);
+  }
+  .ideation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ideation-card {
+    background: white;
+    border: 0.5px solid var(--bd-soft);
+    border-radius: var(--r-lg);
+    padding: 14px 18px;
+    transition: border-color 120ms;
+  }
+  .ideation-card:hover { border-color: var(--olive, #5a6c4a); }
+  .ideation-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .ideation-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-1);
+    line-height: 1.4;
+  }
+  .ideation-status {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .ideation-meta {
+    font-size: 11px;
+    color: var(--text-3);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .ideation-meta-sep { color: var(--text-4, #ccc); }
+  .ideation-pillar-chip {
+    background: var(--bg-soft, #f7f5f0);
+    color: var(--text-2);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .ideation-body {
+    margin: 8px 0 0;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .ideation-url {
+    color: var(--olive, #5a6c4a);
+    font-size: 12px;
+    text-decoration: none;
+    border-bottom: 0.5px solid var(--olive, #5a6c4a);
+    word-break: break-all;
+  }
+  .ideation-url:hover { color: var(--text-1); border-bottom-color: var(--text-1); }
+  .ideation-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .plan-ideas-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    user-select: none;
+    padding: 0 8px;
+  }
+  .plan-ideas-toggle input[type="checkbox"] {
+    cursor: pointer;
+  }
+
   /* Pillar balance toggle */
   .plan-balance {
     background: white;
@@ -2939,9 +3155,12 @@
       return subnavWrap + renderHistoryContent();
     }
 
+    if (sub === 'ideation') {
+      return subnavWrap + renderIdeationContent();
+    }
+
     const map = {
-      ideation: { title: 'Ideation thread — coming next', body: 'A thread you add to. Drop ideas, dates, top performers as fast notes — Claude folds them into the next plan automatically.' },
-      reports: { title: 'Monthly reports — coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
+      reports: { title: 'Monthly reports - coming next', body: 'Auto-generated monthly recaps. Pulls from Performance + Plans, Claude writes the narrative, you approve and send.' }
     };
     const cfg = map[sub];
     if (!cfg) return subnavWrap;
@@ -3300,6 +3519,7 @@
     refining: false,
     proofCorpus: [],   // top performers used in last generation, for reference rendering
     knowledgeUsed: [], // knowledge docs injected into last generation
+    ideasInjected: [], // active ideas injected into last generation (for marking 'used' on save)
     expandedProofRef: null  // { dayId, postIndex } for proof popover state
   };
 
@@ -3380,7 +3600,11 @@
 
         <div class="plan-brief-row">
           <input id="plan-week-of" class="plan-week-input" type="text" placeholder="Plan label" value="${esc(defaultWeek)}">
-          <button class="btn btn-primary" onclick="generatePlan()">Generate plan →</button>
+          <label class="plan-ideas-toggle">
+            <input type="checkbox" id="plan-pull-ideas">
+            <span>Pull from active ideas</span>
+          </label>
+          <button class="btn btn-primary" onclick="generatePlan()">Generate plan \u2192</button>
         </div>
       </div>
     `;
@@ -3735,32 +3959,39 @@
 
     const brief = document.getElementById('plan-brief')?.value?.trim() || '';
     const weekOf = document.getElementById('plan-week-of')?.value?.trim() || 'Two-week plan';
+    const pullIdeas = !!document.getElementById('plan-pull-ideas')?.checked;
 
     planState.generating = true;
     planState.plan = null;
     planState.planId = null;
     planState.refineMessages = [];
+    planState.ideasInjected = [];
     refreshPlannerScreen();
 
     try {
-      // Fetch top performers as proof corpus AND knowledge docs in parallel
-      const [topPerformers, knowledgeDocs] = await Promise.all([
+      // Fetch top performers, knowledge, and (optionally) active ideas in parallel
+      const ideasPromise = pullIdeas ? fetchActiveIdeasForPlan(activeClient.id) : Promise.resolve([]);
+      const [topPerformers, knowledgeDocs, activeIdeas] = await Promise.all([
         fetchTopPerformers(activeClient.id, 20),
-        fetchKnowledgeForPlan(activeClient.id)
+        fetchKnowledgeForPlan(activeClient.id),
+        ideasPromise
       ]);
-      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers, knowledgeDocs });
+      const result = await callClaudeForPlan({ apiKey, client: activeClient, brief, weekOf, topPerformers, knowledgeDocs, activeIdeas });
       planState.plan = result;
       planState.plan.created_label = 'Just now';
       planState.proofCorpus = topPerformers;
       planState.knowledgeUsed = knowledgeDocs;
+      planState.ideasInjected = activeIdeas;  // remember so we can mark them used after save
       planState.generating = false;
       refreshPlannerScreen();
       const proofCount = topPerformers.length;
       const kbCount = knowledgeDocs.length;
+      const ideaCount = activeIdeas.length;
       const parts = [];
       if (proofCount > 0) parts.push(`${proofCount} proof posts`);
       if (kbCount > 0) parts.push(`${kbCount} knowledge ${kbCount === 1 ? 'doc' : 'docs'}`);
-      toast(parts.length ? `Plan ready · used ${parts.join(' + ')}` : 'Plan ready', 'success');
+      if (ideaCount > 0) parts.push(`${ideaCount} ${ideaCount === 1 ? 'idea' : 'ideas'}`);
+      toast(parts.length ? `Plan ready \u00b7 used ${parts.join(' + ')}` : 'Plan ready', 'success');
     } catch (e) {
       planState.generating = false;
       refreshPlannerScreen();
@@ -3812,8 +4043,8 @@
     }
   }
 
-  async function callClaudeForPlan({ apiKey, client, brief, weekOf, topPerformers = [], knowledgeDocs = [] }) {
-    const systemPrompt = buildPlannerSystemPrompt(client, topPerformers, knowledgeDocs);
+  async function callClaudeForPlan({ apiKey, client, brief, weekOf, topPerformers = [], knowledgeDocs = [], activeIdeas = [] }) {
+    const systemPrompt = buildPlannerSystemPrompt(client, topPerformers, knowledgeDocs, activeIdeas);
     const userPrompt = buildPlannerUserPrompt({ brief, weekOf });
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3864,7 +4095,7 @@
     return parsed;
   }
 
-  function buildPlannerSystemPrompt(client, topPerformers = [], knowledgeDocs = []) {
+  function buildPlannerSystemPrompt(client, topPerformers = [], knowledgeDocs = [], activeIdeas = []) {
     const parts = [];
 
     // ---- Skills team intro (only if skills are loaded) ----
@@ -4255,6 +4486,40 @@ For single Static images (post_type = Static, NOT Quote): standard body + visual
       kbParts.push('═══════════════════════════════════════════');
 
       parts.push(kbParts.join('\n'));
+    }
+
+    // ---- ACTIVE IDEAS — user-captured ideas opted into this plan ----
+    if (activeIdeas && activeIdeas.length > 0) {
+      const ideaParts = [
+        '',
+        '═══════════════════════════════════════════',
+        'ACTIVE IDEAS - CAPTURED BY THE USER FOR THIS CYCLE',
+        '═══════════════════════════════════════════',
+        '',
+        `The user has captured ${activeIdeas.length} idea${activeIdeas.length === 1 ? '' : 's'} they want considered for this plan. These are seeds, not commands - fold them in where they fit naturally. Skip ones that don't serve the brief.`,
+        '',
+        'GUIDANCE:',
+        '  - Use ideas as seeds for posts, not as the post itself. The user wrote a brief idea; YOU develop it.',
+        '  - If an idea has a URL, treat it as a reference (a Reel they want to riff on, an article that sparked them). Build something INSPIRED BY it, never copy it.',
+        '  - If an idea is tagged with a pillar, that pillar is the user\'s suggestion - honor it unless your strategic read says otherwise.',
+        '  - You do NOT have to use every idea. Use the ones that serve the brief best. Ignored ideas remain available for future cycles.',
+        '  - When you DO use an idea, mention it in the day brief: "Built from idea: [idea title]" so the user can see the connection.',
+        ''
+      ];
+
+      activeIdeas.forEach((idea, i) => {
+        const num = i + 1;
+        ideaParts.push(`--- [IDEA #${num}: ${idea.title}${idea.pillar ? ' | pillar: ' + idea.pillar : ''}] ---`);
+        if (idea.body) ideaParts.push(idea.body);
+        if (idea.url) ideaParts.push(`Reference: ${idea.url}`);
+        ideaParts.push('');
+      });
+
+      ideaParts.push('═══════════════════════════════════════════');
+      ideaParts.push('END ACTIVE IDEAS');
+      ideaParts.push('═══════════════════════════════════════════');
+
+      parts.push(ideaParts.join('\n'));
     }
 
     if (topPerformers && topPerformers.length > 0) {
@@ -4730,6 +4995,16 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
 
       if (dayRows.length) {
         await sbPost('plan_days', dayRows);
+      }
+
+      // If the user opted to pull from active ideas, mark those ideas as 'used' linked to this plan.
+      // We mark them used regardless of whether each one actually appeared in the plan - the user opted
+      // them in to the cycle, so they're "used" for cycle purposes. User can manually reactivate any
+      // they want to see again.
+      const injected = planState.ideasInjected || [];
+      if (injected.length > 0 && !planState.planId_was_existing) {
+        const ideaIds = injected.map(i => i.id).filter(Boolean);
+        await markIdeasAsUsed(ideaIds, savedPlanId);
       }
 
       toast('Plan saved', 'success');
@@ -5237,6 +5512,393 @@ Apply ONLY that change. Return the full updated plan as JSON with refine_summary
       refreshHistoryScreen();
     }
   };
+
+  // ============================================================
+  // IDEATION TAB
+  // ============================================================
+  // Capture ideas per client. Each idea: title, body, optional URL, optional pillar.
+  // Status: active / used / archived. Auto-injection into plan generation is opt-in
+  // via a toggle on the plan form (default OFF).
+
+  const ideationState = {
+    ideas: [],          // [{id, client_id, title, body, url, pillar, status, used_in_plan_id, created_at}]
+    loaded: false,
+    loading: false,
+    statusFilter: 'active',  // 'active' | 'used' | 'archived' | 'all'
+    pillarFilter: 'all',
+    searchTerm: '',
+    editingIdea: null,   // {id?, title, body, url, pillar} when modal open
+    capturing: false     // true while a save is in flight
+  };
+
+  // Reset when client switches
+  const _origOpenClientForIdeas = window.openClient || function(){};
+  window.openClient = function(clientId, subpage) {
+    if (clientId !== (activeClient && activeClient.id)) {
+      ideationState.ideas = [];
+      ideationState.loaded = false;
+      ideationState.statusFilter = 'active';
+      ideationState.pillarFilter = 'all';
+      ideationState.searchTerm = '';
+      ideationState.editingIdea = null;
+    }
+    return _origOpenClientForIdeas.call(this, clientId, subpage);
+  };
+
+  function refreshIdeationScreen() {
+    if (currentScreen !== 'studio' || activeSubpage !== 'ideation') return;
+    document.getElementById('studio-body').innerHTML = renderStudioSubpage('ideation');
+  }
+
+  async function loadIdeationData() {
+    if (!activeClient || ideationState.loading) return;
+    ideationState.loading = true;
+    try {
+      const ideas = await sbGet(`ideas?client_id=eq.${activeClient.id}&order=created_at.desc&select=*`);
+      ideationState.ideas = ideas || [];
+      ideationState.loaded = true;
+    } catch (e) {
+      console.error('Failed to load ideas:', e);
+      toast('Failed to load ideas: ' + e.message, 'error');
+    } finally {
+      ideationState.loading = false;
+      refreshIdeationScreen();
+    }
+  }
+
+  function renderIdeationContent() {
+    if (!activeClient) {
+      return `<div class="placeholder"><h3>No client selected</h3><p>Pick a client from the rail.</p></div>`;
+    }
+
+    if (!ideationState.loaded) {
+      setTimeout(loadIdeationData, 10);
+      return `<div class="placeholder"><h3>Loading ideas\u2026</h3><p>Pulling captured ideas for ${esc(activeClient.brand_name || activeClient.name || 'this client')}.</p></div>`;
+    }
+
+    const ideas = ideationState.ideas;
+    const captureBox = renderIdeationCaptureBox();
+
+    if (ideas.length === 0) {
+      return captureBox + `
+        <div class="placeholder" style="margin-top:24px">
+          <h3>No ideas captured yet</h3>
+          <p>Drop a thought, paste a Reel URL you want to riff on, capture a moment from a call. Ideas you save here can be folded into your next plan generation.</p>
+        </div>
+      `;
+    }
+
+    return captureBox + renderIdeationLoaded();
+  }
+
+  function renderIdeationCaptureBox() {
+    const editing = ideationState.editingIdea;
+    const isEditing = !!(editing && editing.id);
+    const e = editing || { title: '', body: '', url: '', pillar: '' };
+
+    // Pillars come from active client (if any are configured)
+    const pillarsRaw = activeClient && activeClient.content_pillars;
+    let pillars = [];
+    if (Array.isArray(pillarsRaw)) {
+      pillars = pillarsRaw.map(p => (typeof p === 'string') ? p : (p.name || p.title || '')).filter(Boolean);
+    } else if (typeof pillarsRaw === 'string' && pillarsRaw.trim()) {
+      pillars = pillarsRaw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+    }
+
+    return `
+      <div class="ideation-capture">
+        <div class="ideation-capture-head">
+          <h3 style="margin:0; font-size:15px; font-weight:600;">${isEditing ? 'Edit idea' : 'Capture an idea'}</h3>
+          <span style="color:var(--text-3); font-size:12px;">${isEditing ? 'Save changes below' : 'Drop fast. Refine later.'}</span>
+        </div>
+        <div class="ideation-capture-body">
+          <input type="text" id="idea-title" class="ideation-input" placeholder="What's the idea? (e.g. \u201CSeries on the eviction testimony\u201D)" value="${esc(e.title || '')}" oninput="ideationOnInput('title', this.value)">
+          <textarea id="idea-body" class="ideation-textarea" placeholder="Optional: more detail. Why this idea? What angle? What does it unlock?" oninput="ideationOnInput('body', this.value)">${esc(e.body || '')}</textarea>
+          <div class="ideation-capture-row">
+            <input type="url" id="idea-url" class="ideation-input" placeholder="Optional URL (Reel, article, screenshot link)" value="${esc(e.url || '')}" oninput="ideationOnInput('url', this.value)">
+            ${pillars.length > 0
+              ? `<select id="idea-pillar" class="ideation-input" onchange="ideationOnInput('pillar', this.value)" style="max-width:220px;">
+                   <option value="">No pillar</option>
+                   ${pillars.map(p => `<option value="${esc(p)}" ${e.pillar === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+                 </select>`
+              : `<input type="text" id="idea-pillar" class="ideation-input" placeholder="Optional: pillar tag" value="${esc(e.pillar || '')}" oninput="ideationOnInput('pillar', this.value)" style="max-width:220px;">`
+            }
+          </div>
+          <div class="ideation-capture-actions">
+            <button class="btn btn-skin btn-sm" onclick="ideationSave()" ${ideationState.capturing ? 'disabled' : ''}>${ideationState.capturing ? 'Saving\u2026' : (isEditing ? 'Save changes' : 'Capture')}</button>
+            ${isEditing ? `<button class="btn btn-ghost btn-sm" onclick="ideationCancelEdit()">Cancel</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderIdeationLoaded() {
+    const ideas = ideationState.ideas;
+
+    // Build pillar list from existing ideas
+    const pillarsInUse = [...new Set(ideas.map(i => i.pillar).filter(Boolean))];
+
+    // Filter
+    const filtered = ideas.filter(i => {
+      if (ideationState.statusFilter !== 'all' && i.status !== ideationState.statusFilter) return false;
+      if (ideationState.pillarFilter !== 'all' && i.pillar !== ideationState.pillarFilter) return false;
+      if (ideationState.searchTerm) {
+        const term = ideationState.searchTerm.toLowerCase();
+        const haystack = `${i.title || ''} ${i.body || ''} ${i.url || ''} ${i.pillar || ''}`.toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      return true;
+    });
+
+    const counts = {
+      active: ideas.filter(i => i.status === 'active').length,
+      used: ideas.filter(i => i.status === 'used').length,
+      archived: ideas.filter(i => i.status === 'archived').length
+    };
+
+    return `
+      <div class="ideation-toolbar">
+        <input class="ideation-search" type="text" placeholder="Search ideas\u2026" value="${esc(ideationState.searchTerm)}" oninput="ideationSetSearch(this.value)">
+        <div class="ideation-status-tabs">
+          <button class="ideation-status-tab ${ideationState.statusFilter === 'active' ? 'active' : ''}" onclick="ideationSetStatusFilter('active')">Active <span class="ideation-count">${counts.active}</span></button>
+          <button class="ideation-status-tab ${ideationState.statusFilter === 'used' ? 'active' : ''}" onclick="ideationSetStatusFilter('used')">Used <span class="ideation-count">${counts.used}</span></button>
+          <button class="ideation-status-tab ${ideationState.statusFilter === 'archived' ? 'active' : ''}" onclick="ideationSetStatusFilter('archived')">Archived <span class="ideation-count">${counts.archived}</span></button>
+          <button class="ideation-status-tab ${ideationState.statusFilter === 'all' ? 'active' : ''}" onclick="ideationSetStatusFilter('all')">All</button>
+        </div>
+        ${pillarsInUse.length > 0 ? `
+          <select class="ideation-input" style="max-width:200px;" onchange="ideationSetPillarFilter(this.value)">
+            <option value="all" ${ideationState.pillarFilter === 'all' ? 'selected' : ''}>All pillars</option>
+            ${pillarsInUse.map(p => `<option value="${esc(p)}" ${ideationState.pillarFilter === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+          </select>
+        ` : ''}
+      </div>
+      <div class="ideation-list">
+        ${filtered.length === 0
+          ? `<div class="placeholder"><h3>No ideas match these filters</h3><p>Try a different status or clear the search.</p></div>`
+          : filtered.map(renderIdeationCard).join('')
+        }
+      </div>
+    `;
+  }
+
+  function renderIdeationCard(idea) {
+    const created = idea.created_at ? new Date(idea.created_at) : null;
+    const dateStr = created ? created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '\u2014';
+    const statusColors = {
+      active: 'var(--olive, #5a6c4a)',
+      used: 'var(--accent-emerald, #10b981)',
+      archived: 'var(--text-3, #888)'
+    };
+    const statusColor = statusColors[idea.status] || 'var(--text-3, #888)';
+    const urlSnippet = idea.url ? `<a href="${esc(idea.url)}" target="_blank" rel="noopener" class="ideation-url">${esc(idea.url.replace(/^https?:\/\//, '').slice(0, 60))}${idea.url.length > 67 ? '\u2026' : ''}</a>` : '';
+    const pillarChip = idea.pillar ? `<span class="ideation-pillar-chip">${esc(idea.pillar)}</span>` : '';
+
+    return `
+      <div class="ideation-card" data-idea-id="${esc(idea.id)}">
+        <div class="ideation-card-head">
+          <h4 class="ideation-title">${esc(idea.title)}</h4>
+          <span class="ideation-status" style="color:${statusColor};">${esc(idea.status)}</span>
+        </div>
+        <div class="ideation-meta">
+          <span>${dateStr}</span>
+          ${pillarChip ? `<span class="ideation-meta-sep">\u00b7</span>${pillarChip}` : ''}
+        </div>
+        ${idea.body ? `<p class="ideation-body">${esc(idea.body)}</p>` : ''}
+        ${urlSnippet ? `<div style="margin-top:8px;">${urlSnippet}</div>` : ''}
+        <div class="ideation-actions">
+          <button class="btn btn-ghost btn-sm" onclick="ideationEdit('${esc(idea.id)}')">Edit</button>
+          ${idea.status === 'active'
+            ? `<button class="btn btn-ghost btn-sm" onclick="ideationSetStatus('${esc(idea.id)}', 'archived')">Archive</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="ideationSetStatus('${esc(idea.id)}', 'active')">Reactivate</button>`
+          }
+          <button class="btn btn-ghost btn-sm" onclick="ideationDelete('${esc(idea.id)}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- Action handlers ----
+
+  window.ideationOnInput = function(field, value) {
+    if (!ideationState.editingIdea) ideationState.editingIdea = { title: '', body: '', url: '', pillar: '' };
+    ideationState.editingIdea[field] = value;
+    // Don't refresh on every keystroke - DOM has the value, state catches up on save
+  };
+
+  window.ideationCancelEdit = function() {
+    ideationState.editingIdea = null;
+    refreshIdeationScreen();
+  };
+
+  window.ideationSetSearch = function(value) {
+    ideationState.searchTerm = value;
+    // Manual partial refresh - just re-render the list, not the capture box
+    const listContainer = document.querySelector('.ideation-list');
+    if (listContainer) {
+      // Easier to just re-render whole tab; capture box state is tracked via DOM during typing
+      preserveIdeationCaptureFromDom();
+      refreshIdeationScreen();
+    }
+  };
+
+  window.ideationSetStatusFilter = function(status) {
+    ideationState.statusFilter = status;
+    preserveIdeationCaptureFromDom();
+    refreshIdeationScreen();
+  };
+
+  window.ideationSetPillarFilter = function(pillar) {
+    ideationState.pillarFilter = pillar;
+    preserveIdeationCaptureFromDom();
+    refreshIdeationScreen();
+  };
+
+  // Before any full re-render, snapshot whatever's in the capture box DOM into editingIdea
+  // so it survives the re-render
+  function preserveIdeationCaptureFromDom() {
+    const titleEl = document.getElementById('idea-title');
+    if (!titleEl) return;
+    const draft = {
+      id: ideationState.editingIdea ? ideationState.editingIdea.id : undefined,
+      title: titleEl.value || '',
+      body: (document.getElementById('idea-body') || {}).value || '',
+      url: (document.getElementById('idea-url') || {}).value || '',
+      pillar: (document.getElementById('idea-pillar') || {}).value || ''
+    };
+    // Only preserve if there's something there OR we were already editing
+    if (draft.title || draft.body || draft.url || draft.pillar || (ideationState.editingIdea && ideationState.editingIdea.id)) {
+      ideationState.editingIdea = draft;
+    }
+  }
+
+  window.ideationSave = async function() {
+    // Read directly from DOM (input may not be synced to state yet)
+    const title = (document.getElementById('idea-title').value || '').trim();
+    const body = (document.getElementById('idea-body').value || '').trim();
+    const url = (document.getElementById('idea-url').value || '').trim();
+    const pillar = (document.getElementById('idea-pillar').value || '').trim();
+
+    if (!title) {
+      toast('Idea needs a title', 'error');
+      return;
+    }
+
+    ideationState.capturing = true;
+    refreshIdeationScreen();
+
+    const editing = ideationState.editingIdea;
+    const isEditing = !!(editing && editing.id);
+
+    try {
+      if (isEditing) {
+        await sbPatch(`ideas?id=eq.${editing.id}`, {
+          title,
+          body: body || null,
+          url: url || null,
+          pillar: pillar || null,
+          updated_at: new Date().toISOString()
+        });
+        toast('Idea updated', 'success');
+      } else {
+        await sbPost('ideas', {
+          client_id: activeClient.id,
+          title,
+          body: body || null,
+          url: url || null,
+          pillar: pillar || null,
+          status: 'active'
+        });
+        toast('Idea captured', 'success');
+      }
+      ideationState.editingIdea = null;
+      ideationState.capturing = false;
+      ideationState.loaded = false;  // force reload
+      await loadIdeationData();
+    } catch (e) {
+      ideationState.capturing = false;
+      toast('Save failed: ' + e.message, 'error');
+      refreshIdeationScreen();
+    }
+  };
+
+  window.ideationEdit = function(ideaId) {
+    const idea = ideationState.ideas.find(i => i.id === ideaId);
+    if (!idea) return;
+    ideationState.editingIdea = {
+      id: idea.id,
+      title: idea.title || '',
+      body: idea.body || '',
+      url: idea.url || '',
+      pillar: idea.pillar || ''
+    };
+    refreshIdeationScreen();
+    // Scroll to top so user sees the edit form
+    setTimeout(() => {
+      const captureBox = document.querySelector('.ideation-capture');
+      if (captureBox) captureBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  window.ideationSetStatus = async function(ideaId, status) {
+    if (!ideaId) return;
+    try {
+      await sbPatch(`ideas?id=eq.${ideaId}`, { status, updated_at: new Date().toISOString() });
+      // Update local state without full reload
+      const idx = ideationState.ideas.findIndex(i => i.id === ideaId);
+      if (idx >= 0) ideationState.ideas[idx].status = status;
+      toast(status === 'archived' ? 'Idea archived' : 'Idea reactivated', 'success');
+      preserveIdeationCaptureFromDom();
+      refreshIdeationScreen();
+    } catch (e) {
+      toast('Status update failed: ' + e.message, 'error');
+    }
+  };
+
+  window.ideationDelete = async function(ideaId) {
+    if (!ideaId) return;
+    const idea = ideationState.ideas.find(i => i.id === ideaId);
+    const title = idea ? idea.title : 'this idea';
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    try {
+      await fetch(SB_URL + '/rest/v1/ideas?id=eq.' + ideaId, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      ideationState.ideas = ideationState.ideas.filter(i => i.id !== ideaId);
+      toast('Idea deleted', 'success');
+      preserveIdeationCaptureFromDom();
+      refreshIdeationScreen();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+    }
+  };
+
+  // Helper for plan generation: returns active ideas formatted as injection text.
+  // Called from the plan generator when the "Pull from active ideas" toggle is on.
+  async function fetchActiveIdeasForPlan(clientId) {
+    if (!clientId) return [];
+    try {
+      const ideas = await sbGet(`ideas?client_id=eq.${clientId}&status=eq.active&order=created_at.desc&select=id,title,body,url,pillar`);
+      return ideas || [];
+    } catch (e) {
+      console.error('Failed to fetch ideas for plan injection:', e);
+      return [];
+    }
+  }
+
+  // After a plan is saved, mark ideas as 'used' if their IDs were in the injected set
+  async function markIdeasAsUsed(ideaIds, planId) {
+    if (!Array.isArray(ideaIds) || !ideaIds.length || !planId) return;
+    const promises = ideaIds.map(id =>
+      sbPatch(`ideas?id=eq.${id}`, {
+        status: 'used',
+        used_in_plan_id: planId,
+        updated_at: new Date().toISOString()
+      }).catch(e => console.error('Failed to mark idea used:', id, e))
+    );
+    await Promise.all(promises);
+  }
 
   function renderKnowledgeContent() {
     if (!activeClient) {
