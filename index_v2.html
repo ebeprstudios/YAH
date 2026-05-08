@@ -4095,6 +4095,86 @@
     return parsed;
   }
 
+  // Voice fences config. Keyed by lowercase brand name match.
+  // Each entry lists the catchphrases and autobiographical anchor stories that
+  // originate with this client. When generating for ANY OTHER client, these
+  // markers are forbidden (voice substitution prevention).
+  // To add a fence for a new client, add an entry here matching their brand_name.
+  const VOICE_FENCES = {
+    'tiffany haynes co': {
+      catchphrases: [
+        '"baby" or "baby girl" as a vocative',
+        '"on these people\'s internet"',
+        '"now I know you see" / "don\'t act like you don\'t see it"',
+        '"she don\'t curse but..." constructions',
+        '"that\'s not judgment, that\'s just math"',
+        '"bam bam bam"',
+        '"find you a soldier"',
+        '"read them their rights" / "head shots only"',
+        '"stay with me, you about to get a breakthrough"',
+        '"dipping dabbling"',
+        '"I will write a prayer on your behind"',
+        '"I told y\'all I was going to act up"'
+      ],
+      anchorStories: [
+        'the "5 AM for 30 days" prayer story',
+        'the eviction or bankruptcy testimony',
+        'the "empty room" testimony',
+        'the cell theory analogy as her personal lived experience',
+        'the "I was driving to a job to make not enough" story'
+      ]
+    }
+  };
+
+  function buildVoiceFences(currentClient, roster) {
+    const currentName = (currentClient.brand_name || currentClient.name || '').toLowerCase().trim();
+    const others = (roster || []).filter(c => {
+      const n = (c.brand_name || c.name || '').toLowerCase().trim();
+      return n && n !== currentName;
+    });
+    if (others.length === 0) return '';
+
+    const lines = [
+      '',
+      '═══════════════════════════════════════════',
+      'VOICE FENCES. STRICT. APPLY LAST',
+      '═══════════════════════════════════════════',
+      '',
+      `Each client has a distinct brand. When generating for "${currentClient.brand_name || currentClient.name}", do not borrow signature phrases, anchor stories, or pillar architecture from other clients in this YAH instance. Family resemblance between sister brands (for example, editorial reverence shared across faith-based clients) is permitted; voice substitution is not.`,
+      '',
+      `Other clients in this instance whose voices must not bleed in: ${others.map(c => `"${c.brand_name || c.name}"`).join(', ')}.`,
+      '',
+      'These fences OVERRIDE anything earlier in this system prompt that named specific catchphrases, hook archetypes, or named teachings as universal positive examples. Those examples were written when this instance had one anchor client. They apply ONLY to that client.',
+      ''
+    ];
+
+    let fenceCount = 0;
+    for (const other of others) {
+      const key = (other.brand_name || other.name || '').toLowerCase().trim();
+      const fence = VOICE_FENCES[key];
+      if (!fence) continue;
+      fenceCount++;
+      lines.push(`--- FORBIDDEN MARKERS originating with "${other.brand_name || other.name}" ---`);
+      lines.push('');
+      lines.push('Catchphrases (do NOT use any of these in hooks, captions, talking points, slide text, or CTAs):');
+      fence.catchphrases.forEach(p => lines.push(`  - ${p}`));
+      lines.push('');
+      lines.push('Anchor stories (autobiographical events that belong to this other client. Do NOT project them onto the current client):');
+      fence.anchorStories.forEach(s => lines.push(`  - ${s}`));
+      lines.push('');
+    }
+
+    if (fenceCount === 0) {
+      lines.push('No specific marker fences are configured for the other clients in this instance yet. The general rule above still applies: do not borrow voice signatures or anchor stories across clients.');
+      lines.push('');
+    }
+
+    lines.push('═══════════════════════════════════════════');
+    lines.push('END VOICE FENCES');
+    lines.push('═══════════════════════════════════════════');
+    return lines.join('\n');
+  }
+
   function buildPlannerSystemPrompt(client, topPerformers = [], knowledgeDocs = [], activeIdeas = []) {
     const parts = [];
 
@@ -4801,6 +4881,11 @@ CAROUSEL TYPE MIX TARGET for the 14-day plan:
 - If the plan includes ~3-4 carousels total, aim for: 1 declaration / 2 repurposed-reel / 1 original-teaching
 - Repurposed-reel carousels should always pull from teaching pillars only (Business / Spiritual / Personal Development)
 - Pick the highest-performing TEACHING Reels in the proof corpus as the source material for repurposed carousels`);
+
+    // Voice fences. Last in the prompt for recency. Override any
+    // earlier client-specific examples baked into the prompt above.
+    const fences = buildVoiceFences(client, allClients);
+    if (fences) parts.push(fences);
 
     return parts.join('\n\n');
   }
